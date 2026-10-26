@@ -1,0 +1,341 @@
+
+/* =========================================
+   CONTENEDOR PRINCIPAL
+========================================= */
+
+.gasto-container {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+
+/* =========================================
+   ENCABEZADO
+========================================= */
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.header p {
+  margin: 6px 0 0;
+  color: #757575;
+  font-size: 14px;
+}
+
+
+/* =========================================
+   BOTÓN NUEVO
+========================================= */
+
+.header button {
+  height: 44px;
+}
+
+.header button mat-icon {
+  margin-right: 6px;
+}
+
+
+/* =========================================
+   CARD
+========================================= */
+
+.gasto-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+
+/* =========================================
+   TOOLBAR
+========================================= */
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  padding: 20px 20px 8px;
+}
+
+.search-field {
+  width: 100%;
+  max-width: 650px;
+}
+
+.search-field mat-icon {
+  color: #757575;
+}
+
+
+/* =========================================
+   TABLA
+========================================= */
+
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.gasto-table {
+  width: 100%;
+  min-width: 1100px;
+}
+
+
+/* =========================================
+   CELDAS
+========================================= */
+
+.gasto-table th {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.gasto-table td,
+.gasto-table th {
+  padding: 14px 16px;
+}
+
+
+/* =========================================
+   FILAS
+========================================= */
+
+.gasto-table tr.mat-mdc-row {
+  transition: background-color 0.2s ease;
+}
+
+.gasto-table tr.mat-mdc-row:hover {
+  background-color: #f7f7f7;
+}
+
+
+/* =========================================
+   BADGES
+========================================= */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 40px;
+
+  padding: 4px 8px;
+
+  border-radius: 6px;
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badge.caja {
+  background-color: #eeeeee;
+}
+
+.badge.usuario {
+  background-color: #eeeeee;
+}
+
+
+/* =========================================
+   COMPROBANTE
+========================================= */
+
+.comprobante {
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.sin-dato {
+  color: #9e9e9e;
+  font-style: italic;
+}
+
+
+/* =========================================
+   MONTO
+========================================= */
+
+.monto {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+
+/* =========================================
+   OBSERVACIÓN
+========================================= */
+
+.observacion {
+  display: block;
+
+  max-width: 250px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  cursor: default;
+}
+
+
+/* =========================================
+   ACCIONES
+========================================= */
+
+.acciones-header {
+  text-align: center;
+}
+
+.acciones {
+  text-align: center;
+  white-space: nowrap;
+}
+
+.acciones button {
+  margin: 0 2px;
+}
+
+
+/* =========================================
+   LOADING
+========================================= */
+
+.loading-container {
+  min-height: 300px;
+
+  display: flex;
+  flex-direction: column;
+
+  justify-content: center;
+  align-items: center;
+
+  gap: 16px;
+}
+
+.loading-container p {
+  margin: 0;
+  color: #757575;
+}
+
+
+/* =========================================
+   SIN RESULTADOS
+========================================= */
+
+.empty-container {
+  min-height: 300px;
+
+  display: flex;
+  flex-direction: column;
+
+  justify-content: center;
+  align-items: center;
+
+  text-align: center;
+
+  padding: 40px 20px;
+}
+
+.empty-container > mat-icon {
+  width: 64px;
+  height: 64px;
+
+  font-size: 64px;
+
+  margin-bottom: 16px;
+}
+
+.empty-container h3 {
+  margin: 0 0 8px;
+
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.empty-container p {
+  margin: 0 0 20px;
+
+  color: #757575;
+}
+
+.empty-container button mat-icon {
+  margin-right: 6px;
+}
+
+
+/* =========================================
+   PAGINADOR
+========================================= */
+
+mat-paginator {
+  border-top: 1px solid #eeeeee;
+}
+
+
+/* =========================================
+   RESPONSIVE TABLET
+========================================= */
+
+@media (max-width: 768px) {
+
+  .gasto-container {
+    padding: 16px;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .header h1 {
+    font-size: 24px;
+  }
+
+  .header button {
+    width: 100%;
+  }
+
+  .toolbar {
+    padding: 16px 16px 4px;
+  }
+
+  .search-field {
+    max-width: none;
+  }
+
+}
+
+
+/* =========================================
+   RESPONSIVE MÓVIL
+========================================= */
+
+@media (max-width: 480px) {
+
+  .gasto-container {
+    padding: 10px;
+  }
+
+  .gasto-card {
+    border-radius: 8px;
+  }
+
+  .header {
+    margin-bottom: 16px;
+  }
+
+}
+

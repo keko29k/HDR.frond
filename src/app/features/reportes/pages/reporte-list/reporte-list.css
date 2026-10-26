@@ -1,0 +1,72 @@
+.container {
+  max-width: 1200px;
+  margin: auto;
+  padding: 20px;
+}
+
+/* HEADER */
+.header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* FILTROS */
+.filtros-card {
+  margin-bottom: 20px;
+}
+
+.filtros {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* LOADING */
+.loading {
+  display: flex;
+  justify-content: center;
+  margin: 20px;
+}
+
+/* ERROR */
+.error {
+  color: #d32f2f;
+  text-align: center;
+  margin: 10px;
+  font-weight: bold;
+}
+
+/* RESUMEN */
+.resumen {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.card {
+  text-align: center;
+  padding: 15px;
+  color: white;
+  font-weight: bold;
+}
+
+.total { background: #1976d2; }
+.inversion { background: #6d4c41; }
+.gasto { background: #d32f2f; }
+.ganancia { background: #388e3c; }
+
+/* TABLA */
+.tabla-card {
+  padding: 10px;
+}
+
+table {
+  width: 100%;
+}
+
+.ganancia {
+  color: #9da52a;
+  font-weight: bold;
+}

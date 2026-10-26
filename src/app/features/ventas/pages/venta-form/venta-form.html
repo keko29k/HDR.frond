@@ -1,0 +1,195 @@
+<form class="page" [formGroup]="form" (ngSubmit)="guardar()">
+
+  <!-- HEADER -->
+  <header class="header">
+    <div>
+      <h2>Nueva venta</h2>
+      <p>{{ hoy | date:'dd/MM/yyyy' }}</p>
+    </div>
+  </header>
+
+  <div class="layout">
+
+    <!-- ================= IZQUIERDA ================= -->
+    <section class="left">
+
+      <!-- DATOS DE LA VENTA -->
+      <mat-card class="card">
+        <h3 class="card-title">Datos de la venta</h3>
+
+        <div class="grid-2">
+          <mat-form-field appearance="outline">
+            <mat-label>Cliente</mat-label>
+            <mat-select formControlName="idCliente" panelClass="hr-dark-panel">
+              @for (c of clientes; track c.id) {
+                <mat-option [value]="c.id">{{ c.nombres }} {{ c.apellidos }}</mat-option>
+              }
+            </mat-select>
+            @if (form.controls.idCliente.invalid && form.controls.idCliente.touched) {
+              <mat-error>Elige un cliente</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Sucursal</mat-label>
+            <mat-select formControlName="idSucursal" panelClass="hr-dark-panel">
+              @for (s of sucursales; track s.id) {
+                <mat-option [value]="s.id">{{ s.nombre }}</mat-option>
+              }
+            </mat-select>
+            @if (form.controls.idSucursal.invalid && form.controls.idSucursal.touched) {
+              <mat-error>Elige una sucursal</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="full">
+          <mat-label>Observación</mat-label>
+          <textarea matInput rows="2" formControlName="observacion"></textarea>
+        </mat-form-field>
+      </mat-card>
+
+      <!-- PRODUCTOS -->
+      <mat-card class="card">
+        <div class="products-head">
+          <h3 class="card-title">Productos</h3>
+
+          <mat-form-field appearance="outline" class="search" subscriptSizing="dynamic">
+            <mat-label>Buscar producto</mat-label>
+            <input matInput #buscador
+                   (input)="onBuscar(buscador.value)"
+                   (keydown.enter)="$event.preventDefault()">
+          </mat-form-field>
+        </div>
+
+        @if (cargandoProductos) {
+          <div class="loading">
+            <mat-spinner diameter="28"></mat-spinner>
+          </div>
+        } @else {
+          <div class="products">
+            @for (p of productos; track p.id) {
+              <button type="button"
+                      class="product"
+                      [class.in-cart]="enCarrito(p) > 0"
+                      (click)="agregarProducto(p)">
+                <span class="name">{{ p.nombre }}</span>
+                <span class="price">Bs {{ p.precioVenta | number:'1.2-2' }}</span>
+
+                @if (enCarrito(p) > 0) {
+                  <span class="badge">{{ enCarrito(p) }}</span>
+                }
+              </button>
+            } @empty {
+              <p class="empty">No hay productos que coincidan con «{{ buscar }}».</p>
+            }
+          </div>
+
+          <div class="pager">
+            <button type="button" class="btn ghost small"
+                    [disabled]="pageNumber === 1"
+                    (click)="cambiarPagina(-1)">Anterior</button>
+            <span>Página {{ pageNumber }}</span>
+            <button type="button" class="btn ghost small"
+                    [disabled]="!hayMasPaginas"
+                    (click)="cambiarPagina(1)">Siguiente</button>
+          </div>
+        }
+      </mat-card>
+
+    </section>
+
+    <!-- ================= DERECHA ================= -->
+    <aside class="right">
+      <mat-card class="card sticky">
+
+        <!-- CARRITO -->
+        <div class="cart-header">
+          <h3 class="card-title">Carrito</h3>
+          @if (detalles.length) {
+            <button type="button" class="link" (click)="limpiarCarrito()">Vaciar</button>
+          }
+        </div>
+
+        <div class="cart">
+          @for (d of detalles; track d.productoId; let i = $index) {
+            <div class="item">
+              <div class="item-info">
+                <span class="title">{{ d.nombre }}</span>
+                <span class="unit">Bs {{ d.precioUnitario | number:'1.2-2' }} c/u</span>
+              </div>
+
+              <div class="qty">
+                <button type="button" (click)="cambiarCantidad(d, -1)"
+                        [disabled]="d.cantidad <= 1" aria-label="Quitar uno">−</button>
+                <span>{{ d.cantidad }}</span>
+                <button type="button" (click)="cambiarCantidad(d, 1)"
+                        aria-label="Agregar uno">+</button>
+              </div>
+
+              <span class="subtotal">Bs {{ d.subtotal | number:'1.2-2' }}</span>
+
+              <button type="button" class="delete" (click)="eliminarDetalle(i)"
+                      aria-label="Eliminar producto">✕</button>
+            </div>
+          } @empty {
+            <p class="empty">Toca un producto para agregarlo.</p>
+          }
+        </div>
+
+        <!-- TOTAL -->
+        <div class="total">
+          <span>Total · {{ cantidadItems }} {{ cantidadItems === 1 ? 'unidad' : 'unidades' }}</span>
+          <strong>Bs {{ total | number:'1.2-2' }}</strong>
+        </div>
+
+        <!-- FORMA DE PAGO -->
+        <div class="segmented" role="group" aria-label="Forma de pago">
+          <button type="button" [class.on]="!esCredito" (click)="setCredito(false)">Contado</button>
+          <button type="button" [class.on]="esCredito" (click)="setCredito(true)">Crédito</button>
+        </div>
+
+        @if (esCredito) {
+          <div class="credit">
+            <mat-form-field appearance="outline">
+              <mat-label>Monto pagado ahora</mat-label>
+              <span matTextPrefix>Bs&nbsp;</span>
+              <input matInput type="number" min="0" step="0.01" formControlName="montoPagado">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Fecha límite de pago</mat-label>
+              <input matInput [matDatepicker]="picker" [min]="hoy" formControlName="fechaLimitePago">
+              <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+              <mat-datepicker #picker panelClass="hr-dark-panel"></mat-datepicker>
+              @if (form.controls.fechaLimitePago.hasError('required')) {
+                <mat-error>Indica hasta cuándo puede pagar</mat-error>
+              }
+            </mat-form-field>
+
+            <div class="saldo">
+              <span>Saldo pendiente</span>
+              <strong>Bs {{ saldoPendiente | number:'1.2-2' }}</strong>
+            </div>
+          </div>
+        }
+
+        <!-- ACCIONES -->
+        <div class="actions">
+          <button type="submit" class="btn primary"
+                  [disabled]="guardando || detalles.length === 0">
+            @if (guardando) {
+              <mat-spinner diameter="18"></mat-spinner>
+            } @else {
+              {{ esCredito ? 'Registrar venta a crédito' : 'Cobrar Bs ' + (total | number:'1.2-2') }}
+            }
+          </button>
+
+          <button type="button" class="btn ghost" (click)="cancelar()">Cancelar</button>
+        </div>
+
+      </mat-card>
+    </aside>
+
+  </div>
+</form>

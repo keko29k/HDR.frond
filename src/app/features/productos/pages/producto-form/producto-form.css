@@ -1,0 +1,308 @@
+.producto-form-container {
+  width: 100%;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+/* ==========================================
+   CARD PRINCIPAL
+   ========================================== */
+
+.producto-card {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+mat-card-header {
+  padding: 24px 24px 12px;
+}
+
+mat-card-title {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+mat-card-subtitle {
+  margin-top: 6px;
+}
+
+
+/* ==========================================
+   CONTENIDO
+   ========================================== */
+
+mat-card-content {
+  padding: 24px !important;
+}
+
+
+/* ==========================================
+   TÍTULOS DE SECCIÓN
+   ========================================== */
+
+
+   .producto-card[_ngcontent-ng-c2769511730] {
+
+    color: black;
+}
+
+
+.section-title {
+  margin: 24px 0 16px;
+  padding-bottom: 8px;
+
+  font-size: 17px;
+  font-weight: 600;
+
+  border-bottom: 1px solid #000000;
+}
+
+.section-title:first-child {
+  margin-top: 0;
+}
+
+
+/* ==========================================
+   GRID DEL FORMULARIO
+   ========================================== */
+
+.form-grid {
+  display: grid;
+
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 8px 20px;
+
+  width: 100%;
+}
+
+
+/* ==========================================
+   CAMPOS COMPLETOS
+   ========================================== */
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+
+/* ==========================================
+   FORM FIELDS
+   ========================================== */
+
+mat-form-field {
+  width: 100%;
+}
+
+
+/* ==========================================
+   CONFIGURACIONES
+   ========================================== */
+
+.options-container {
+  display: flex;
+  flex-direction: column;
+
+  width: 100%;
+
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+
+  overflow: hidden;
+}
+
+
+/* ==========================================
+   OPCIÓN INDIVIDUAL
+   ========================================== */
+
+.option-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 24px;
+
+  min-height: 85px;
+
+  padding: 14px 20px;
+
+  border-bottom: 1px solid #e0e0e0;
+
+  box-sizing: border-box;
+}
+
+.option-item:last-child {
+  border-bottom: none;
+}
+
+
+/* ==========================================
+   TEXTO DE OPCIONES
+   ========================================== */
+
+.option-text {
+  display: flex;
+  flex-direction: column;
+
+  gap: 5px;
+
+  flex: 1;
+
+  min-width: 0;
+}
+
+.option-text strong {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.option-text span {
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+
+/* ==========================================
+   SELECT DE OPCIONES
+   ========================================== */
+
+.option-select {
+  width: 180px;
+  flex-shrink: 0;
+}
+
+
+/* ==========================================
+   BOTONES
+   ========================================== */
+
+.form-actions {
+  display: flex;
+
+  justify-content: flex-end;
+  align-items: center;
+
+  gap: 12px;
+
+  margin-top: 30px;
+  padding-top: 20px;
+
+  border-top: 1px solid #e0e0e0;
+}
+
+.form-actions button {
+  min-width: 130px;
+  min-height: 42px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+}
+
+
+/* ==========================================
+   SPINNER DEL BOTÓN
+   ========================================== */
+
+.form-actions mat-spinner {
+  display: inline-block;
+}
+
+
+/* ==========================================
+   RESPONSIVE - TABLET
+   ========================================== */
+
+@media (max-width: 768px) {
+
+  .producto-form-container {
+    padding: 16px;
+  }
+
+  mat-card-header {
+    padding: 20px 16px 10px;
+  }
+
+  mat-card-content {
+    padding: 16px !important;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .full-width {
+    grid-column: auto;
+  }
+
+  .option-item {
+    align-items: flex-start;
+    flex-direction: column;
+
+    gap: 10px;
+
+    padding: 16px;
+  }
+
+  .option-select {
+    width: 100%;
+  }
+
+}
+
+
+/* ==========================================
+   RESPONSIVE - CELULAR
+   ========================================== */
+
+@media (max-width: 480px) {
+
+  .producto-form-container {
+    padding: 8px;
+  }
+
+  mat-card {
+    border-radius: 8px;
+  }
+
+  mat-card-header {
+    padding: 16px 12px 8px;
+  }
+
+  mat-card-content {
+    padding: 12px !important;
+  }
+
+  mat-card-title {
+    font-size: 20px;
+  }
+
+  mat-card-subtitle {
+    font-size: 13px;
+  }
+
+  .section-title {
+    font-size: 16px;
+    margin-top: 20px;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+
+    align-items: stretch;
+
+    gap: 10px;
+  }
+
+  .form-actions button {
+    width: 100%;
+  }
+
+}

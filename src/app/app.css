@@ -1,0 +1,197 @@
+/* ==========================================================
+   Herederos del Rey — tema dark
+   Importa las fuentes en index.html o styles.css global:
+   <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+   ========================================================== */
+
+:host {
+  --bg: #0b0d12;
+  --surface: #12151c;
+  --surface-2: #161a24;
+  --border: #232838;
+  --text: #e8e9ee;
+  --text-dim: #a9adbb;
+  --text-faint: #6b7080;
+  --gold: #cda45e;
+  --gold-soft: rgba(205, 164, 94, 0.12);
+  --red: #d3695a;
+}
+
+.sidenav-container {
+  height: 100vh;
+  background: var(--bg);
+  font-family: 'Inter', sans-serif;
+  color: var(--text);
+}
+
+/* ---------- SIDENAV ---------- */
+.sidenav {
+  width: 264px;
+  background: var(--surface) !important;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 22px 20px 18px;
+  border-bottom: 1px solid var(--border);
+}
+.brand .crown { width: 32px; height: 32px; flex-shrink: 0; }
+.brand h1 {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: 16px;
+  margin: 0;
+  color: var(--text);
+  line-height: 1.2;
+}
+.brand span {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-top: 2px;
+  font-weight: 500;
+}
+
+/* ---------- MENÚ ---------- */
+.nav {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px 10px 20px;
+  background: transparent !important;
+
+  /* Color del texto e íconos de los ítems (Angular Material v18+) */
+  --mat-list-list-item-label-text-color: var(--text-dim);
+  --mat-list-list-item-hover-label-text-color: var(--text);
+  --mat-list-list-item-focus-label-text-color: var(--text);
+  --mat-list-list-item-leading-icon-color: var(--text-faint);
+  --mat-list-list-item-hover-leading-icon-color: var(--text-dim);
+  --mat-list-list-item-one-line-container-height: 40px;
+
+  /* Mismo ajuste para Angular Material v15–17 */
+  --mdc-list-list-item-label-text-color: var(--text-dim);
+  --mdc-list-list-item-hover-label-text-color: var(--text);
+  --mdc-list-list-item-focus-label-text-color: var(--text);
+  --mdc-list-list-item-leading-icon-color: var(--text-faint);
+  --mdc-list-list-item-hover-leading-icon-color: var(--text-dim);
+  --mdc-list-list-item-one-line-container-height: 40px;
+}
+
+.nav-eyebrow {
+  font-size: 10.5px;
+  letter-spacing: 1.3px;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  padding: 14px 14px 6px;
+  font-weight: 600;
+}
+
+.nav a[mat-list-item] {
+  border-radius: 8px;
+  margin: 1px 4px;
+  width: auto;
+  font-size: 13.5px;
+  font-weight: 500;
+  height: 40px !important;
+}
+.nav a[mat-list-item]:hover {
+  background: var(--surface-2) !important;
+}
+.nav a[mat-list-item] mat-icon {
+  margin-right: 12px;
+}
+
+/* Ítem activo en dorado */
+.nav a.active-link {
+  background: var(--gold-soft) !important;
+  position: relative;
+
+  --mat-list-list-item-label-text-color: var(--gold);
+  --mat-list-list-item-hover-label-text-color: var(--gold);
+  --mat-list-list-item-leading-icon-color: var(--gold);
+  --mat-list-list-item-hover-leading-icon-color: var(--gold);
+  --mdc-list-list-item-label-text-color: var(--gold);
+  --mdc-list-list-item-hover-label-text-color: var(--gold);
+  --mdc-list-list-item-leading-icon-color: var(--gold);
+  --mdc-list-list-item-hover-leading-icon-color: var(--gold);
+}
+.nav a.active-link::before {
+  content: "";
+  position: absolute;
+  left: -4px;
+  top: 6px;
+  bottom: 6px;
+  width: 2.5px;
+  background: var(--gold);
+  border-radius: 2px;
+}
+
+/* Scrollbar del menú */
+.nav::-webkit-scrollbar { width: 6px; }
+.nav::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+/* ---------- FOOTER DEL SIDENAV (para cuando agregues el usuario) ---------- */
+.sidenav-footer {
+  border-top: 1px solid var(--border);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #cda45e, #8a6a34);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 12.5px;
+  color: #0b0d12;
+  flex-shrink: 0;
+}
+.user-meta { line-height: 1.25; overflow: hidden; }
+.user-meta .name {
+  font-size: 13px; font-weight: 600; color: var(--text);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.user-meta .role { font-size: 11.5px; color: var(--text-faint); }
+.logout-btn { margin-left: auto; color: var(--text-faint) !important; }
+.logout-btn:hover { color: var(--red) !important; }
+
+/* ---------- TOOLBAR ---------- */
+.toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--surface) !important;
+  border-bottom: 1px solid var(--border);
+  color: var(--text) !important;
+  height: 60px;
+}
+.toolbar .title {
+  font-size: 15px;
+  font-weight: 600;
+  margin-left: 6px;
+}
+.toolbar .spacer { flex: 1 1 auto; }
+.toolbar .icon-btn { color: var(--text-dim) !important; }
+.toolbar .icon-btn:hover { color: var(--text) !important; }
+
+/* ---------- CONTENIDO ---------- */
+.content {
+  padding: 26px 30px 40px;
+  background: var(--bg);
+  min-height: calc(100vh - 60px);
+}
+
+@media (max-width: 640px) {
+  .content { padding: 18px 14px 32px; }
+}

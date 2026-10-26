@@ -1,0 +1,196 @@
+/* ==========================================================
+   Sucursales · formulario — tema dark (Herederos del Rey)
+   ========================================================== */
+
+:host {
+  --bg: #0b0d12;
+  --surface: #12151c;
+  --surface-2: #161a24;
+  --border: #232838;
+  --border-hover: #3a4156;
+  --text: #e8e9ee;
+  --text-dim: #a9adbb;
+  --text-faint: #6b7080;
+  --gold: #cda45e;
+  --gold-strong: #e0b970;
+  --red: #d3695a;
+
+  display: block;
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+
+  /* ---- Form field (v15–19) ---- */
+  --mdc-outlined-text-field-outline-color: var(--border);
+  --mdc-outlined-text-field-hover-outline-color: var(--border-hover);
+  --mdc-outlined-text-field-focus-outline-color: var(--gold);
+  --mdc-outlined-text-field-error-outline-color: var(--red);
+  --mdc-outlined-text-field-error-focus-outline-color: var(--red);
+  --mdc-outlined-text-field-error-label-text-color: var(--red);
+  --mdc-outlined-text-field-label-text-color: var(--text-dim);
+  --mdc-outlined-text-field-hover-label-text-color: var(--text);
+  --mdc-outlined-text-field-focus-label-text-color: var(--gold);
+  --mdc-outlined-text-field-input-text-color: var(--text);
+  --mdc-outlined-text-field-caret-color: var(--gold);
+
+  /* ---- Form field (v20+) ---- */
+  --mat-form-field-outlined-outline-color: var(--border);
+  --mat-form-field-outlined-hover-outline-color: var(--border-hover);
+  --mat-form-field-outlined-focus-outline-color: var(--gold);
+  --mat-form-field-outlined-error-outline-color: var(--red);
+  --mat-form-field-outlined-error-focus-outline-color: var(--red);
+  --mat-form-field-outlined-error-label-text-color: var(--red);
+  --mat-form-field-outlined-label-text-color: var(--text-dim);
+  --mat-form-field-outlined-hover-label-text-color: var(--text);
+  --mat-form-field-outlined-focus-label-text-color: var(--gold);
+  --mat-form-field-outlined-input-text-color: var(--text);
+  --mat-form-field-outlined-caret-color: var(--gold);
+
+  --mat-form-field-leading-icon-color: var(--text-faint);
+  --mat-form-field-error-text-color: var(--red);
+  --mat-form-field-subscript-text-color: var(--text-faint);
+
+  /* ---- Card y spinner ---- */
+  --mdc-elevated-card-container-color: var(--surface);
+  --mat-card-elevated-container-color: var(--surface);
+  --mdc-circular-progress-active-indicator-color: var(--gold);
+  --mat-progress-spinner-active-indicator-color: var(--gold);
+}
+
+/* ---------- PÁGINA ---------- */
+.page {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.header {
+  margin-bottom: 22px;
+}
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--text-faint);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.back mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+.back:hover { color: var(--gold); }
+
+.header h2 {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: 28px;
+  margin: 0;
+  color: var(--text);
+}
+.header p {
+  margin: 6px 0 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--text-faint);
+  max-width: 60ch;
+}
+
+/* ---------- CARD ---------- */
+.card {
+  background: var(--surface) !important;
+  border: 1px solid var(--border);
+  border-radius: 14px !important;
+  box-shadow: none !important;
+  padding: 26px 26px 22px;
+  color: var(--text);
+}
+
+.loading {
+  display: grid;
+  place-items: center;
+  padding: 60px 0;
+}
+
+/* ---------- FORM ---------- */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 16px;
+}
+.full,
+mat-form-field { width: 100%; }
+
+/* ---------- ACCIONES ---------- */
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 140px;
+  height: 44px;
+  padding: 0 20px;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+
+.btn.primary {
+  background: var(--gold);
+  border: 0;
+  color: var(--bg);
+}
+.btn.primary:hover:not(:disabled) { background: var(--gold-strong); }
+.btn.primary mat-spinner {
+  --mdc-circular-progress-active-indicator-color: var(--bg);
+  --mat-progress-spinner-active-indicator-color: var(--bg);
+}
+
+.btn.ghost {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+}
+.btn.ghost:hover {
+  border-color: var(--border-hover);
+  color: var(--text);
+}
+
+.btn:focus-visible,
+.back:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 600px) {
+  .grid-2 { grid-template-columns: 1fr; }
+  .card { padding: 20px 16px 16px; }
+  .actions { flex-direction: column-reverse; }
+  .btn { width: 100%; }
+}

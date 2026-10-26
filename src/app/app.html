@@ -1,0 +1,187 @@
+<mat-sidenav-container class="sidenav-container">
+
+  <!-- =========================
+       SIDENAV
+  ========================== -->
+
+  <mat-sidenav
+    #sidenav
+    mode="side"
+    opened
+    class="sidenav">
+
+    <!-- MARCA -->
+    <div class="brand">
+
+      <svg
+        class="crown"
+        viewBox="0 0 48 48"
+        fill="none">
+
+        <path
+          d="M8 34 L6 16 L15 24 L24 12 L33 24 L42 16 L40 34 Z"
+          stroke="#cda45e"
+          stroke-width="2"
+          stroke-linejoin="round"
+          fill="rgba(205,164,94,0.08)">
+        </path>
+
+        <circle
+          cx="24"
+          cy="38"
+          r="1.6"
+          fill="#cda45e">
+        </circle>
+
+      </svg>
+
+      <div>
+        <h1>Herederos del Rey</h1>
+        <span>Sistema de inventario</span>
+      </div>
+
+    </div>
+
+
+    <!-- =========================
+         MENÚ
+    ========================== -->
+
+    <mat-nav-list class="nav">
+
+      <!-- =========================
+           CATÁLOGO
+      ========================== -->
+
+      <div class="nav-eyebrow">Catálogo</div>
+
+      <!-- PRODUCTOS -->
+      <a mat-list-item routerLink="/productos" routerLinkActive="active-link">
+        <mat-icon matListItemIcon>inventory_2</mat-icon>
+        <span matListItemTitle>Productos</span>
+      </a>
+
+      <!-- CATEGORÍAS -->
+      <a mat-list-item routerLink="/categorias" routerLinkActive="active-link">
+        <mat-icon matListItemIcon>sell</mat-icon>
+        <span matListItemTitle>Categorías</span>
+      </a>
+
+      <!-- MARCAS -->
+      <a mat-list-item routerLink="/marcas" routerLinkActive="active-link">
+        <mat-icon matListItemIcon>branding_watermark</mat-icon>
+        <span matListItemTitle>Marcas</span>
+      </a>
+
+      <!-- PROVEEDORES -->
+      <a mat-list-item routerLink="/proveedores" routerLinkActive="active-link">
+        <mat-icon matListItemIcon>local_shipping</mat-icon>
+        <span matListItemTitle>Proveedores</span>
+      </a>
+
+
+      <!-- =========================
+           OPERACIONES
+      ========================== -->
+
+      <div class="nav-eyebrow">Operaciones</div>
+
+      <!-- VENTAS -->
+      <a mat-list-item routerLink="/ventas" routerLinkActive="active-link">
+        <mat-icon matListItemIcon>point_of_sale</mat-icon>
+        <span matListItemTitle>Ventas</span>
+      </a>
+
+      <!-- COMPRAS -->
+      <a mat-list-item routerLink="/compras" routerLinkActive="active-link">
+        <mat-icon matListItemIcon>shopping_cart</mat-icon>
+        <span matListItemTitle>Compras</span>
+      </a>
+
+      <!-- CAJAS -->
+      <a mat-list-item routerLink="/cajas" routerLinkActive="active-link">
+        <mat-icon matListItemIcon>payments</mat-icon>
+        <span matListItemTitle>Cajas</span>
+      </a>
+
+
+      <!-- =========================
+           GESTIÓN
+      ========================== -->
+
+      <div class="nav-eyebrow">Gestión</div>
+
+      <!-- CLIENTES -->
+      <a mat-list-item routerLink="/clientes" routerLinkActive="active-link">
+        <mat-icon matListItemIcon>group</mat-icon>
+        <span matListItemTitle>Clientes</span>
+      </a>
+
+      <!-- USUARIOS -->
+      <a mat-list-item routerLink="/usuarios" routerLinkActive="active-link">
+        <mat-icon matListItemIcon>manage_accounts</mat-icon>
+        <span matListItemTitle>Usuarios</span>
+      </a>
+
+      <!-- SUCURSALES (nuevo) -->
+      <a mat-list-item routerLink="/sucursales" routerLinkActive="active-link">
+        <mat-icon matListItemIcon>storefront</mat-icon>
+        <span matListItemTitle>Sucursales</span>
+      </a>
+
+
+      <!-- =========================
+           FINANZAS
+      ========================== -->
+
+      <div class="nav-eyebrow">Finanzas</div>
+
+      <!-- GASTOS -->
+      <a mat-list-item routerLink="/gastos" routerLinkActive="active-link">
+        <mat-icon matListItemIcon>receipt_long</mat-icon>
+        <span matListItemTitle>Gastos</span>
+      </a>
+
+      <!-- REPORTES -->
+      <a mat-list-item routerLink="/reportes" routerLinkActive="active-link">
+        <mat-icon matListItemIcon>bar_chart</mat-icon>
+        <span matListItemTitle>Reportes</span>
+      </a>
+
+    </mat-nav-list>
+
+  </mat-sidenav>
+
+
+  <!-- =========================
+       CONTENIDO PRINCIPAL
+  ========================== -->
+
+  <mat-sidenav-content>
+
+    <!-- TOOLBAR -->
+    <mat-toolbar class="toolbar">
+
+      <button
+        mat-icon-button
+        type="button"
+        class="icon-btn"
+        aria-label="Mostrar u ocultar menú"
+        (click)="sidenav.toggle()">
+        <mat-icon>menu</mat-icon>
+      </button>
+
+      <span class="title">Herederos del Rey</span>
+
+      <span class="spacer"></span>
+
+    </mat-toolbar>
+
+    <!-- CONTENIDO DE LAS RUTAS -->
+    <main class="content">
+      <router-outlet></router-outlet>
+    </main>
+
+  </mat-sidenav-content>
+
+</mat-sidenav-container>

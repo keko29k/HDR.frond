@@ -1,0 +1,90 @@
+<div class="page">
+
+  <!-- HEADER -->
+  <header class="header">
+    <button type="button" class="back" (click)="cancelar()" aria-label="Volver a sucursales">
+      <mat-icon>arrow_back</mat-icon>
+      Sucursales
+    </button>
+    <h2>{{ titulo }}</h2>
+    <p>
+      {{ editando
+          ? 'Actualiza los datos de contacto de esta sucursal.'
+          : 'Registra una sucursal para asignarle usuarios, cajas y ventas.' }}
+    </p>
+  </header>
+
+  <mat-card class="card">
+
+    @if (loading) {
+      <div class="loading">
+        <mat-spinner diameter="32"></mat-spinner>
+      </div>
+    } @else {
+
+      <form [formGroup]="form" (ngSubmit)="guardar()" class="form" novalidate>
+
+        <!-- NOMBRE -->
+        <mat-form-field appearance="outline" class="full">
+          <mat-label>Nombre de la sucursal</mat-label>
+          <mat-icon matIconPrefix>storefront</mat-icon>
+          <input matInput formControlName="nombre" maxlength="100" autocomplete="off">
+          @if (form.controls.nombre.hasError('required')) {
+            <mat-error>Escribe el nombre de la sucursal</mat-error>
+          }
+          @if (form.controls.nombre.hasError('maxlength')) {
+            <mat-error>Máximo 100 caracteres</mat-error>
+          }
+        </mat-form-field>
+
+        <div class="grid-2">
+
+          <!-- TELÉFONO -->
+          <mat-form-field appearance="outline">
+            <mat-label>Teléfono</mat-label>
+            <mat-icon matIconPrefix>call</mat-icon>
+            <input matInput formControlName="telefono" type="tel" maxlength="30" autocomplete="off">
+            @if (form.controls.telefono.hasError('pattern')) {
+              <mat-error>Solo números, espacios, + y -</mat-error>
+            }
+          </mat-form-field>
+
+          <!-- CORREO -->
+          <mat-form-field appearance="outline">
+            <mat-label>Correo</mat-label>
+            <mat-icon matIconPrefix>mail</mat-icon>
+            <input matInput formControlName="correo" type="email" maxlength="150" autocomplete="off">
+            @if (form.controls.correo.hasError('email')) {
+              <mat-error>Escribe un correo válido, por ejemplo sucursal&#64;gmail.com</mat-error>
+            }
+          </mat-form-field>
+
+        </div>
+
+        <!-- DIRECCIÓN -->
+        <mat-form-field appearance="outline" class="full">
+          <mat-label>Dirección</mat-label>
+          <mat-icon matIconPrefix>place</mat-icon>
+          <textarea matInput formControlName="direccion" rows="2" maxlength="250"></textarea>
+          <mat-hint align="end">{{ form.controls.direccion.value.length }}/250</mat-hint>
+        </mat-form-field>
+
+        <!-- ACCIONES -->
+        <div class="actions">
+          <button type="button" class="btn ghost" (click)="cancelar()">Cancelar</button>
+
+          <button type="submit" class="btn primary" [disabled]="guardando">
+            @if (guardando) {
+              <mat-spinner diameter="18"></mat-spinner>
+            } @else {
+              {{ editando ? 'Guardar cambios' : 'Crear sucursal' }}
+            }
+          </button>
+        </div>
+
+      </form>
+    }
+
+  </mat-card>
+
+</div>

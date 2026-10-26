@@ -1,0 +1,225 @@
+/* ==========================================================
+   Sucursales · listado — tema dark (Herederos del Rey)
+   ========================================================== */
+
+:host {
+  --bg: #0b0d12;
+  --surface: #12151c;
+  --surface-2: #161a24;
+  --surface-3: #1c2130;
+  --border: #232838;
+  --border-hover: #3a4156;
+  --text: #e8e9ee;
+  --text-dim: #a9adbb;
+  --text-faint: #6b7080;
+  --gold: #cda45e;
+  --gold-strong: #e0b970;
+  --gold-soft: rgba(205, 164, 94, 0.12);
+  --red: #d3695a;
+
+  display: block;
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+
+  /* ---- Form field (v15–19) ---- */
+  --mdc-outlined-text-field-outline-color: var(--border);
+  --mdc-outlined-text-field-hover-outline-color: var(--border-hover);
+  --mdc-outlined-text-field-focus-outline-color: var(--gold);
+  --mdc-outlined-text-field-label-text-color: var(--text-faint);
+  --mdc-outlined-text-field-hover-label-text-color: var(--text-dim);
+  --mdc-outlined-text-field-focus-label-text-color: var(--gold);
+  --mdc-outlined-text-field-input-text-color: var(--text);
+  --mdc-outlined-text-field-caret-color: var(--gold);
+
+  /* ---- Form field (v20+) ---- */
+  --mat-form-field-outlined-outline-color: var(--border);
+  --mat-form-field-outlined-hover-outline-color: var(--border-hover);
+  --mat-form-field-outlined-focus-outline-color: var(--gold);
+  --mat-form-field-outlined-label-text-color: var(--text-faint);
+  --mat-form-field-outlined-hover-label-text-color: var(--text-dim);
+  --mat-form-field-outlined-focus-label-text-color: var(--gold);
+  --mat-form-field-outlined-input-text-color: var(--text);
+  --mat-form-field-outlined-caret-color: var(--gold);
+  --mat-form-field-leading-icon-color: var(--text-faint);
+  --mat-form-field-trailing-icon-color: var(--text-faint);
+
+  /* ---- Tabla ---- */
+  --mat-table-background-color: transparent;
+  --mat-table-header-headline-color: var(--text-faint);
+  --mat-table-row-item-label-text-color: var(--text-dim);
+  --mat-table-row-item-outline-color: var(--border);
+  --mat-table-header-container-height: 46px;
+  --mat-table-row-item-container-height: 58px;
+
+  /* ---- Paginador ---- */
+  --mat-paginator-container-background-color: transparent;
+  --mat-paginator-container-text-color: var(--text-dim);
+  --mat-paginator-enabled-icon-color: var(--text-dim);
+  --mat-paginator-disabled-icon-color: #3a4156;
+  --mat-select-trigger-text-color: var(--text);
+  --mat-select-enabled-arrow-color: var(--text-dim);
+  --mat-select-focused-arrow-color: var(--gold);
+
+  /* ---- Card, botones de icono y spinner ---- */
+  --mdc-elevated-card-container-color: var(--surface);
+  --mat-card-elevated-container-color: var(--surface);
+  --mat-icon-button-state-layer-color: var(--text);
+  --mdc-circular-progress-active-indicator-color: var(--gold);
+  --mat-progress-spinner-active-indicator-color: var(--gold);
+}
+
+/* ---------- PÁGINA ---------- */
+.page {
+  max-width: 1320px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+.header h2 {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: 28px;
+  margin: 0;
+  color: var(--text);
+}
+.header p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--text-faint);
+}
+
+/* ---------- CARD ---------- */
+.card {
+  background: var(--surface) !important;
+  border: 1px solid var(--border);
+  border-radius: 14px !important;
+  box-shadow: none !important;
+  padding: 18px 20px 6px;
+  color: var(--text);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  margin-bottom: 14px;
+}
+.search {
+  width: 100%;
+  max-width: 420px;
+}
+
+/* ---------- TABLA ---------- */
+.table-wrap {
+  position: relative;
+  overflow-x: auto;
+  min-height: 140px;
+}
+.table {
+  width: 100%;
+  min-width: 760px;
+}
+
+th.mat-mdc-header-cell {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  border-bottom-color: var(--border) !important;
+}
+td.mat-mdc-cell {
+  font-size: 13.5px;
+  border-bottom-color: var(--border) !important;
+}
+tr.mat-mdc-row:hover td {
+  background: var(--surface-2);
+}
+
+.strong { color: var(--text); font-weight: 600; }
+.faint { color: var(--text-faint); }
+.mono {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+}
+.wrap {
+  max-width: 320px;
+  line-height: 1.4;
+}
+.right { text-align: right; }
+
+.mail {
+  color: var(--text-dim);
+  text-decoration: none;
+  border-bottom: 1px dashed var(--border-hover);
+}
+.mail:hover {
+  color: var(--gold);
+  border-bottom-color: var(--gold);
+}
+
+.icon-btn { color: var(--text-faint) !important; }
+.icon-btn:hover { color: var(--gold) !important; }
+.icon-btn.danger:hover { color: var(--red) !important; }
+
+.empty {
+  padding: 40px 16px;
+  text-align: center;
+  font-size: 13.5px;
+  color: var(--text-faint);
+}
+
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  background: rgba(18, 21, 28, 0.6);
+}
+
+/* ---------- BOTONES ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 42px;
+  padding: 0 18px;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.btn mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+.btn.primary {
+  background: var(--gold);
+  border: 0;
+  color: var(--bg);
+}
+.btn.primary:hover { background: var(--gold-strong); }
+
+.btn:focus-visible,
+.mail:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 640px) {
+  .header { flex-direction: column; align-items: stretch; }
+  .search { max-width: none; }
+}

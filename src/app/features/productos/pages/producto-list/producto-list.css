@@ -1,0 +1,382 @@
+.list-card {
+  margin: 24px;
+  padding: 24px;
+  border-radius: 12px;
+}
+
+
+/* ==========================================
+   ENCABEZADO
+   ========================================== */
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.header-info h2 {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 600;
+}
+
+.header-info p {
+  margin: 6px 0 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+
+/* ==========================================
+   BOTÓN NUEVO PRODUCTO
+   ========================================== */
+
+.header button {
+  min-width: 160px;
+  height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+
+/* ==========================================
+   FILTROS
+   ========================================== */
+
+.filtros {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+
+.buscador {
+  width: 100%;
+  max-width: 500px;
+}
+
+
+/* ==========================================
+   ICONO DEL BUSCADOR
+   ========================================== */
+
+.buscador mat-icon {
+  margin-right: 8px;
+}
+
+
+/* ==========================================
+   CONTENIDO
+   ========================================== */
+
+.contenido {
+  width: 100%;
+}
+
+
+/* ==========================================
+   CONTENEDOR DE TABLA
+   ========================================== */
+
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 8px;
+}
+
+
+/* ==========================================
+   TABLA
+   ========================================== */
+
+.tabla {
+  width: 100%;
+  min-width: 1200px;
+}
+
+
+/* ==========================================
+   ENCABEZADO
+   ========================================== */
+
+th.mat-mdc-header-cell {
+  padding: 14px 16px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+
+/* ==========================================
+   CELDAS
+   ========================================== */
+
+td.mat-mdc-cell {
+  padding: 14px 16px;
+  vertical-align: middle;
+}
+
+
+/* ==========================================
+   ID
+   ========================================== */
+
+th:first-child,
+td:first-child {
+  width: 60px;
+  text-align: center;
+}
+
+
+/* ==========================================
+   CÓDIGO
+   ========================================== */
+
+th:nth-child(2),
+td:nth-child(2) {
+  min-width: 120px;
+}
+
+
+/* ==========================================
+   NOMBRE
+   ========================================== */
+
+th:nth-child(3),
+td:nth-child(3) {
+  min-width: 200px;
+}
+
+
+/* ==========================================
+   NOMBRE GENÉRICO
+   ========================================== */
+
+th:nth-child(4),
+td:nth-child(4) {
+  min-width: 180px;
+}
+
+
+/* ==========================================
+   PRECIOS
+   ========================================== */
+
+th:nth-child(5),
+td:nth-child(5),
+th:nth-child(6),
+td:nth-child(6) {
+  min-width: 120px;
+  text-align: right;
+}
+
+
+/* ==========================================
+   ESTADOS
+   ========================================== */
+
+th:nth-child(7),
+td:nth-child(7),
+th:nth-child(8),
+td:nth-child(8),
+th:nth-child(9),
+td:nth-child(9),
+th:nth-child(10),
+td:nth-child(10) {
+  min-width: 110px;
+  text-align: center;
+}
+
+
+/* ==========================================
+   BADGES DE ESTADO
+   ========================================== */
+
+.estado {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 45px;
+  padding: 4px 10px;
+
+  border-radius: 20px;
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+
+/* ESTADO SÍ */
+
+.estado-si {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+
+/* ESTADO NO */
+
+.estado-no {
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+
+/* ==========================================
+   TEXTO VACÍO
+   ========================================== */
+
+.texto-vacio {
+  color: #9ca3af;
+  font-style: italic;
+}
+
+
+/* ==========================================
+   ACCIONES
+   ========================================== */
+
+.acciones {
+  min-width: 210px;
+  white-space: nowrap;
+}
+
+.acciones button {
+  margin-right: 8px;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.acciones button:last-child {
+  margin-right: 0;
+}
+
+
+/* ==========================================
+   ICONOS DE ACCIONES
+   ========================================== */
+
+.acciones mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+
+/* ==========================================
+   LOADING
+   ========================================== */
+
+.loading-container {
+  min-height: 300px;
+
+  display: flex;
+  flex-direction: column;
+
+  justify-content: center;
+  align-items: center;
+
+  gap: 14px;
+
+  color: #6b7280;
+}
+
+
+/* ==========================================
+   SIN DATOS
+   ========================================== */
+
+.sin-datos {
+  height: 180px;
+
+  text-align: center;
+
+  color: #6b7280;
+
+  font-size: 15px;
+}
+
+.sin-datos mat-icon {
+  display: block;
+
+  margin: 0 auto 8px;
+
+  font-size: 36px;
+
+  width: 36px;
+  height: 36px;
+}
+
+
+/* ==========================================
+   PAGINADOR
+   ========================================== */
+
+mat-paginator {
+  margin-top: 8px;
+}
+
+
+/* ==========================================
+   RESPONSIVE - TABLET
+   ========================================== */
+
+@media (max-width: 900px) {
+
+  .list-card {
+    margin: 16px;
+    padding: 18px;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .header button {
+    width: 100%;
+  }
+
+  .buscador {
+    max-width: 100%;
+  }
+
+}
+
+
+/* ==========================================
+   RESPONSIVE - CELULAR
+   ========================================== */
+
+@media (max-width: 600px) {
+
+  .list-card {
+    margin: 8px;
+    padding: 12px;
+  }
+
+  .header-info h2 {
+    font-size: 22px;
+  }
+
+  .header-info p {
+    font-size: 13px;
+  }
+
+  .tabla {
+    min-width: 1100px;
+  }
+
+  .acciones button {
+    margin-bottom: 5px;
+  }
+
+}

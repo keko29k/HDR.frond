@@ -1,0 +1,119 @@
+<div class="page-container">
+  <mat-card class="table-card">
+
+    <!-- HEADER -->
+    <div class="header">
+      <h2>Lista de compras</h2>
+
+      <button mat-raised-button color="primary" (click)="nuevo()">
+        Nueva compra
+      </button>
+    </div>
+
+    <!-- FILTRO -->
+    <div class="filters">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Buscar compra</mat-label>
+        <input matInput [formControl]="buscarControl" placeholder="Descripción, proveedor..." />
+      </mat-form-field>
+    </div>
+
+    <!-- LOADING -->
+    <div class="loading-container" *ngIf="loading">
+      <mat-spinner diameter="42"></mat-spinner>
+    </div>
+
+    <!-- TABLA -->
+    <div class="table-container" *ngIf="!loading">
+      <table mat-table [dataSource]="compras" class="full-width-table mat-elevation-z1">
+
+        <!-- ID -->
+        <ng-container matColumnDef="id">
+          <th mat-header-cell *matHeaderCellDef>ID</th>
+          <td mat-cell *matCellDef="let compra">{{ compra.id }}</td>
+        </ng-container>
+
+        <!-- FECHA -->
+        <ng-container matColumnDef="fecha">
+          <th mat-header-cell *matHeaderCellDef>Fecha</th>
+          <td mat-cell *matCellDef="let compra">
+            {{ compra.fecha | date:'dd/MM/yyyy' }}
+          </td>
+        </ng-container>
+
+        <!-- TOTAL -->
+        <ng-container matColumnDef="total">
+          <th mat-header-cell *matHeaderCellDef>Total</th>
+          <td mat-cell *matCellDef="let compra">
+            {{ compra.total | currency }}
+          </td>
+        </ng-container>
+
+        <!-- DESCRIPCION -->
+        <ng-container matColumnDef="descripcion">
+          <th mat-header-cell *matHeaderCellDef>Descripción</th>
+          <td mat-cell *matCellDef="let compra">
+            {{ compra.descripcion || '-' }}
+          </td>
+        </ng-container>
+
+        <!-- PROVEEDOR -->
+        <ng-container matColumnDef="proveedorId">
+          <th mat-header-cell *matHeaderCellDef>Proveedor</th>
+          <td mat-cell *matCellDef="let compra">
+            {{ compra.nombreProveedor}}
+          </td>
+        </ng-container>
+
+        <!-- USUARIO -->
+        <ng-container matColumnDef="usuarioId">
+          <th mat-header-cell *matHeaderCellDef>Usuario</th>
+          <td mat-cell *matCellDef="let compra">
+            {{ compra.nombreUsuario }}
+          </td>
+        </ng-container>
+
+        <!-- ACCIONES -->
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef>Acciones</th>
+
+          <td mat-cell *matCellDef="let compra" class="actions-cell">
+
+            <button mat-icon-button color="primary"
+                    (click)="editar(compra.id)"
+                    matTooltip="Editar">
+              <mat-icon>edit</mat-icon>
+            </button>
+
+            <button mat-icon-button color="warn"
+                    (click)="eliminar(compra.id)"
+                    matTooltip="Eliminar">
+              <mat-icon>delete</mat-icon>
+            </button>
+
+          </td>
+        </ng-container>
+
+        <!-- FILAS -->
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="table-row"></tr>
+      </table>
+
+      <!-- EMPTY -->
+      <div class="empty-state" *ngIf="compras.length === 0">
+        No se encontraron compras.
+      </div>
+    </div>
+
+    <!-- PAGINADOR -->
+    <mat-paginator
+      [length]="meta.totalCount"
+      [pageSize]="meta.pageSize"
+      [pageIndex]="meta.currentPage - 1"
+      [pageSizeOptions]="[5, 10, 20, 50]"
+      showFirstLastButtons
+      (page)="cambiarPagina($event)">
+    </mat-paginator>
+
+  </mat-card>
+</div>

@@ -1,0 +1,28 @@
+.page-container {
+  min-height: 100vh;
+  background: #f4f6f8;
+  padding: 24px;
+}
+
+.table-card {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.full-width-table {
+  width: 100%;
+}

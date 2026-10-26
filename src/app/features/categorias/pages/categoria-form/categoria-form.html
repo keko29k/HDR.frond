@@ -1,0 +1,38 @@
+<div class="page-container">
+  <mat-card class="form-card">
+    <h2>{{ titulo }}</h2>
+
+    <div class="loading-container" *ngIf="loading">
+      <mat-spinner diameter="42"></mat-spinner>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="guardar()" *ngIf="!loading">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Nombre de Categoria</mat-label>
+        <input matInput formControlName="nombre" />
+        <mat-error *ngIf="form.get('nombre')?.hasError('required')">
+          El nombre es obligatorio
+        </mat-error>
+        <mat-error *ngIf="form.get('nombre')?.hasError('maxlength')">
+          Máximo 100 caracteres
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>descripcion</mat-label>
+        <input matInput type="text" formControlName="descripcion" />
+      </mat-form-field>
+
+  
+      <div class="actions">
+        <button mat-raised-button color="primary" type="submit" [disabled]="loading">
+          {{ editando ? 'Actualizar' : 'Guardar' }}
+        </button>
+
+        <button mat-stroked-button color="accent" type="button" (click)="cancelar()">
+          Cancelar
+        </button>
+      </div>
+    </form>
+  </mat-card>
+</div>

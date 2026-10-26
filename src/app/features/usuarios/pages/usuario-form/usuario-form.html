@@ -1,0 +1,401 @@
+<div class="usuario-form-container">
+
+  <mat-card class="usuario-card">
+
+    <!-- ========================================= -->
+    <!-- ENCABEZADO -->
+    <!-- ========================================= -->
+
+    <mat-card-header>
+
+      <mat-card-title>
+        {{ titulo }}
+      </mat-card-title>
+
+      <mat-card-subtitle>
+        {{ editando
+          ? 'Modifica la información del usuario'
+          : 'Registra un nuevo usuario'
+        }}
+      </mat-card-subtitle>
+
+    </mat-card-header>
+
+
+    <mat-card-content>
+
+      <form
+        [formGroup]="form"
+        (ngSubmit)="guardar()"
+      >
+
+        <!-- ========================================= -->
+        <!-- INFORMACIÓN DEL USUARIO -->
+        <!-- ========================================= -->
+
+        <h3 class="section-title">
+          Información del usuario
+        </h3>
+
+        <div class="form-grid">
+
+          <!-- SUCURSAL -->
+          <mat-form-field appearance="outline">
+
+            <mat-label>Sucursal</mat-label>
+
+            <mat-select formControlName="idSucursal">
+
+              <mat-option [value]="0">
+                Seleccione una sucursal
+              </mat-option>
+
+              @for (sucursal of sucursales; track sucursal.id) {
+
+                <mat-option [value]="sucursal.id">
+                  {{ sucursal.nombre }}
+                </mat-option>
+
+              }
+
+            </mat-select>
+
+            @if (
+              form.get('idSucursal')?.hasError('required') ||
+              form.get('idSucursal')?.hasError('min')
+            ) {
+
+              <mat-error>
+                Seleccione una sucursal
+              </mat-error>
+
+            }
+
+          </mat-form-field>
+
+
+          <!-- ROL -->
+          <mat-form-field appearance="outline">
+
+            <mat-label>Rol</mat-label>
+
+            <mat-select formControlName="rol">
+
+              <mat-option value="">
+                Seleccione un rol
+              </mat-option>
+
+              <mat-option value="Administrador">
+                Administrador
+              </mat-option>
+
+              <mat-option value="Vendedor">
+                Vendedor
+              </mat-option>
+
+              <mat-option value="Almacenero">
+                Almacenero
+              </mat-option>
+
+              <mat-option value="Supervisor">
+                Supervisor
+              </mat-option>
+
+            </mat-select>
+
+            @if (form.get('rol')?.hasError('required')) {
+
+              <mat-error>
+                Seleccione un rol
+              </mat-error>
+
+            }
+
+          </mat-form-field>
+
+
+          <!-- NOMBRES -->
+          <mat-form-field appearance="outline">
+
+            <mat-label>Nombres</mat-label>
+
+            <input
+              matInput
+              type="text"
+              formControlName="nombres"
+              placeholder="Ej. Juan Carlos"
+            />
+
+            @if (form.get('nombres')?.hasError('required')) {
+
+              <mat-error>
+                Los nombres son obligatorios
+              </mat-error>
+
+            }
+
+            @if (form.get('nombres')?.hasError('maxlength')) {
+
+              <mat-error>
+                Máximo 100 caracteres
+              </mat-error>
+
+            }
+
+          </mat-form-field>
+
+
+          <!-- APELLIDOS -->
+          <mat-form-field appearance="outline">
+
+            <mat-label>Apellidos</mat-label>
+
+            <input
+              matInput
+              type="text"
+              formControlName="apellidos"
+              placeholder="Ej. Pérez López"
+            />
+
+            @if (form.get('apellidos')?.hasError('required')) {
+
+              <mat-error>
+                Los apellidos son obligatorios
+              </mat-error>
+
+            }
+
+            @if (form.get('apellidos')?.hasError('maxlength')) {
+
+              <mat-error>
+                Máximo 100 caracteres
+              </mat-error>
+
+            }
+
+          </mat-form-field>
+
+
+          <!-- USUARIO -->
+          <mat-form-field appearance="outline">
+
+            <mat-label>Nombre de usuario</mat-label>
+
+            <input
+              matInput
+              type="text"
+              formControlName="usuario1"
+              placeholder="Ej. jperez"
+              autocomplete="username"
+            />
+
+            @if (form.get('usuario1')?.hasError('required')) {
+
+              <mat-error>
+                El nombre de usuario es obligatorio
+              </mat-error>
+
+            }
+
+            @if (form.get('usuario1')?.hasError('maxlength')) {
+
+              <mat-error>
+                Máximo 100 caracteres
+              </mat-error>
+
+            }
+
+          </mat-form-field>
+
+
+          <!-- CONTRASEÑA -->
+          <mat-form-field appearance="outline">
+
+            <mat-label>
+              {{ editando
+                ? 'Nueva contraseña'
+                : 'Contraseña'
+              }}
+            </mat-label>
+
+            <input
+              matInput
+              type="password"
+              formControlName="clave"
+              placeholder="Ingrese la contraseña"
+              autocomplete="new-password"
+            />
+
+            @if (
+              form.get('clave')?.hasError('required')
+            ) {
+
+              <mat-error>
+                La contraseña es obligatoria
+              </mat-error>
+
+            }
+
+            @if (
+              form.get('clave')?.hasError('minlength')
+            ) {
+
+              <mat-error>
+                La contraseña debe tener mínimo 6 caracteres
+              </mat-error>
+
+            }
+
+            @if (
+              form.get('clave')?.hasError('maxlength')
+            ) {
+
+              <mat-error>
+                Máximo 255 caracteres
+              </mat-error>
+
+            }
+
+          </mat-form-field>
+
+
+          <!-- TELÉFONO -->
+          <mat-form-field appearance="outline">
+
+            <mat-label>Teléfono</mat-label>
+
+            <input
+              matInput
+              type="tel"
+              formControlName="telefono"
+              placeholder="Ej. 76123456"
+            />
+
+            @if (form.get('telefono')?.hasError('maxlength')) {
+
+              <mat-error>
+                Máximo 30 caracteres
+              </mat-error>
+
+            }
+
+          </mat-form-field>
+
+
+          <!-- correo -->
+          <mat-form-field appearance="outline">
+
+            <mat-label>correo electrónico</mat-label>
+
+            <input
+              matInput
+              type="correo"
+              formControlName="correo"
+              placeholder="Ej. usuario@gmail.com"
+              autocomplete="correo"
+            />
+
+            @if (form.get('correo')?.hasError('correo')) {
+
+              <mat-error>
+                Ingrese un correo electrónico válido
+              </mat-error>
+
+            }
+
+            @if (form.get('correo')?.hasError('maxlength')) {
+
+              <mat-error>
+                Máximo 150 caracteres
+              </mat-error>
+
+            }
+
+          </mat-form-field>
+
+
+          <!-- FOTO -->
+          <mat-form-field
+            appearance="outline"
+            class="full-width"
+          >
+
+            <mat-label>Foto</mat-label>
+
+            <input
+              matInput
+              type="text"
+              formControlName="foto"
+              placeholder="URL o ruta de la fotografía"
+            />
+
+            @if (form.get('foto')?.hasError('maxlength')) {
+
+              <mat-error>
+                Máximo 500 caracteres
+              </mat-error>
+
+            }
+
+          </mat-form-field>
+
+        </div>
+
+
+        <!-- ========================================= -->
+        <!-- BOTONES -->
+        <!-- ========================================= -->
+
+        <div class="form-actions">
+
+          <!-- CANCELAR -->
+          <button
+            mat-stroked-button
+            type="button"
+            (click)="cancelar()"
+            [disabled]="loading"
+          >
+            Cancelar
+          </button>
+
+
+          <!-- GUARDAR / ACTUALIZAR -->
+          <button
+            mat-flat-button
+            color="primary"
+            type="submit"
+            [disabled]="loading"
+          >
+
+            @if (loading) {
+
+              <mat-spinner
+                diameter="20"
+              ></mat-spinner>
+
+              <span>
+                Guardando...
+              </span>
+
+            } @else {
+
+              <span>
+                {{ editando
+                  ? 'Actualizar usuario'
+                  : 'Guardar usuario'
+                }}
+              </span>
+
+            }
+
+          </button>
+
+        </div>
+
+      </form>
+
+    </mat-card-content>
+
+  </mat-card>
+
+</div>

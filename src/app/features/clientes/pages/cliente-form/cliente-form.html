@@ -1,0 +1,201 @@
+```html
+<div class="cliente-form-container">
+  <div class="header">
+    <div>
+      <h1>{{ titulo }}</h1>
+      <p>
+        {{ editando ? 'Modifique la información del cliente' : 'Registre un nuevo cliente' }}
+      </p>
+    </div>
+  </div>
+
+  <mat-card class="form-card">
+    <form [formGroup]="form" (ngSubmit)="guardar()">
+
+      <div class="section-title">
+        <h2>Información personal</h2>
+        <p>Datos principales del cliente</p>
+      </div>
+
+      <div class="form-grid">
+
+        <!-- NOMBRES -->
+        <mat-form-field appearance="outline">
+          <mat-label>Nombres</mat-label>
+          <input
+            matInput
+            formControlName="nombres"
+            placeholder="Ej. Juan Carlos">
+
+          @if (form.get('nombres')?.hasError('required') && form.get('nombres')?.touched) {
+            <mat-error>Los nombres son obligatorios.</mat-error>
+          }
+
+          @if (form.get('nombres')?.hasError('maxlength')) {
+            <mat-error>Máximo 100 caracteres.</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- APELLIDOS -->
+        <mat-form-field appearance="outline">
+          <mat-label>Apellidos</mat-label>
+          <input
+            matInput
+            formControlName="apellidos"
+            placeholder="Ej. Pérez López">
+
+          @if (form.get('apellidos')?.hasError('required') && form.get('apellidos')?.touched) {
+            <mat-error>Los apellidos son obligatorios.</mat-error>
+          }
+
+          @if (form.get('apellidos')?.hasError('maxlength')) {
+            <mat-error>Máximo 100 caracteres.</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- NIT / CI -->
+        <mat-form-field appearance="outline">
+          <mat-label>NIT / CI</mat-label>
+          <input
+            matInput
+            formControlName="nitCi"
+            placeholder="Ej. 1234567">
+
+          @if (form.get('nitCi')?.hasError('required') && form.get('nitCi')?.touched) {
+            <mat-error>El NIT/CI es obligatorio.</mat-error>
+          }
+
+          @if (form.get('nitCi')?.hasError('maxlength')) {
+            <mat-error>Máximo 20 caracteres.</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- TELEFONO -->
+        <mat-form-field appearance="outline">
+          <mat-label>Teléfono</mat-label>
+          <input
+            matInput
+            type="tel"
+            formControlName="telefono"
+            placeholder="Ej. 76123456"
+            autocomplete="tel">
+
+          <mat-hint>
+            Puede incluir prefijo, por ejemplo +591.
+          </mat-hint>
+
+          @if (form.get('telefono')?.hasError('required') && form.get('telefono')?.touched) {
+            <mat-error>El teléfono es obligatorio.</mat-error>
+          }
+
+          @if (form.get('telefono')?.hasError('maxlength')) {
+            <mat-error>Máximo 20 caracteres.</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- CORREO -->
+        <mat-form-field appearance="outline">
+          <mat-label>Correo electrónico</mat-label>
+          <input
+            matInput
+            type="email"
+            formControlName="correo"
+            placeholder="Ej. cliente@gmail.com"
+            autocomplete="email">
+
+          @if (form.get('correo')?.hasError('email') && form.get('correo')?.touched) {
+            <mat-error>Ingrese un correo válido.</mat-error>
+          }
+
+          @if (form.get('correo')?.hasError('maxlength')) {
+            <mat-error>Máximo 150 caracteres.</mat-error>
+          }
+        </mat-form-field>
+
+        <!-- FECHA DE NACIMIENTO -->
+        <mat-form-field appearance="outline">
+          <mat-label>Fecha de nacimiento</mat-label>
+          <input
+            matInput
+            type="date"
+            formControlName="fechaNacimiento">
+        </mat-form-field>
+
+        <!-- DIRECCION -->
+        <mat-form-field
+          appearance="outline"
+          class="full-width">
+
+          <mat-label>Dirección</mat-label>
+
+          <input
+            matInput
+            formControlName="direccion"
+            placeholder="Ej. Av. Las Americas #123">
+
+          @if (form.get('direccion')?.hasError('maxlength')) {
+            <mat-error>Máximo 250 caracteres.</mat-error>
+          }
+
+        </mat-form-field>
+
+        <!-- OBSERVACION -->
+        <mat-form-field
+          appearance="outline"
+          class="full-width">
+
+          <mat-label>Observación</mat-label>
+
+          <textarea
+            matInput
+            formControlName="observacion"
+            rows="4"
+            maxlength="500"
+            placeholder="Ingrese alguna observación sobre el cliente...">
+          </textarea>
+
+          <mat-hint align="end">
+            {{ form.get('observacion')?.value?.length || 0 }}/500
+          </mat-hint>
+
+          @if (form.get('observacion')?.hasError('maxlength')) {
+            <mat-error>Máximo 500 caracteres.</mat-error>
+          }
+
+        </mat-form-field>
+
+      </div>
+
+      <!-- BOTONES -->
+      <div class="form-actions">
+
+        <button
+          mat-stroked-button
+          type="button"
+          (click)="cancelar()"
+          [disabled]="loading">
+          Cancelar
+        </button>
+
+        <button
+          mat-raised-button
+          color="primary"
+          type="submit"
+          [disabled]="loading">
+
+          @if (loading) {
+            <mat-spinner diameter="20"></mat-spinner>
+          } @else {
+            <span>
+              {{ editando ? 'Actualizar cliente' : 'Guardar cliente' }}
+            </span>
+          }
+
+        </button>
+
+      </div>
+
+    </form>
+  </mat-card>
+</div>
+```

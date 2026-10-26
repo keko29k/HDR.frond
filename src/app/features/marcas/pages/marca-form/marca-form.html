@@ -1,0 +1,194 @@
+<div class="marca-form-container">
+
+  <!-- HEADER -->
+
+  <div class="header">
+    <div>
+      <h1>{{ titulo }}</h1>
+
+```
+  <p>
+    {{ editando
+      ? 'Modifique la información de la marca'
+      : 'Registre una nueva marca' }}
+  </p>
+</div>
+```
+
+  </div>
+
+  <!-- CARD DEL FORMULARIO -->
+
+  <mat-card class="form-card">
+
+```
+<form
+  [formGroup]="form"
+  (ngSubmit)="guardar()">
+
+  <!-- TÍTULO -->
+  <div class="section-title">
+
+    <h2>Información de la marca</h2>
+
+    <p>
+      Ingrese los datos correspondientes a la marca.
+    </p>
+
+  </div>
+
+
+  <!-- CAMPOS -->
+  <div class="form-grid">
+
+    <!-- NOMBRE -->
+    <mat-form-field
+      appearance="outline"
+      class="full-width">
+
+      <mat-label>
+        Nombre de la marca
+      </mat-label>
+
+      <input
+        matInput
+        formControlName="nombre"
+        placeholder="Ej. Bayer"
+        maxlength="100">
+
+
+      <!-- ERROR NOMBRE REQUERIDO -->
+      @if (
+        form.get('nombre')?.hasError('required') &&
+        form.get('nombre')?.touched
+      ) {
+
+        <mat-error>
+          El nombre de la marca es obligatorio.
+        </mat-error>
+
+      }
+
+
+      <!-- ERROR NOMBRE MÁXIMO -->
+      @if (
+        form.get('nombre')?.hasError('maxlength')
+      ) {
+
+        <mat-error>
+          Máximo 100 caracteres.
+        </mat-error>
+
+      }
+
+    </mat-form-field>
+
+
+    <!-- DESCRIPCIÓN -->
+    <mat-form-field
+      appearance="outline"
+      class="full-width">
+
+      <mat-label>
+        Descripción
+      </mat-label>
+
+      <textarea
+        matInput
+        formControlName="descripcion"
+        rows="5"
+        maxlength="250"
+        placeholder="Ingrese una descripción de la marca...">
+      </textarea>
+
+
+      <!-- CONTADOR -->
+      <mat-hint align="end">
+        {{ form.get('descripcion')?.value?.length || 0 }}/250
+      </mat-hint>
+
+
+      <!-- ERROR DESCRIPCIÓN REQUERIDA -->
+      @if (
+        form.get('descripcion')?.hasError('required') &&
+        form.get('descripcion')?.touched
+      ) {
+
+        <mat-error>
+          La descripción es obligatoria.
+        </mat-error>
+
+      }
+
+
+      <!-- ERROR DESCRIPCIÓN MÁXIMO -->
+      @if (
+        form.get('descripcion')?.hasError('maxlength')
+      ) {
+
+        <mat-error>
+          Máximo 250 caracteres.
+        </mat-error>
+
+      }
+
+    </mat-form-field>
+
+  </div>
+
+
+  <!-- BOTONES -->
+  <div class="form-actions">
+
+    <!-- CANCELAR -->
+    <button
+      mat-stroked-button
+      type="button"
+      (click)="cancelar()"
+      [disabled]="loading">
+
+      Cancelar
+
+    </button>
+
+
+    <!-- GUARDAR / ACTUALIZAR -->
+    <button
+      mat-raised-button
+      color="primary"
+      type="submit"
+      [disabled]="loading">
+
+      <!-- SPINNER -->
+      <mat-spinner
+        [hidden]="!loading"
+        diameter="20">
+      </mat-spinner>
+
+
+      <!-- ICONO -->
+      <mat-icon
+        [hidden]="loading"
+        [textContent]="editando ? 'save' : 'add'">
+      </mat-icon>
+
+
+      <!-- TEXTO -->
+      <span [hidden]="loading">
+
+        {{ editando
+          ? 'Actualizar marca'
+          : 'Guardar marca' }}
+
+      </span>
+
+    </button>
+
+  </div>
+
+</form>
+```
+
+  </mat-card>
+
+</div>

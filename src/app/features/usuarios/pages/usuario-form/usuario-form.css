@@ -1,0 +1,226 @@
+.usuario-form-container {
+  width: 100%;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+/* ==========================================
+   CARD PRINCIPAL
+   ========================================== */
+
+.usuario-card {
+  width: 100%;
+  max-width: 1050px;
+  margin: 0 auto;
+
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+
+/* ==========================================
+   ENCABEZADO
+   ========================================== */
+
+mat-card-header {
+  padding: 24px 24px 12px;
+}
+
+mat-card-title {
+  font-size: 24px;
+  font-weight: 600;
+}
+
+mat-card-subtitle {
+  margin-top: 6px;
+}
+
+
+/* ==========================================
+   CONTENIDO
+   ========================================== */
+
+mat-card-content {
+  padding: 24px !important;
+}
+
+
+/* ==========================================
+   TÍTULO DE SECCIÓN
+   ========================================== */
+
+.section-title {
+  margin: 10px 0 20px;
+
+  padding-bottom: 10px;
+
+  font-size: 17px;
+  font-weight: 600;
+
+  border-bottom: 1px solid #e0e0e0;
+}
+
+
+/* ==========================================
+   GRID
+   ========================================== */
+
+.form-grid {
+  display: grid;
+
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  column-gap: 20px;
+  row-gap: 6px;
+
+  width: 100%;
+}
+
+
+/* ==========================================
+   CAMPOS
+   ========================================== */
+
+mat-form-field {
+  width: 100%;
+}
+
+
+/* ==========================================
+   ANCHO COMPLETO
+   ========================================== */
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+
+/* ==========================================
+   FOTO
+   ========================================== */
+
+input[formControlName="foto"] {
+  width: 100%;
+}
+
+
+/* ==========================================
+   BOTONES
+   ========================================== */
+
+.form-actions {
+  display: flex;
+
+  justify-content: flex-end;
+  align-items: center;
+
+  gap: 12px;
+
+  margin-top: 30px;
+  padding-top: 20px;
+
+  border-top: 1px solid #e0e0e0;
+}
+
+
+.form-actions button {
+  min-width: 145px;
+  min-height: 42px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+}
+
+
+/* ==========================================
+   SPINNER
+   ========================================== */
+
+.form-actions mat-spinner {
+  display: inline-block;
+}
+
+
+/* ==========================================
+   TABLET
+   ========================================== */
+
+@media (max-width: 768px) {
+
+  .usuario-form-container {
+    padding: 16px;
+  }
+
+  mat-card-header {
+    padding: 20px 16px 10px;
+  }
+
+  mat-card-content {
+    padding: 16px !important;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+
+    column-gap: 0;
+    row-gap: 4px;
+  }
+
+  .full-width {
+    grid-column: auto;
+  }
+
+}
+
+
+/* ==========================================
+   CELULAR
+   ========================================== */
+
+@media (max-width: 480px) {
+
+  .usuario-form-container {
+    padding: 8px;
+  }
+
+  .usuario-card {
+    border-radius: 8px;
+  }
+
+  mat-card-header {
+    padding: 16px 12px 8px;
+  }
+
+  mat-card-content {
+    padding: 12px !important;
+  }
+
+  mat-card-title {
+    font-size: 20px;
+  }
+
+  mat-card-subtitle {
+    font-size: 13px;
+  }
+
+  .section-title {
+    font-size: 16px;
+    margin-top: 8px;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+
+    align-items: stretch;
+
+    gap: 10px;
+  }
+
+  .form-actions button {
+    width: 100%;
+  }
+
+}

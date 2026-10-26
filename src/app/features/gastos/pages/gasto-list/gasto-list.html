@@ -1,0 +1,408 @@
+```html
+<div class="gasto-container">
+
+  <!-- ENCABEZADO -->
+  <div class="header">
+
+    <div>
+      <h1>Gastos</h1>
+      <p>Administración y registro de gastos</p>
+    </div>
+
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="nuevo()">
+
+      <mat-icon>add</mat-icon>
+
+      Nuevo gasto
+
+    </button>
+
+  </div>
+
+
+  <!-- TARJETA PRINCIPAL -->
+  <mat-card class="gasto-card">
+
+    <!-- BUSCADOR -->
+    <div class="toolbar">
+
+      <mat-form-field
+        appearance="outline"
+        class="search-field">
+
+        <mat-label>Buscar gasto</mat-label>
+
+        <mat-icon matPrefix>search</mat-icon>
+
+        <input
+          matInput
+          [formControl]="buscarControl"
+          placeholder="Buscar por comprobante, concepto u observación">
+
+        @if (buscarControl.value) {
+
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            aria-label="Limpiar búsqueda"
+            (click)="buscarControl.setValue('')">
+
+            <mat-icon>close</mat-icon>
+
+          </button>
+
+        }
+
+      </mat-form-field>
+
+    </div>
+
+
+    <!-- CONTENIDO -->
+    <div class="table-container">
+
+      <!-- LOADING -->
+      @if (loading) {
+
+        <div class="loading-container">
+
+          <mat-spinner diameter="45"></mat-spinner>
+
+          <p>Cargando gastos...</p>
+
+        </div>
+
+      }
+
+
+      <!-- TABLA -->
+      @if (!loading) {
+
+        @if (gastos.length > 0) {
+
+          <table
+            mat-table
+            [dataSource]="gastos"
+            class="gasto-table">
+
+
+            <!-- ID -->
+            <ng-container matColumnDef="id">
+
+              <th
+                mat-header-cell
+                *matHeaderCellDef>
+
+                ID
+
+              </th>
+
+              <td
+                mat-cell
+                *matCellDef="let gasto">
+
+                {{ gasto.id }}
+
+              </td>
+
+            </ng-container>
+
+
+            <!-- ID CAJA -->
+            <ng-container matColumnDef="idCaja">
+
+              <th
+                mat-header-cell
+                *matHeaderCellDef>
+
+                Caja
+
+              </th>
+
+              <td
+                mat-cell
+                *matCellDef="let gasto">
+
+                <span class="badge caja">
+                  #{{ gasto.idCaja }}
+                </span>
+
+              </td>
+
+            </ng-container>
+
+
+            <!-- ID USUARIO -->
+            <ng-container matColumnDef="idUsuario">
+
+              <th
+                mat-header-cell
+                *matHeaderCellDef>
+
+                Usuario
+
+              </th>
+
+              <td
+                mat-cell
+                *matCellDef="let gasto">
+
+                <span class="badge usuario">
+                  #{{ gasto.idUsuario }}
+                </span>
+
+              </td>
+
+            </ng-container>
+
+
+            <!-- CONCEPTO -->
+            <ng-container matColumnDef="concepto">
+
+              <th
+                mat-header-cell
+                *matHeaderCellDef>
+
+                Concepto
+
+              </th>
+
+              <td
+                mat-cell
+                *matCellDef="let gasto">
+
+                {{ gasto.concepto }}
+
+              </td>
+
+            </ng-container>
+
+
+            <!-- NUMERO COMPROBANTE -->
+            <ng-container matColumnDef="numeroComprobante">
+
+              <th
+                mat-header-cell
+                *matHeaderCellDef>
+
+                Comprobante
+
+              </th>
+
+              <td
+                mat-cell
+                *matCellDef="let gasto">
+
+                @if (gasto.numeroComprobante) {
+
+                  <span class="comprobante">
+                    {{ gasto.numeroComprobante }}
+                  </span>
+
+                } @else {
+
+                  <span class="sin-dato">
+                    Sin comprobante
+                  </span>
+
+                }
+
+              </td>
+
+            </ng-container>
+
+
+            <!-- MONTO -->
+            <ng-container matColumnDef="monto">
+
+              <th
+                mat-header-cell
+                *matHeaderCellDef>
+
+                Monto
+
+              </th>
+
+              <td
+                mat-cell
+                *matCellDef="let gasto">
+
+                <span class="monto">
+                  Bs. {{ gasto.monto | number:'1.2-2' }}
+                </span>
+
+              </td>
+
+            </ng-container>
+
+
+            <!-- OBSERVACION -->
+            <ng-container matColumnDef="observacion">
+
+              <th
+                mat-header-cell
+                *matHeaderCellDef>
+
+                Observación
+
+              </th>
+
+              <td
+                mat-cell
+                *matCellDef="let gasto">
+
+                @if (gasto.observacion) {
+
+                  <span
+                    class="observacion"
+                    [matTooltip]="gasto.observacion">
+
+                    {{ gasto.observacion }}
+
+                  </span>
+
+                } @else {
+
+                  <span class="sin-dato">
+                    Sin observación
+                  </span>
+
+                }
+
+              </td>
+
+            </ng-container>
+
+
+            <!-- ACCIONES -->
+            <ng-container matColumnDef="acciones">
+
+              <th
+                mat-header-cell
+                *matHeaderCellDef
+                class="acciones-header">
+
+                Acciones
+
+              </th>
+
+              <td
+                mat-cell
+                *matCellDef="let gasto"
+                class="acciones">
+
+                <!-- EDITAR -->
+                <button
+                  mat-icon-button
+                  color="primary"
+                  matTooltip="Editar gasto"
+                  (click)="editar(gasto.id)">
+
+                  <mat-icon>
+                    edit
+                  </mat-icon>
+
+                </button>
+
+
+                <!-- ELIMINAR -->
+                <button
+                  mat-icon-button
+                  color="warn"
+                  matTooltip="Eliminar gasto"
+                  (click)="eliminar(gasto.id)">
+
+                  <mat-icon>
+                    delete
+                  </mat-icon>
+
+                </button>
+
+              </td>
+
+            </ng-container>
+
+
+            <!-- HEADER -->
+            <tr
+              mat-header-row
+              *matHeaderRowDef="displayedColumns">
+            </tr>
+
+
+            <!-- FILAS -->
+            <tr
+              mat-row
+              *matRowDef="
+                let row;
+                columns: displayedColumns;
+              ">
+            </tr>
+
+          </table>
+
+        }
+
+
+        <!-- SIN RESULTADOS -->
+        @if (gastos.length === 0) {
+
+          <div class="empty-container">
+
+            <mat-icon>
+              receipt_long
+            </mat-icon>
+
+            <h3>
+              No se encontraron gastos
+            </h3>
+
+            <p>
+              No existen gastos que coincidan con la búsqueda.
+            </p>
+
+            <button
+              mat-stroked-button
+              color="primary"
+              (click)="nuevo()">
+
+              <mat-icon>
+                add
+              </mat-icon>
+
+              Registrar gasto
+
+            </button>
+
+          </div>
+
+        }
+
+      }
+
+    </div>
+
+
+    <!-- PAGINADOR -->
+    @if (!loading && gastos.length > 0) {
+
+      <mat-paginator
+        [length]="meta.totalCount"
+        [pageSize]="meta.pageSize"
+        [pageIndex]="meta.currentPage - 1"
+        [pageSizeOptions]="[5, 10, 20, 50]"
+        (page)="cambiarPagina($event)"
+        showFirstLastButtons>
+
+      </mat-paginator>
+
+    }
+
+  </mat-card>
+
+</div>
+```

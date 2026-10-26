@@ -1,0 +1,133 @@
+<div class="container">
+
+  <!-- LOADING -->
+  <div class="loading" *ngIf="loading">
+    <mat-spinner></mat-spinner>
+  </div>
+
+  <mat-card class="card">
+
+    <!-- HEADER -->
+    <mat-toolbar color="primary" class="toolbar">
+      🛒 Nueva Compra
+    </mat-toolbar>
+
+    <!-- FORM -->
+    <form [formGroup]="form" class="form">
+
+      <div class="grid">
+
+
+        <!-- PROVEEDOR -->
+        <mat-form-field appearance="outline">
+          <mat-label>Proveedor</mat-label>
+          <mat-select formControlName="proveedorId">
+            <mat-option *ngFor="let p of proveedores" [value]="p.id">
+              {{ p.nombre }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+    
+        <!-- DESCRIPCION -->
+        <mat-form-field appearance="outline" class="full">
+          <mat-label>Descripción</mat-label>
+          <input matInput formControlName="descripcion">
+        </mat-form-field>
+
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <!-- ========================= -->
+      <!-- PRODUCTOS -->
+      <!-- ========================= -->
+      <h3 class="title">📦 Productos</h3>
+
+      <div class="productos">
+
+        <div class="producto-card" *ngFor="let p of productos">
+
+          <div class="info">
+            <strong>{{ p.nombre }}</strong>
+            
+            <span>Bs {{ p.precioCompra }}</span>
+          </div>
+
+          <div class="acciones">
+            <button mat-stroked-button color="primary"
+                    (click)="agregarProducto(p, 1)">
+              ➕ Agregar
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <!-- ========================= -->
+      <!-- CARRITO -->
+      <!-- ========================= -->
+      <h3 class="title">🧾 Detalle de Compra</h3>
+
+      <table class="table" *ngIf="detalles.length > 0">
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Cant.</th>
+            <th>Precio</th>
+            <th>Subtotal</th>
+            <th></th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let d of detalles; let i = index">
+            <td>{{ d.productoId }}</td>
+            <td>{{ d.cantidad }}</td>
+            <td>{{ d.precio }}</td>
+            <td>{{ d.subtotal }}</td>
+            <td>
+              <button mat-icon-button color="warn"
+                      (click)="eliminarDetalle(i)">
+                ❌
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p *ngIf="detalles.length === 0" class="empty">
+        No hay productos agregados
+      </p>
+
+      <!-- TOTAL -->
+      <div class="total">
+        💰 Total: <strong>Bs {{ form.value.total }}</strong>
+      </div>
+
+      <!-- BOTONES -->
+      <div class="buttons">
+
+        <button mat-raised-button color="primary"
+                (click)="guardar()">
+          Guardar Compra
+        </button>
+
+        <button mat-stroked-button color="warn"
+                (click)="limpiar()">
+          Limpiar
+        </button>
+
+        <button mat-button (click)="cancelar()">
+          Cancelar
+        </button>
+
+      </div>
+
+    </form>
+
+  </mat-card>
+</div>
