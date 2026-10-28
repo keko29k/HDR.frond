@@ -8,7 +8,7 @@
     <p>
       {{ editando
         ? 'Actualiza el estado y la observación de esta caja.'
-        : 'Registra la apertura de caja para una sucursal.' }}
+        : 'El usuario y la sucursal se asignan automáticamente desde tu sesión.' }}
     </p>
   </header>
 
@@ -21,20 +21,21 @@
       <form [formGroup]="form" (ngSubmit)="guardar()" class="form" novalidate>
         @if (!editando) {
           <h3 class="section-title">Datos de apertura</h3>
-          <div class="grid-2">
-            <mat-form-field appearance="outline">
-              <mat-label>ID de sucursal</mat-label>
-              <mat-icon matIconPrefix>storefront</mat-icon>
-              <input matInput type="number" min="1" formControlName="idSucursal" placeholder="Ingrese el ID de la sucursal">
-              @if (form.controls.idSucursal.hasError('required') && form.controls.idSucursal.touched) {
-                <mat-error>La sucursal es obligatoria.</mat-error>
+          <aside class="info-box" aria-live="polite">
+            <mat-icon>{{ cargandoContexto ? 'sync' : 'storefront' }}</mat-icon>
+            <div>
+              <strong>Sucursal asignada</strong>
+              @if (cargandoContexto) {
+                <p>Cargando el usuario y su sucursal…</p>
+              } @else if (sucursalAsignada) {
+                <p>{{ sucursalAsignada.nombre }}</p>
+              } @else {
+                <p>No se pudo confirmar la sucursal. No será posible abrir la caja.</p>
               }
-              @if (form.controls.idSucursal.hasError('min')) {
-                <mat-error>El ID debe ser mayor a cero.</mat-error>
-              }
-            </mat-form-field>
+            </div>
+          </aside>
 
-            <mat-form-field appearance="outline">
+          <mat-form-field appearance="outline" class="full">
               <mat-label>Monto inicial</mat-label>
               <mat-icon matIconPrefix>payments</mat-icon>
               <span matTextPrefix>Bs.&nbsp;</span>
@@ -45,8 +46,7 @@
               @if (form.controls.montoInicial.hasError('min')) {
                 <mat-error>El monto no puede ser negativo.</mat-error>
               }
-            </mat-form-field>
-          </div>
+          </mat-form-field>
         } @else {
           <h3 class="section-title">Estado de caja</h3>
           <mat-form-field appearance="outline" class="full">
@@ -78,7 +78,7 @@
             <mat-icon>info</mat-icon>
             <div>
               <strong>Apertura de caja</strong>
-              <p>Se asignarán automáticamente el usuario y la fecha actuales. La caja se abrirá con estado <strong>ABIERTA</strong>.</p>
+              <p>El usuario actual, su sucursal y la fecha se asignarán automáticamente. La caja se abrirá con estado <strong>ABIERTA</strong>.</p>
             </div>
           </aside>
         }
@@ -87,7 +87,7 @@
           <button type="button" class="btn ghost" (click)="cancelar()" [disabled]="loading">
             Cancelar
           </button>
-          <button type="submit" class="btn primary" [disabled]="loading">
+          <button type="submit" class="btn primary" [disabled]="loading || (!editando && !contextoCargado)">
             @if (loading) {
               <mat-spinner diameter="18"></mat-spinner>
               {{ editando ? 'Guardando...' : 'Abriendo...' }}

@@ -8,9 +8,9 @@
   ========================== -->
 
   <mat-sidenav
-    #sidenav
-    mode="side"
-    opened
+    [mode]="isMobile ? 'over' : 'side'"
+    [opened]="sidebarOpened"
+    (openedChange)="sidebarOpened = $event"
     class="sidenav">
 
     <!-- MARCA -->
@@ -22,19 +22,9 @@
         fill="none">
 
         <path
-          d="M8 34 L6 16 L15 24 L24 12 L33 24 L42 16 L40 34 Z"
-          stroke="#cda45e"
-          stroke-width="2"
-          stroke-linejoin="round"
-          fill="rgba(205,164,94,0.08)">
+          d="M20 6h8v14h14v8H28v14h-8V28H6v-8h14z"
+          fill="#ffffff">
         </path>
-
-        <circle
-          cx="24"
-          cy="38"
-          r="1.6"
-          fill="#cda45e">
-        </circle>
 
       </svg>
 
@@ -183,13 +173,59 @@
         type="button"
         class="icon-btn"
         aria-label="Mostrar u ocultar menú"
-        (click)="sidenav.toggle()">
+        (click)="toggleMenu()">
         <mat-icon>menu</mat-icon>
       </button>
 
       <span class="title">Herederos del Rey</span>
 
       <span class="spacer"></span>
+
+      @if (usuarioAutenticado) {
+        <div class="toolbar-context" aria-live="polite">
+          <div class="context-pill branch-pill" [title]="errorSucursal ? 'No se pudo consultar la sucursal' : 'Sucursal asignada al usuario'">
+            <mat-icon aria-hidden="true">storefront</mat-icon>
+            <span>{{ errorSucursal ? 'Sucursal no disponible' : (sucursalActual?.nombre || 'Cargando sucursal…') }}</span>
+          </div>
+          @if (cajaActual) {
+            <div class="context-pill caja-pill caja-open" [title]="estadoCajaTexto">
+              <span class="status-dot" aria-hidden="true"></span>
+              <span>{{ estadoCajaTexto }}</span>
+            </div>
+          } @else if (cargandoContexto) {
+            <div class="context-pill caja-pill" aria-live="polite">
+              <span class="status-dot" aria-hidden="true"></span>
+              <span>Consultando caja…</span>
+            </div>
+          } @else if (errorCaja) {
+            <button
+              type="button"
+              class="context-pill caja-pill caja-error caja-action"
+              title="Volver a consultar el estado de caja"
+              (click)="reintentarEstadoCaja()">
+              <span class="status-dot" aria-hidden="true"></span>
+              <span>Reintentar caja</span>
+            </button>
+          } @else {
+            <button
+              type="button"
+              class="context-pill caja-pill caja-closed caja-action"
+              title="Abrir caja para esta sucursal"
+              (click)="abrirCaja()">
+            <span class="status-dot" aria-hidden="true"></span>
+              <mat-icon aria-hidden="true">add</mat-icon>
+              <span>Abrir caja</span>
+            </button>
+          }
+          <div class="toolbar-user">
+            <div class="avatar" aria-hidden="true">{{ inicialesUsuario }}</div>
+            <div class="user-meta">
+              <span class="name">{{ nombreCompleto }}</span>
+              <span class="role">{{ usuarioActual?.rol || rolUsuarioSesion }}</span>
+            </div>
+          </div>
+        </div>
+      }
 
     </mat-toolbar>
 

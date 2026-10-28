@@ -1,13 +1,57 @@
 html, body {
   height: 100%;
   margin: 0;
-  font-family: Roboto, Arial, sans-serif;
-  background-color: #f4f6f8;
-  color: #f4f6f8;
+  font-family: 'Onest', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  background-color: #f3f6f5;
+  color: #12201c;
 }
 
 * {
   box-sizing: border-box;
+}
+
+app-root {
+  --bg: #f3f6f5 !important;
+  --surface: #ffffff !important;
+  --surface-2: #eaf0ee !important;
+  --border: #d6e0dc !important;
+  --border-hover: #9db8ad !important;
+  --text: #12201c !important;
+  --text-dim: #4a5c56 !important;
+  --text-faint: #62736d !important;
+  --gold: #0b6e55 !important;
+  --gold-strong: #08513f !important;
+  --gold-soft: #ddf1ea !important;
+  --red: #b42318 !important;
+  --green: #0b6e55 !important;
+  --mat-sys-primary: #0b6e55 !important;
+  --mat-sys-on-primary: #ffffff !important;
+  --mat-sys-surface: #ffffff !important;
+  --mat-sys-on-surface: #12201c !important;
+}
+
+app-root * {
+  --bg: #f3f6f5 !important;
+  --surface: #ffffff !important;
+  --surface-2: #eaf0ee !important;
+  --border: #d6e0dc !important;
+  --border-hover: #9db8ad !important;
+  --text: #12201c !important;
+  --text-dim: #4a5c56 !important;
+  --text-faint: #62736d !important;
+  --gold: #0b6e55 !important;
+  --gold-strong: #08513f !important;
+  --gold-soft: #ddf1ea !important;
+  --red: #b42318 !important;
+  --green: #0b6e55 !important;
+  --mat-sys-primary: #0b6e55 !important;
+  --mat-sys-on-primary: #ffffff !important;
+  --mat-sys-surface: #ffffff !important;
+  --mat-sys-on-surface: #12201c !important;
+}
+
+.content > * {
+  font-family: 'Onest', system-ui, -apple-system, 'Segoe UI', sans-serif !important;
 }
 
 .snackbar-success .mdc-snackbar__surface {
@@ -23,7 +67,4 @@ html, body {
 }
 
 html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
-
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+body { margin: 0; }

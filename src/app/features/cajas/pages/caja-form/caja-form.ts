@@ -11,6 +11,9 @@ import { finalize } from 'rxjs';
 
 import { NotificationService } from '../../../../core/services/notification.service';
 import { CajaService } from '../../services/caja';
+import { UsuarioService } from '../../../usuarios/services/usuario';
+import { SucursalService } from '../../../sucursales/services/sucursal';
+import { Sucursal } from '../../../sucursales/models/sucursal.model';
 
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -45,11 +48,17 @@ export class CajaFormComponent implements OnInit {
   private fb = inject(FormBuilder);
   private cajaService = inject(CajaService);
   private notificationService = inject(NotificationService);
+  private usuarioService = inject(UsuarioService);
+  private sucursalService = inject(SucursalService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
   editando = false;
   cajaId = 0;
+  usuarioId = 0;
+  sucursalAsignada: Sucursal | null = null;
+  cargandoContexto = false;
+  contextoCargado = false;
 
   titulo = 'Nueva caja';
 
@@ -61,15 +70,6 @@ export class CajaFormComponent implements OnInit {
   // ==========================================
 
   form = this.fb.group({
-
-    idSucursal: [
-      0,
-      [
-        Validators.required,
-        Validators.min(1)
-      ]
-    ],
-
     montoInicial: [
       0,
       [
@@ -98,7 +98,6 @@ export class CajaFormComponent implements OnInit {
   // ==========================================
 
   ngOnInit(): void {
-
     const id = this.route.snapshot.paramMap.get('id');
 
     if (id) {
@@ -110,11 +109,47 @@ export class CajaFormComponent implements OnInit {
       this.titulo = 'Editar caja';
 
       this.cargarCaja(this.cajaId);
-
+    } else {
+      this.cargarContextoApertura();
     }
-
   }
 
+  private cargarContextoApertura(): void {
+    this.usuarioId = Number(localStorage.getItem('Id'));
+    if (!Number.isInteger(this.usuarioId) || this.usuarioId <= 0) {
+      this.notificationService.error('No se pudo identificar al usuario. Inicie sesión nuevamente.');
+      return;
+    }
+
+    this.cargandoContexto = true;
+    this.usuarioService.getById(this.usuarioId).subscribe({
+      next: usuario => {
+        if (!Number.isInteger(usuario.idSucursal) || usuario.idSucursal <= 0) {
+          this.cargandoContexto = false;
+          this.notificationService.error('El usuario no tiene una sucursal asignada.');
+          return;
+        }
+
+        this.sucursalService.getById(usuario.idSucursal)
+          .pipe(finalize(() => this.cargandoContexto = false))
+          .subscribe({
+            next: sucursal => {
+              this.sucursalAsignada = sucursal;
+              this.contextoCargado = true;
+            },
+            error: error => {
+              console.error('Error al cargar la sucursal asignada al usuario:', error);
+              this.notificationService.error('No se pudo cargar la sucursal del usuario.');
+            }
+          });
+      },
+      error: error => {
+        this.cargandoContexto = false;
+        console.error('Error al cargar el usuario que abrirá la caja:', error);
+        this.notificationService.error('No se pudieron cargar los datos del usuario.');
+      }
+    });
+  }
 
   // ==========================================
   // CARGAR CAJA
@@ -134,9 +169,6 @@ export class CajaFormComponent implements OnInit {
         next: (caja) => {
 
           this.form.patchValue({
-
-            idSucursal: caja.idSucursal,
-
             montoInicial: caja.montoInicial,
 
             estadoCaja: caja.estadoCaja,
@@ -172,6 +204,10 @@ export class CajaFormComponent implements OnInit {
   // ==========================================
 
   guardar(): void {
+    if (!this.editando && !this.contextoCargado) {
+      this.notificationService.error('No se puede abrir la caja sin confirmar el usuario y su sucursal.');
+      return;
+    }
 
     if (this.form.invalid) {
 
@@ -203,9 +239,14 @@ export class CajaFormComponent implements OnInit {
 // ==========================================
 
 crear(): void {
+  if (!this.sucursalAsignada || this.usuarioId <= 0) {
+    this.notificationService.error('No se puede abrir la caja sin un usuario y sucursal válidos.');
+    return;
+  }
+
   const data: CajaCreate = {
-    idSucursal: this.form.value.idSucursal!,
-    idUsuarioApertura: Number(localStorage.getItem('Id')),
+    idSucursal: this.sucursalAsignada.id,
+    idUsuarioApertura: this.usuarioId,
     idUsuarioCierre: null,
     fechaApertura: new Date(),
     fechaCierre: null,
