@@ -1,3 +1,6 @@
+@if (router.url.startsWith('/login')) {
+  <router-outlet></router-outlet>
+} @else {
 <mat-sidenav-container class="sidenav-container">
 
   <!-- =========================
@@ -148,6 +151,13 @@
         <span matListItemTitle>Reportes</span>
       </a>
 
+      <div class="nav-eyebrow">Cuenta</div>
+
+      <a mat-list-item routerLink="/login" routerLinkActive="active-link">
+        <mat-icon matListItemIcon>login</mat-icon>
+        <span matListItemTitle>Iniciar sesión</span>
+      </a>
+
     </mat-nav-list>
 
   </mat-sidenav>
@@ -185,3 +195,4 @@
   </mat-sidenav-content>
 
 </mat-sidenav-container>
+}

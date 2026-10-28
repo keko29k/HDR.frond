@@ -1,28 +1,296 @@
-.page-container {
-  min-height: 100vh;
-  background: #f4f6f8;
-  padding: 24px;
+:host {
+  --bg: #0b0d12;
+  --surface: #12151c;
+  --surface-2: #161a24;
+  --border: #232838;
+  --border-hover: #3a4156;
+  --text: #e8e9ee;
+  --text-dim: #a9adbb;
+  --text-faint: #6b7080;
+  --gold: #cda45e;
+  --gold-strong: #e0b970;
+  --gold-soft: rgba(205, 164, 94, 0.12);
+  --red: #d3695a;
+
+  display: block;
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+
+  --mdc-outlined-text-field-outline-color: var(--border);
+  --mdc-outlined-text-field-hover-outline-color: var(--border-hover);
+  --mdc-outlined-text-field-focus-outline-color: var(--gold);
+  --mdc-outlined-text-field-label-text-color: var(--text-faint);
+  --mdc-outlined-text-field-hover-label-text-color: var(--text-dim);
+  --mdc-outlined-text-field-focus-label-text-color: var(--gold);
+  --mdc-outlined-text-field-input-text-color: var(--text);
+  --mdc-outlined-text-field-caret-color: var(--gold);
+
+  --mat-form-field-outlined-outline-color: var(--border);
+  --mat-form-field-outlined-hover-outline-color: var(--border-hover);
+  --mat-form-field-outlined-focus-outline-color: var(--gold);
+  --mat-form-field-outlined-label-text-color: var(--text-faint);
+  --mat-form-field-outlined-hover-label-text-color: var(--text-dim);
+  --mat-form-field-outlined-focus-label-text-color: var(--gold);
+  --mat-form-field-outlined-input-text-color: var(--text);
+  --mat-form-field-outlined-caret-color: var(--gold);
+  --mat-form-field-leading-icon-color: var(--text-faint);
+  --mat-form-field-trailing-icon-color: var(--text-faint);
+
+  --mat-table-background-color: transparent;
+  --mat-table-header-headline-color: var(--text-faint);
+  --mat-table-row-item-label-text-color: var(--text-dim);
+  --mat-table-row-item-outline-color: var(--border);
+  --mat-table-header-container-height: 46px;
+  --mat-table-row-item-container-height: 58px;
+
+  --mat-paginator-container-background-color: transparent;
+  --mat-paginator-container-text-color: var(--text-dim);
+  --mat-paginator-enabled-icon-color: var(--text-dim);
+  --mat-paginator-disabled-icon-color: #3a4156;
+  --mat-select-trigger-text-color: var(--text);
+  --mat-select-enabled-arrow-color: var(--text-dim);
+  --mat-select-focused-arrow-color: var(--gold);
+
+  --mdc-elevated-card-container-color: var(--surface);
+  --mat-card-elevated-container-color: var(--surface);
+  --mat-icon-button-state-layer-color: var(--text);
+  --mdc-circular-progress-active-indicator-color: var(--gold);
+  --mat-progress-spinner-active-indicator-color: var(--gold);
 }
 
-.table-card {
-  max-width: 1100px;
+.page {
+  max-width: 1320px;
   margin: 0 auto;
   padding: 24px;
 }
 
 .header {
   display: flex;
+  align-items: flex-end;
   justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.header h2 {
+  margin: 0;
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-size: 30px;
+  color: var(--text);
+}
+
+.header p {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--text-faint);
+}
+
+.card {
+  background: var(--surface) !important;
+  border: 1px solid var(--border);
+  border-radius: 14px !important;
+  box-shadow: none !important;
+  padding: 18px 20px 8px;
+  color: var(--text);
+}
+
+.toolbar {
+  display: flex;
   align-items: center;
-  margin-bottom: 24px;
-  gap: 12px;
-  flex-wrap: wrap;
+  margin-bottom: 14px;
 }
 
-.table-container {
-  overflow-x: auto;
-}
-
-.full-width-table {
+.search {
   width: 100%;
+  max-width: 440px;
+}
+
+.search mat-icon {
+  color: var(--text-faint);
+}
+
+.table-wrap {
+  position: relative;
+  overflow-x: auto;
+  min-height: 140px;
+}
+
+.table {
+  width: 100%;
+  min-width: 900px;
+  background: transparent;
+}
+
+th.mat-mdc-header-cell {
+  padding: 14px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  color: var(--text-faint);
+  border-bottom-color: var(--border) !important;
+}
+
+td.mat-mdc-cell {
+  padding: 14px 16px;
+  font-size: 13.5px;
+  color: var(--text-dim);
+  border-bottom-color: var(--border) !important;
+}
+
+tr.mat-mdc-row:hover td {
+  background: var(--surface-2);
+}
+
+.mono {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12.5px;
+}
+
+.faint {
+  color: var(--text-faint);
+}
+
+.strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.wrap {
+  max-width: 350px;
+  line-height: 1.4;
+}
+
+.right {
+  text-align: right;
+}
+
+.acciones {
+  min-width: 160px;
+  white-space: nowrap;
+}
+
+.icon-btn {
+  color: var(--text-faint) !important;
+}
+
+.icon-btn:hover {
+  color: var(--gold) !important;
+}
+
+.icon-btn.danger:hover {
+  color: var(--red) !important;
+}
+
+.empty {
+  padding: 36px 16px;
+  text-align: center;
+  color: var(--text-faint);
+  font-size: 13.5px;
+}
+
+.empty mat-icon {
+  display: block;
+  margin: 0 auto 8px;
+  font-size: 36px;
+  width: 36px;
+  height: 36px;
+  color: var(--gold);
+}
+
+.loading-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  background: rgba(18, 21, 28, 0.64);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 42px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.btn mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.btn.primary {
+  background: var(--gold);
+  color: var(--bg);
+}
+
+.btn.primary:hover {
+  background: var(--gold-strong);
+}
+
+mat-paginator {
+  background: transparent !important;
+  color: var(--text-dim);
+  border-top: 1px solid var(--border);
+}
+
+.mat-mdc-paginator-page-size-label,
+.mat-mdc-paginator-range-label,
+.mat-mdc-paginator-navigation-next,
+.mat-mdc-paginator-navigation-previous,
+.mat-mdc-paginator-navigation-first,
+.mat-mdc-paginator-navigation-last,
+.mat-mdc-paginator-icon {
+  color: var(--text-dim);
+  fill: var(--text-dim) !important;
+}
+
+.mat-mdc-paginator-navigation-next[disabled],
+.mat-mdc-paginator-navigation-previous[disabled],
+.mat-mdc-paginator-navigation-first[disabled],
+.mat-mdc-paginator-navigation-last[disabled] {
+  opacity: 0.45;
+}
+
+@media (max-width: 900px) {
+  .page {
+    padding: 16px;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn.primary {
+    width: 100%;
+  }
+
+  .search {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .page {
+    padding: 12px;
+  }
+
+  .header h2 {
+    font-size: 22px;
+  }
+
+  .table {
+    min-width: 760px;
+  }
 }

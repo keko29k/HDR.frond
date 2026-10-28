@@ -1,87 +1,76 @@
-<div class="page-container">
-  <mat-card class="table-card">
+<div class="page">
 
-    <div class="header">
-      <h2>Lista de Categorias</h2>
-
-      <button mat-raised-button color="primary" (click)="nuevo()">
-        Nuevo Categoria
-      </button>
+  <header class="header">
+    <div>
+      <h2>Categorías</h2>
+      <p>{{ meta.totalCount }} {{ meta.totalCount === 1 ? 'categoría registrada' : 'categorías registradas' }}</p>
     </div>
 
-    <div class="filters">
-      <mat-form-field appearance="outline" class="search-field">
-        <mat-label>Buscar Categoria</mat-label>
-        <input matInput [formControl]="buscarControl" placeholder="Nombre" />
+    <button type="button" class="btn primary" (click)="nuevo()">
+      <mat-icon>add</mat-icon>
+      Nueva categoría
+    </button>
+  </header>
+
+  <mat-card class="card">
+
+    <div class="toolbar">
+      <mat-form-field appearance="outline" class="search" subscriptSizing="dynamic">
+        <mat-label>Buscar categoría</mat-label>
+        <mat-icon matPrefix>search</mat-icon>
+        <input matInput [formControl]="buscarControl" placeholder="Nombre o descripción">
       </mat-form-field>
     </div>
 
-    <!-- LOADING -->
-    <div class="loading-container" *ngIf="loading">
-      <mat-spinner diameter="42"></mat-spinner>
-    </div>
+    <div class="table-wrap">
 
-    <!-- TABLA -->
-    <div class="table-container" *ngIf="!loading">
-      <table mat-table [dataSource]="categorias" class="full-width-table mat-elevation-z1">
+      <div class="loading-overlay" *ngIf="loading">
+        <mat-spinner diameter="32"></mat-spinner>
+      </div>
 
-        <!-- ID -->
+      <table mat-table [dataSource]="categorias" class="table" *ngIf="!loading">
+
         <ng-container matColumnDef="id">
-          <th mat-header-cell *matHeaderCellDef>ID</th>
-          <td mat-cell *matCellDef="let categoria">{{ categoria.id }}</td>
+          <th mat-header-cell *matHeaderCellDef>#</th>
+          <td mat-cell *matCellDef="let categoria" class="mono faint">{{ categoria.id }}</td>
         </ng-container>
 
-        <!-- NOMBRE -->
         <ng-container matColumnDef="nombre">
           <th mat-header-cell *matHeaderCellDef>Nombre</th>
-          <td mat-cell *matCellDef="let categoria">
-            {{ categoria.nombre }}
-          </td>
+          <td mat-cell *matCellDef="let categoria" class="strong">{{ categoria.nombre }}</td>
         </ng-container>
 
-        <!-- EMAIL -->
         <ng-container matColumnDef="descripcion">
-          <th mat-header-cell *matHeaderCellDef>Correo</th>
-          <td mat-cell *matCellDef="let categoria">
-            {{ categoria.descripcion }}
-          </td>
+          <th mat-header-cell *matHeaderCellDef>Descripción</th>
+          <td mat-cell *matCellDef="let categoria" class="wrap">{{ categoria.descripcion || 'Sin descripción' }}</td>
         </ng-container>
 
         <ng-container matColumnDef="acciones">
-  <th mat-header-cell *matHeaderCellDef>Acciones</th>
+          <th mat-header-cell *matHeaderCellDef class="right">Acciones</th>
+          <td mat-cell *matCellDef="let categoria" class="acciones right">
+            <button mat-icon-button type="button" class="icon-btn" [attr.aria-label]="'Editar ' + categoria.nombre" (click)="editar(categoria.id)">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button type="button" class="icon-btn danger" [attr.aria-label]="'Eliminar ' + categoria.nombre" (click)="eliminar(categoria.id)">
+              <mat-icon>delete_outline</mat-icon>
+            </button>
+          </td>
+        </ng-container>
 
-  <td mat-cell *matCellDef="let categoria" class="actions-cell">
-
-    <button mat-icon-button color="primary"
-            (click)="editar(categoria.id)"
-            matTooltip="Editar">
-      <mat-icon>edit</mat-icon>
-    </button>
-
-    <button mat-icon-button color="warn"
-            (click)="eliminar(categoria.id)"
-            matTooltip="Eliminar">
-      <mat-icon>delete</mat-icon>
-    </button>
-
-  </td>
-</ng-container>
-
-       
-
-        <!-- FILAS -->
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="table-row"></tr>
-      </table>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
 
-      <!-- EMPTY -->
-      <div class="empty-state" *ngIf="categorias.length === 0">
-        No se encontraron categorias.
-      </div>
+        <tr *ngIf="categorias.length === 0">
+          <td [attr.colspan]="displayedColumns.length" class="empty">
+            <mat-icon>category</mat-icon>
+            <span>No se encontraron categorías.</span>
+          </td>
+        </tr>
+      </table>
     </div>
 
-    <!-- PAGINADOR -->
     <mat-paginator
+      *ngIf="!loading"
       [length]="meta.totalCount"
       [pageSize]="meta.pageSize"
       [pageIndex]="meta.currentPage - 1"

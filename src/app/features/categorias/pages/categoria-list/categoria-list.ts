@@ -17,7 +17,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatIcon } from '@angular/material/icon';
+import { MatIconModule } from '@angular/material/icon';
 import { CategoriaService } from '../../services/categoria';
 import { Categoria } from '../../models/categoria.model';
 
@@ -34,7 +34,7 @@ import { Categoria } from '../../models/categoria.model';
     MatInputModule,
     MatPaginatorModule,
     MatProgressSpinnerModule,
-    MatIcon
+    MatIconModule
   ],
   templateUrl: './categoria-list.html',
   styleUrl: './categoria-list.css'

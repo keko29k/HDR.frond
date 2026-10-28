@@ -1,5 +1,9 @@
 import { Routes } from '@angular/router';
 
+const loadLoginComponent = () =>
+import('./features/auth/pages/login/login')
+.then(m => m.LoginComponent);
+
 /* =========================================================
 USUARIOS
 ========================================================= */
@@ -145,6 +149,11 @@ RUTAS
 ========================================================= */
 
 export const routes: Routes = [
+
+{
+path: 'login',
+loadComponent: loadLoginComponent
+},
 
 /* =======================================================
 PRODUCTOS
