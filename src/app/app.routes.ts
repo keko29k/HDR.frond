@@ -101,6 +101,18 @@ import('./features/productos/pages/producto-form/producto-form')
 .then(m => m.ProductoFormComponent);
 
 /* =========================================================
+LOTES
+========================================================= */
+
+const loadLoteListComponent = () =>
+import('./features/lotes/pages/lote-list/lote-list')
+.then(m => m.LoteList);
+
+const loadLoteFormComponent = () =>
+import('./features/lotes/pages/lote-form/lote-form')
+.then(m => m.LoteForm);
+
+/* =========================================================
 CLIENTES
 ========================================================= */
 
@@ -173,6 +185,24 @@ loadComponent: loadProductoFormComponent
 {
 path: 'editar/:id',
 loadComponent: loadProductoFormComponent
+}
+]
+},
+
+{
+path: 'lotes',
+children: [
+{
+path: '',
+loadComponent: loadLoteListComponent
+},
+{
+path: 'nuevo',
+loadComponent: loadLoteFormComponent
+},
+{
+path: 'editar/:id',
+loadComponent: loadLoteFormComponent
 }
 ]
 },

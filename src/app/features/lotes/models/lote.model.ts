@@ -5,8 +5,8 @@ export interface Lote {
   idSucursal: number;
   idProducto : number;
   numeroLote : string;
-  fechaFabricacion: Date;
-  fechaVencimiento: Date ;
+  fechaFabricacion: Date | string;
+  fechaVencimiento: Date | string;
 
   cantidadInicial: number;
   cantidadDisponible : number ; 

@@ -100,19 +100,7 @@ export class ProductoFormComponent implements OnInit {
       Validators.min(0)
     ]],
 
-    controlaInventario: [true, [
-      Validators.required
-    ]],
-
-    manejaLotes: [false, [
-      Validators.required
-    ]],
-
     tieneVencimiento: [false, [
-      Validators.required
-    ]],
-
-    permiteVenta: [true, [
       Validators.required
     ]]
   });
@@ -196,11 +184,7 @@ export class ProductoFormComponent implements OnInit {
             precioVenta: producto.precioVenta,
 
             peso: producto.peso,
-
-            controlaInventario: producto.controlaInventario,
-            manejaLotes: producto.manejaLotes,
-            tieneVencimiento: producto.tieneVencimiento,
-            permiteVenta: producto.permiteVenta
+            tieneVencimiento: producto.tieneVencimiento
 
           });
 
@@ -267,13 +251,13 @@ export class ProductoFormComponent implements OnInit {
 
       peso: this.form.value.peso ?? null,
 
-      controlaInventario: this.form.value.controlaInventario!,
+      controlaInventario: true,
 
-      manejaLotes: this.form.value.manejaLotes!,
+      manejaLotes: true,
 
       tieneVencimiento: this.form.value.tieneVencimiento!,
 
-      permiteVenta: this.form.value.permiteVenta!
+      permiteVenta: true
 
     };
 
@@ -336,13 +320,13 @@ export class ProductoFormComponent implements OnInit {
 
       peso: this.form.value.peso ?? null,
 
-      controlaInventario: this.form.value.controlaInventario!,
+      controlaInventario: true,
 
-      manejaLotes: this.form.value.manejaLotes!,
+      manejaLotes: true,
 
       tieneVencimiento: this.form.value.tieneVencimiento!,
 
-      permiteVenta: this.form.value.permiteVenta!
+      permiteVenta: true
 
     };
 

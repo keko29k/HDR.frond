@@ -116,10 +116,6 @@ export class UsuarioFormComponent implements OnInit {
 
     correo: ['', [
       Validators.maxLength(150)
-    ]],
-
-    foto: ['', [
-      Validators.maxLength(500)
     ]]
 
   });
@@ -232,9 +228,7 @@ export class UsuarioFormComponent implements OnInit {
 
             telefono: usuario.telefono,
 
-            correo: usuario.correo,
-
-            foto: usuario.foto
+            correo: usuario.correo
 
           });
 
@@ -315,8 +309,7 @@ export class UsuarioFormComponent implements OnInit {
       correo:
         this.form.value.correo ?? '',
 
-      foto:
-        this.form.value.foto ?? ''
+      foto: ''
 
     };
 
@@ -397,8 +390,7 @@ export class UsuarioFormComponent implements OnInit {
       correo:
         this.form.value.correo ?? '',
 
-      foto:
-        this.form.value.foto ?? ''
+      foto: ''
 
     };
 

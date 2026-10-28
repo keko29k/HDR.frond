@@ -1,1 +1,123 @@
-<p>lote-form works!</p>
+<main class="page">
+  <header class="header">
+    <button class="back" type="button" (click)="cancelar()">
+      <mat-icon>arrow_back</mat-icon>
+      Volver a lotes
+    </button>
+    <h2>{{ titulo }}</h2>
+    <p>Registra la sucursal, el producto, la trazabilidad y las cantidades del lote.</p>
+  </header>
+
+  <mat-card class="card">
+    @if (loading) {
+      <div class="loading" role="status" aria-label="Cargando datos del lote">
+        <mat-spinner diameter="36"></mat-spinner>
+      </div>
+    } @else {
+      <form [formGroup]="form" (ngSubmit)="guardar()" class="form">
+        <h3 class="section-title">Identificación del lote</h3>
+
+        <div class="grid-2">
+          <mat-form-field appearance="outline">
+            <mat-label>Sucursal</mat-label>
+            <mat-select formControlName="idSucursal">
+              <mat-option [value]="0">Seleccione una sucursal</mat-option>
+              @for (sucursal of sucursales; track sucursal.id) {
+                <mat-option [value]="sucursal.id">{{ sucursal.nombre }}</mat-option>
+              }
+            </mat-select>
+            @if (form.controls.idSucursal.invalid && form.controls.idSucursal.touched) {
+              <mat-error>Seleccione una sucursal.</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Producto</mat-label>
+            <mat-select formControlName="idProducto">
+              <mat-option [value]="0">Seleccione un producto</mat-option>
+              @for (producto of productos; track producto.id) {
+                <mat-option [value]="producto.id">{{ producto.nombre }} · {{ producto.codigo }}</mat-option>
+              }
+            </mat-select>
+            @if (form.controls.idProducto.invalid && form.controls.idProducto.touched) {
+              <mat-error>Seleccione un producto.</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full">
+            <mat-label>Número de lote</mat-label>
+            <input matInput formControlName="numeroLote" maxlength="100" placeholder="Ej. LOT-2026-001">
+            @if (form.controls.numeroLote.hasError('required') && form.controls.numeroLote.touched) {
+              <mat-error>El número de lote es obligatorio.</mat-error>
+            }
+            @if (form.controls.numeroLote.hasError('maxlength')) {
+              <mat-error>Máximo 100 caracteres.</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <h3 class="section-title">Fechas y existencias</h3>
+
+        <div class="grid-2">
+          <mat-form-field appearance="outline">
+            <mat-label>Fecha de fabricación</mat-label>
+            <input matInput type="date" formControlName="fechaFabricacion">
+            @if (form.controls.fechaFabricacion.invalid && form.controls.fechaFabricacion.touched) {
+              <mat-error>Ingrese la fecha de fabricación.</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Fecha de vencimiento</mat-label>
+            <input matInput type="date" formControlName="fechaVencimiento">
+            @if (form.controls.fechaVencimiento.invalid && form.controls.fechaVencimiento.touched) {
+              <mat-error>Ingrese la fecha de vencimiento.</mat-error>
+            }
+            @if (form.hasError('fechaVencimientoAnterior') && form.controls.fechaVencimiento.touched) {
+              <mat-error>El vencimiento no puede ser anterior a la fabricación.</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Cantidad inicial</mat-label>
+            <input matInput type="number" min="0.01" step="0.01" formControlName="cantidadInicial">
+            @if (form.controls.cantidadInicial.hasError('min')) {
+              <mat-error>La cantidad inicial debe ser mayor que cero.</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Cantidad disponible</mat-label>
+            <input matInput type="number" min="0" step="0.01" formControlName="cantidadDisponible">
+            @if (form.controls.cantidadDisponible.hasError('min')) {
+              <mat-error>La cantidad disponible no puede ser negativa.</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Costo de compra por unidad</mat-label>
+            <span matTextPrefix>Bs&nbsp;</span>
+            <input matInput type="number" min="0" step="0.01" formControlName="costoCompra">
+            @if (form.controls.costoCompra.hasError('min')) {
+              <mat-error>El costo no puede ser negativo.</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <div class="actions">
+          <button class="btn ghost" type="button" (click)="cancelar()" [disabled]="loading">
+            Cancelar
+          </button>
+          <button class="btn primary" type="submit" [disabled]="loading">
+            @if (loading) {
+              <mat-spinner diameter="20"></mat-spinner>
+              Guardando...
+            } @else {
+              {{ editando ? 'Actualizar lote' : 'Registrar lote' }}
+            }
+          </button>
+        </div>
+      </form>
+    }
+  </mat-card>
+</main>

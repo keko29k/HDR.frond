@@ -1,8 +1,8 @@
 export interface LoteUpdate {
   idProducto : number;
   numeroLote : string;
-  fechaFabricacion: Date;
-  fechaVencimiento: Date ;
+  fechaFabricacion: string;
+  fechaVencimiento: string;
 
   cantidadInicial: number;
   cantidadDisponible : number ; 

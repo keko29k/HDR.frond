@@ -1,3 +1,39 @@
+:host {
+  --bg: #0b0d12;
+  --surface: #12151c;
+  --surface-2: #161a24;
+  --border: #232838;
+  --border-hover: #3a4156;
+  --text: #e8e9ee;
+  --text-dim: #a9adbb;
+  --text-faint: #6b7080;
+  --gold: #cda45e;
+  --gold-strong: #e0b970;
+  --red: #d3695a;
+
+  display: block;
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+
+  --mdc-outlined-text-field-outline-color: var(--border);
+  --mdc-outlined-text-field-hover-outline-color: var(--border-hover);
+  --mdc-outlined-text-field-focus-outline-color: var(--gold);
+  --mdc-outlined-text-field-error-outline-color: var(--red);
+  --mdc-outlined-text-field-label-text-color: var(--text-dim);
+  --mdc-outlined-text-field-input-text-color: var(--text);
+  --mdc-outlined-text-field-caret-color: var(--gold);
+  --mat-form-field-outlined-outline-color: var(--border);
+  --mat-form-field-outlined-hover-outline-color: var(--border-hover);
+  --mat-form-field-outlined-focus-outline-color: var(--gold);
+  --mat-form-field-outlined-label-text-color: var(--text-dim);
+  --mat-form-field-outlined-input-text-color: var(--text);
+  --mat-form-field-outlined-caret-color: var(--gold);
+  --mdc-elevated-card-container-color: var(--surface);
+  --mat-card-elevated-container-color: var(--surface);
+  --mdc-circular-progress-active-indicator-color: var(--gold);
+  --mat-progress-spinner-active-indicator-color: var(--gold);
+}
+
 .marca-form-container {
   max-width: 900px;
   margin: 0 auto;
@@ -10,18 +46,24 @@
 
 .header h1 {
   margin: 0;
-  font-size: 28px;
-  font-weight: 600;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  color: var(--text);
 }
 
 .header p {
   margin: 6px 0 0;
-  color: #757575;
+  color: var(--text-faint);
   font-size: 14px;
 }
 
 .form-card {
   padding: 28px;
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 28px 60px rgba(0, 0, 0, 0.18) !important;
 }
 
 .section-title {
@@ -30,13 +72,16 @@
 
 .section-title h2 {
   margin: 0;
-  font-size: 20px;
-  font-weight: 600;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
 }
 
 .section-title p {
-  margin: 5px 0 0;
-  color: #757575;
+  margin: 6px 0 0;
+  color: var(--text-faint);
   font-size: 14px;
 }
 
@@ -62,7 +107,7 @@ textarea {
   gap: 12px;
   margin-top: 28px;
   padding-top: 20px;
-  border-top: 1px solid #eeeeee;
+  border-top: 1px solid var(--border);
 }
 
 .form-actions button {
@@ -72,6 +117,19 @@ textarea {
   justify-content: center;
   align-items: center;
   gap: 6px;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+.form-actions button[type="submit"] {
+  background: var(--gold) !important;
+  color: #111827 !important;
+}
+
+.form-actions button[type="button"] {
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  background: transparent;
 }
 
 .form-actions mat-spinner {

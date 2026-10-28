@@ -1,13 +1,17 @@
 import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
-import { Lote } from './lote';
+import { LoteService } from './lote';
 
-describe('Lote', () => {
-  let service: Lote;
+describe('LoteService', () => {
+  let service: LoteService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(Lote);
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()]
+    });
+    service = TestBed.inject(LoteService);
   });
 
   it('should be created', () => {

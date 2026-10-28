@@ -17,21 +17,45 @@
     </div>
 
 
-    <!-- NUEVO PRODUCTO -->
+    <div class="header-actions">
+      <button
+        mat-stroked-button
+        type="button"
+        class="lotes-button"
+        (click)="verLotes()">
+        <mat-icon>layers</mat-icon>
+        Lotes
+      </button>
 
-    <button
-      mat-raised-button
-      color="primary"
-      type="button"
-      (click)="nuevo()">
+      <button
+        mat-raised-button
+        color="primary"
+        type="button"
+        (click)="nuevo()">
+        <mat-icon>add</mat-icon>
+        Nuevo Producto
+      </button>
+    </div>
 
-      <mat-icon>
-        add
-      </mat-icon>
+  </div>
 
-      Nuevo Producto
 
-    </button>
+  <div class="summary-row">
+
+    <div class="summary-card summary-primary">
+      <span class="summary-label">Productos</span>
+      <strong>{{ totalProductos }}</strong>
+    </div>
+
+    <div class="summary-card summary-success">
+      <span class="summary-label">Con vencimiento</span>
+      <strong>{{ productosConVencimiento }}</strong>
+    </div>
+
+    <div class="summary-card summary-info">
+      <span class="summary-label">Con lote</span>
+      <strong>{{ productosConLote }}</strong>
+    </div>
 
   </div>
 
@@ -273,70 +297,6 @@
 
 
         <!-- ====================================
-             CONTROLA INVENTARIO
-             ==================================== -->
-
-        <ng-container matColumnDef="controlaInventario">
-
-          <th
-            mat-header-cell
-            *matHeaderCellDef>
-
-            Inventario
-
-          </th>
-
-          <td
-            mat-cell
-            *matCellDef="let producto">
-
-            <span
-              class="estado"
-              [class.estado-si]="producto.controlaInventario"
-              [class.estado-no]="!producto.controlaInventario">
-
-              {{ producto.controlaInventario ? 'Sí' : 'No' }}
-
-            </span>
-
-          </td>
-
-        </ng-container>
-
-
-        <!-- ====================================
-             MANEJA LOTES
-             ==================================== -->
-
-        <ng-container matColumnDef="manejaLotes">
-
-          <th
-            mat-header-cell
-            *matHeaderCellDef>
-
-            Lotes
-
-          </th>
-
-          <td
-            mat-cell
-            *matCellDef="let producto">
-
-            <span
-              class="estado"
-              [class.estado-si]="producto.manejaLotes"
-              [class.estado-no]="!producto.manejaLotes">
-
-              {{ producto.manejaLotes ? 'Sí' : 'No' }}
-
-            </span>
-
-          </td>
-
-        </ng-container>
-
-
-        <!-- ====================================
              TIENE VENCIMIENTO
              ==================================== -->
 
@@ -369,16 +329,16 @@
 
 
         <!-- ====================================
-             PERMITE VENTA
+             OPERACIÓN
              ==================================== -->
 
-        <ng-container matColumnDef="permiteVenta">
+        <ng-container matColumnDef="operacion">
 
           <th
             mat-header-cell
             *matHeaderCellDef>
 
-            Venta
+            Operación
 
           </th>
 
@@ -386,14 +346,26 @@
             mat-cell
             *matCellDef="let producto">
 
-            <span
-              class="estado"
-              [class.estado-si]="producto.permiteVenta"
-              [class.estado-no]="!producto.permiteVenta">
+            <div class="operacion-badges">
 
-              {{ producto.permiteVenta ? 'Sí' : 'No' }}
+              <span class="estado estado-si">
+                Inventario
+              </span>
 
-            </span>
+              <span class="estado estado-si">
+                Venta
+              </span>
+
+              <span
+                class="estado"
+                [class.estado-si]="producto.manejaLotes"
+                [class.estado-no]="!producto.manejaLotes">
+
+                {{ producto.manejaLotes ? 'Lote' : 'Sin lote' }}
+
+              </span>
+
+            </div>
 
           </td>
 

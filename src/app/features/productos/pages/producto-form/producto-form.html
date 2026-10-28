@@ -339,89 +339,61 @@
 
 
         <!-- ========================================= -->
-        <!-- CONFIGURACIÓN -->
+        <!-- CONFIGURACIÓN OPERATIVA -->
         <!-- ========================================= -->
 
         <h3 class="section-title">
-          Configuración del producto
+          Configuración operativa
         </h3>
 
         <div class="options-container">
 
-          <!-- CONTROLA INVENTARIO -->
           <div class="option-item">
 
             <div class="option-text">
 
               <strong>
-                Controla inventario
+                Inventario y venta
               </strong>
 
               <span>
-                Permite controlar el stock de este producto.
+                Este producto siempre se maneja con inventario activo y venta habilitada.
               </span>
 
             </div>
 
-            <mat-form-field
-              appearance="outline"
-              class="option-select"
-            >
+            <div class="status-group">
 
-              <mat-label>Control de inventario</mat-label>
+              <span class="status-chip success">
+                Inventario activo
+              </span>
 
-              <mat-select formControlName="controlaInventario">
+              <span class="status-chip success">
+                Venta habilitada
+              </span>
 
-                <mat-option [value]="true">
-                  Sí
-                </mat-option>
-
-                <mat-option [value]="false">
-                  No
-                </mat-option>
-
-              </mat-select>
-
-            </mat-form-field>
+            </div>
 
           </div>
 
 
-          <!-- MANEJA LOTES -->
           <div class="option-item">
 
             <div class="option-text">
 
               <strong>
-                Maneja lotes
+                Manejo de lote
               </strong>
 
               <span>
-                Permite registrar el producto mediante lotes.
+                El producto siempre se registra con control de lote.
               </span>
 
             </div>
 
-            <mat-form-field
-              appearance="outline"
-              class="option-select"
-            >
-
-              <mat-label>Manejo de lotes</mat-label>
-
-              <mat-select formControlName="manejaLotes">
-
-                <mat-option [value]="true">
-                  Sí
-                </mat-option>
-
-                <mat-option [value]="false">
-                  No
-                </mat-option>
-
-              </mat-select>
-
-            </mat-form-field>
+            <span class="status-chip info">
+              Lote requerido
+            </span>
 
           </div>
 
@@ -436,7 +408,7 @@
               </strong>
 
               <span>
-                Indica si el producto puede tener fecha de vencimiento.
+                Indica si este producto requiere control por fecha de vencimiento.
               </span>
 
             </div>
@@ -449,45 +421,6 @@
               <mat-label>Fecha de vencimiento</mat-label>
 
               <mat-select formControlName="tieneVencimiento">
-
-                <mat-option [value]="true">
-                  Sí
-                </mat-option>
-
-                <mat-option [value]="false">
-                  No
-                </mat-option>
-
-              </mat-select>
-
-            </mat-form-field>
-
-          </div>
-
-
-          <!-- PERMITE VENTA -->
-          <div class="option-item">
-
-            <div class="option-text">
-
-              <strong>
-                Permite venta
-              </strong>
-
-              <span>
-                Determina si el producto puede venderse.
-              </span>
-
-            </div>
-
-            <mat-form-field
-              appearance="outline"
-              class="option-select"
-            >
-
-              <mat-label>Permitir venta</mat-label>
-
-              <mat-select formControlName="permiteVenta">
 
                 <mat-option [value]="true">
                   Sí

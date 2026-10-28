@@ -29,6 +29,9 @@ import {
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 
+import { SucursalService } from '../../../sucursales/services/sucursal';
+import { Sucursal } from '../../../sucursales/models/sucursal.model';
+
 
 @Component({
   selector: 'app-usuario-list',
@@ -61,6 +64,8 @@ export class UsuarioListComponent implements OnInit {
 
   private usuarioService = inject(UsuarioService);
 
+  private sucursalService = inject(SucursalService);
+
   private notificationService = inject(NotificationService);
 
   private router = inject(Router);
@@ -72,6 +77,10 @@ export class UsuarioListComponent implements OnInit {
 
   usuarios: Usuario[] = [];
 
+  sucursales: Sucursal[] = [];
+
+  sucursalMap = new Map<number, string>();
+
 
   // ==========================================
   // COLUMNAS DE LA TABLA
@@ -81,6 +90,7 @@ export class UsuarioListComponent implements OnInit {
     'id',
     'nombres',
     'apellidos',
+    'sucursal',
     'rol',
     'usuario1',
     'telefono',
@@ -136,6 +146,7 @@ export class UsuarioListComponent implements OnInit {
 
   ngOnInit(): void {
 
+    this.cargarSucursales();
     this.cargarUsuarios();
 
 
@@ -158,6 +169,27 @@ export class UsuarioListComponent implements OnInit {
         this.cargarUsuarios();
 
       });
+
+  }
+
+
+  // ==========================================
+  // CARGAR SUCURSALES
+  // ==========================================
+
+  cargarSucursales(): void {
+
+    this.sucursalService.gets().subscribe({
+      next: (sucursales) => {
+        this.sucursales = sucursales;
+        this.sucursalMap = new Map(
+          sucursales.map(sucursal => [sucursal.id, sucursal.nombre])
+        );
+      },
+      error: () => {
+        this.notificationService.error('No se pudieron cargar las sucursales.');
+      }
+    });
 
   }
 
@@ -206,6 +238,21 @@ export class UsuarioListComponent implements OnInit {
         }
 
       });
+
+  }
+
+
+  // ==========================================
+  // NOMBRE DE SUCURSAL
+  // ==========================================
+
+  obtenerSucursal(usuario: Usuario): string {
+
+    if (!usuario?.idSucursal) {
+      return 'Sin sucursal';
+    }
+
+    return this.sucursalMap.get(usuario.idSucursal) ?? `Sucursal ${usuario.idSucursal}`;
 
   }
 

@@ -80,10 +80,8 @@ export class ProductoListComponent implements OnInit {
     'nombreGenerico',
     'precioCompra',
     'precioVenta',
-    'controlaInventario',
-    'manejaLotes',
     'tieneVencimiento',
-    'permiteVenta',
+    'operacion',
     'acciones'
   ];
 
@@ -127,6 +125,10 @@ export class ProductoListComponent implements OnInit {
     hasNextPage: false,
     hasPreviousPage: false
   };
+
+  totalProductos = 0;
+  productosConVencimiento = 0;
+  productosConLote = 0;
 
 
   // ==========================================
@@ -183,6 +185,13 @@ export class ProductoListComponent implements OnInit {
           this.productos = response.data;
 
           this.meta = response.meta;
+          this.totalProductos = response.meta.totalCount;
+          this.productosConVencimiento = response.data.filter(
+            producto => producto.tieneVencimiento
+          ).length;
+          this.productosConLote = response.data.filter(
+            producto => producto.manejaLotes
+          ).length;
 
           console.log('Productos:', this.productos);
 
@@ -229,6 +238,12 @@ export class ProductoListComponent implements OnInit {
     this.router.navigate([
       '/productos/nuevo'
     ]);
+
+  }
+
+  verLotes(): void {
+
+    this.router.navigate(['/lotes']);
 
   }
 

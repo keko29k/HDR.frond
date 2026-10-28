@@ -1,156 +1,147 @@
+:host {
+  --bg: #0b0d12;
+  --surface: #12151c;
+  --surface-2: #161a24;
+  --border: #232838;
+  --border-hover: #3a4156;
+  --text: #e8e9ee;
+  --text-dim: #a9adbb;
+  --text-faint: #6b7080;
+  --gold: #cda45e;
+  --gold-strong: #e0b970;
+  --red: #d3695a;
+
+  display: block;
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+
+  --mdc-outlined-text-field-outline-color: var(--border);
+  --mdc-outlined-text-field-hover-outline-color: var(--border-hover);
+  --mdc-outlined-text-field-focus-outline-color: var(--gold);
+  --mdc-outlined-text-field-error-outline-color: var(--red);
+  --mdc-outlined-text-field-label-text-color: var(--text-dim);
+  --mdc-outlined-text-field-input-text-color: var(--text);
+  --mdc-outlined-text-field-caret-color: var(--gold);
+  --mat-form-field-outlined-outline-color: var(--border);
+  --mat-form-field-outlined-hover-outline-color: var(--border-hover);
+  --mat-form-field-outlined-focus-outline-color: var(--gold);
+  --mat-form-field-outlined-label-text-color: var(--text-dim);
+  --mat-form-field-outlined-input-text-color: var(--text);
+  --mat-form-field-outlined-caret-color: var(--gold);
+  --mdc-elevated-card-container-color: var(--surface);
+  --mat-card-elevated-container-color: var(--surface);
+  --mdc-circular-progress-active-indicator-color: var(--gold);
+  --mat-progress-spinner-active-indicator-color: var(--gold);
+}
+
 .proveedor-form-container {
   width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
   padding: 24px;
   box-sizing: border-box;
 }
 
-/* ==========================================
-   CARD PRINCIPAL
-   ========================================== */
-
 .proveedor-card {
   width: 100%;
-  max-width: 1000px;
   margin: 0 auto;
-
-  border-radius: 12px;
+  border-radius: 18px !important;
   overflow: hidden;
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: 0 28px 60px rgba(0, 0, 0, 0.18) !important;
 }
 
-
-/* ==========================================
-   ENCABEZADO
-   ========================================== */
-
 mat-card-header {
-  padding: 24px 24px 12px;
+  padding: 26px 26px 8px;
 }
 
 mat-card-title {
-  font-size: 24px;
-  font-weight: 600;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  color: var(--text);
 }
 
 mat-card-subtitle {
-  margin-top: 6px;
+  margin-top: 8px;
+  color: var(--text-faint);
+  font-size: 13px;
 }
-
-
-/* ==========================================
-   CONTENIDO
-   ========================================== */
 
 mat-card-content {
-  padding: 24px !important;
+  padding: 20px 26px 26px !important;
 }
-
-
-/* ==========================================
-   TÍTULOS DE SECCIÓN
-   ========================================== */
 
 .section-title {
   margin: 10px 0 20px;
-
   padding-bottom: 10px;
-
-  font-size: 17px;
-  font-weight: 600;
-
-  border-bottom: 1px solid #e0e0e0;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  border-bottom: 1px solid var(--border);
 }
-
-
-/* ==========================================
-   GRID DEL FORMULARIO
-   ========================================== */
 
 .form-grid {
   display: grid;
-
   grid-template-columns: repeat(2, minmax(0, 1fr));
-
   column-gap: 20px;
   row-gap: 6px;
-
   width: 100%;
 }
-
-
-/* ==========================================
-   CAMPOS DE FORMULARIO
-   ========================================== */
 
 mat-form-field {
   width: 100%;
 }
 
-
-/* ==========================================
-   CAMPOS DE ANCHO COMPLETO
-   ========================================== */
-
 .full-width {
   grid-column: 1 / -1;
 }
-
-
-/* ==========================================
-   ÁREA DE OBSERVACIÓN
-   ========================================== */
 
 textarea {
   resize: vertical;
   min-height: 80px;
 }
 
-
-/* ==========================================
-   BOTONES
-   ========================================== */
-
 .form-actions {
   display: flex;
-
   justify-content: flex-end;
   align-items: center;
-
   gap: 12px;
-
   margin-top: 30px;
   padding-top: 20px;
-
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid var(--border);
 }
-
 
 .form-actions button {
   min-width: 140px;
-  min-height: 42px;
-
+  min-height: 44px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
   gap: 8px;
+  border-radius: 10px;
+  font-weight: 700;
 }
 
+.form-actions button[type="submit"] {
+  background: var(--gold) !important;
+  color: #111827 !important;
+}
 
-/* ==========================================
-   SPINNER
-   ========================================== */
+.form-actions button[type="button"] {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+}
 
 .form-actions mat-spinner {
   display: inline-block;
 }
 
-
-/* ==========================================
-   TABLET
-   ========================================== */
-
 @media (max-width: 768px) {
-
   .proveedor-form-container {
     padding: 16px;
   }
@@ -165,7 +156,6 @@ textarea {
 
   .form-grid {
     grid-template-columns: 1fr;
-
     column-gap: 0;
     row-gap: 4px;
   }
@@ -173,22 +163,15 @@ textarea {
   .full-width {
     grid-column: auto;
   }
-
 }
 
-
-/* ==========================================
-   CELULAR
-   ========================================== */
-
 @media (max-width: 480px) {
-
   .proveedor-form-container {
     padding: 8px;
   }
 
   .proveedor-card {
-    border-radius: 8px;
+    border-radius: 10px;
   }
 
   mat-card-header {
@@ -200,7 +183,7 @@ textarea {
   }
 
   mat-card-title {
-    font-size: 20px;
+    font-size: 22px;
   }
 
   mat-card-subtitle {
@@ -208,20 +191,17 @@ textarea {
   }
 
   .section-title {
-    font-size: 16px;
+    font-size: 14px;
     margin-top: 8px;
   }
 
   .form-actions {
     flex-direction: column-reverse;
-
     align-items: stretch;
-
     gap: 10px;
   }
 
   .form-actions button {
     width: 100%;
   }
-
 }

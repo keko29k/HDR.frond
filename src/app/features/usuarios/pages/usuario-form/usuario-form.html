@@ -314,31 +314,6 @@
           </mat-form-field>
 
 
-          <!-- FOTO -->
-          <mat-form-field
-            appearance="outline"
-            class="full-width"
-          >
-
-            <mat-label>Foto</mat-label>
-
-            <input
-              matInput
-              type="text"
-              formControlName="foto"
-              placeholder="URL o ruta de la fotografía"
-            />
-
-            @if (form.get('foto')?.hasError('maxlength')) {
-
-              <mat-error>
-                Máximo 500 caracteres
-              </mat-error>
-
-            }
-
-          </mat-form-field>
-
         </div>
 
 

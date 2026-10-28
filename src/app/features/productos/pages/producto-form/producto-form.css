@@ -1,137 +1,143 @@
+:host {
+  --bg: #0b0d12;
+  --surface: #12151c;
+  --surface-2: #161a24;
+  --surface-3: #1c2130;
+  --border: #232838;
+  --border-hover: #3a4156;
+  --text: #e8e9ee;
+  --text-dim: #a9adbb;
+  --text-faint: #6b7080;
+  --gold: #cda45e;
+  --gold-strong: #e0b970;
+  --red: #d3695a;
+  --success: #60d394;
+  --success-soft: rgba(96, 211, 148, 0.12);
+  --info: #5ac8fa;
+  --info-soft: rgba(90, 200, 250, 0.12);
+
+  display: block;
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+
+  --mdc-outlined-text-field-outline-color: var(--border);
+  --mdc-outlined-text-field-hover-outline-color: var(--border-hover);
+  --mdc-outlined-text-field-focus-outline-color: var(--gold);
+  --mdc-outlined-text-field-error-outline-color: var(--red);
+  --mdc-outlined-text-field-error-focus-outline-color: var(--red);
+  --mdc-outlined-text-field-error-label-text-color: var(--red);
+  --mdc-outlined-text-field-label-text-color: var(--text-dim);
+  --mdc-outlined-text-field-hover-label-text-color: var(--text);
+  --mdc-outlined-text-field-focus-label-text-color: var(--gold);
+  --mdc-outlined-text-field-input-text-color: var(--text);
+  --mdc-outlined-text-field-caret-color: var(--gold);
+
+  --mat-form-field-outlined-outline-color: var(--border);
+  --mat-form-field-outlined-hover-outline-color: var(--border-hover);
+  --mat-form-field-outlined-focus-outline-color: var(--gold);
+  --mat-form-field-outlined-error-outline-color: var(--red);
+  --mat-form-field-outlined-error-focus-outline-color: var(--red);
+  --mat-form-field-outlined-error-label-text-color: var(--red);
+  --mat-form-field-outlined-label-text-color: var(--text-dim);
+  --mat-form-field-outlined-hover-label-text-color: var(--text);
+  --mat-form-field-outlined-focus-label-text-color: var(--gold);
+  --mat-form-field-outlined-input-text-color: var(--text);
+  --mat-form-field-outlined-caret-color: var(--gold);
+  --mat-form-field-leading-icon-color: var(--text-faint);
+  --mat-form-field-error-text-color: var(--red);
+  --mat-form-field-subscript-text-color: var(--text-faint);
+
+  --mdc-elevated-card-container-color: var(--surface);
+  --mat-card-elevated-container-color: var(--surface);
+  --mdc-circular-progress-active-indicator-color: var(--gold);
+  --mat-progress-spinner-active-indicator-color: var(--gold);
+}
+
 .producto-form-container {
-  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
   padding: 24px;
   box-sizing: border-box;
 }
 
-/* ==========================================
-   CARD PRINCIPAL
-   ========================================== */
-
 .producto-card {
   width: 100%;
-  max-width: 1100px;
-  margin: 0 auto;
-  border-radius: 12px;
+  border-radius: 18px !important;
   overflow: hidden;
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: 0 28px 60px rgba(0, 0, 0, 0.18) !important;
 }
 
 mat-card-header {
-  padding: 24px 24px 12px;
+  padding: 26px 26px 8px;
 }
 
 mat-card-title {
-  font-size: 24px;
-  font-weight: 600;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  color: var(--text);
 }
 
 mat-card-subtitle {
-  margin-top: 6px;
+  margin-top: 8px;
+  color: var(--text-faint);
+  font-size: 13px;
 }
-
-
-/* ==========================================
-   CONTENIDO
-   ========================================== */
 
 mat-card-content {
-  padding: 24px !important;
+  padding: 20px 26px 26px !important;
 }
-
-
-/* ==========================================
-   TÍTULOS DE SECCIÓN
-   ========================================== */
-
-
-   .producto-card[_ngcontent-ng-c2769511730] {
-
-    color: black;
-}
-
 
 .section-title {
-  margin: 24px 0 16px;
+  margin: 16px 0 14px;
   padding-bottom: 8px;
-
-  font-size: 17px;
-  font-weight: 600;
-
-  border-bottom: 1px solid #000000;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  border-bottom: 1px solid var(--border);
 }
 
 .section-title:first-child {
   margin-top: 0;
 }
 
-
-/* ==========================================
-   GRID DEL FORMULARIO
-   ========================================== */
-
 .form-grid {
   display: grid;
-
   grid-template-columns: repeat(2, minmax(0, 1fr));
-
   gap: 8px 20px;
-
   width: 100%;
 }
-
-
-/* ==========================================
-   CAMPOS COMPLETOS
-   ========================================== */
 
 .full-width {
   grid-column: 1 / -1;
 }
 
-
-/* ==========================================
-   FORM FIELDS
-   ========================================== */
-
 mat-form-field {
   width: 100%;
 }
 
-
-/* ==========================================
-   CONFIGURACIONES
-   ========================================== */
-
 .options-container {
   display: flex;
   flex-direction: column;
-
   width: 100%;
-
-  border: 1px solid #e0e0e0;
-  border-radius: 10px;
-
+  border: 1px solid var(--border);
+  border-radius: 14px;
   overflow: hidden;
+  background: rgba(255, 255, 255, 0.02);
 }
-
-
-/* ==========================================
-   OPCIÓN INDIVIDUAL
-   ========================================== */
 
 .option-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-
   gap: 24px;
-
-  min-height: 85px;
-
-  padding: 14px 20px;
-
-  border-bottom: 1px solid #e0e0e0;
-
+  min-height: 90px;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--border);
   box-sizing: border-box;
 }
 
@@ -139,88 +145,98 @@ mat-form-field {
   border-bottom: none;
 }
 
-
-/* ==========================================
-   TEXTO DE OPCIONES
-   ========================================== */
-
 .option-text {
   display: flex;
   flex-direction: column;
-
   gap: 5px;
-
   flex: 1;
-
   min-width: 0;
 }
 
 .option-text strong {
   font-size: 15px;
   font-weight: 600;
+  color: var(--text);
 }
 
 .option-text span {
   font-size: 13px;
   line-height: 1.4;
+  color: var(--text-faint);
 }
 
-
-/* ==========================================
-   SELECT DE OPCIONES
-   ========================================== */
-
 .option-select {
-  width: 180px;
+  width: 190px;
   flex-shrink: 0;
 }
 
-
-/* ==========================================
-   BOTONES
-   ========================================== */
-
-.form-actions {
+.status-group {
   display: flex;
-
+  flex-wrap: wrap;
+  gap: 8px;
   justify-content: flex-end;
-  align-items: center;
-
-  gap: 12px;
-
-  margin-top: 30px;
-  padding-top: 20px;
-
-  border-top: 1px solid #e0e0e0;
 }
 
-.form-actions button {
-  min-width: 130px;
-  min-height: 42px;
-
+.status-chip {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
-  gap: 8px;
+  min-height: 32px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
+.status-chip.success {
+  background: var(--success-soft);
+  color: var(--success);
+}
 
-/* ==========================================
-   SPINNER DEL BOTÓN
-   ========================================== */
+.status-chip.info {
+  background: var(--info-soft);
+  color: var(--info);
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+
+.form-actions button {
+  min-width: 140px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+.form-actions button[type="submit"] {
+  background: var(--gold) !important;
+  color: #111827 !important;
+}
+
+.form-actions button[type="button"] {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+}
 
 .form-actions mat-spinner {
   display: inline-block;
 }
 
-
-/* ==========================================
-   RESPONSIVE - TABLET
-   ========================================== */
-
 @media (max-width: 768px) {
-
   .producto-form-container {
     padding: 16px;
   }
@@ -238,23 +254,27 @@ mat-form-field {
     gap: 4px;
   }
 
-  .full-width {
-    grid-column: auto;
+  .option-item {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
-  .option-item {
-    align-items: flex-start;
-    flex-direction: column;
-
-    gap: 10px;
-
-    padding: 16px;
+  .status-group {
+    width: 100%;
+    justify-content: flex-start;
   }
 
   .option-select {
     width: 100%;
   }
 
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .form-actions button {
+    width: 100%;
+  }
 }
 
 
