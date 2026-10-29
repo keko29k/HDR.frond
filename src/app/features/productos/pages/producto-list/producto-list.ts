@@ -91,6 +91,7 @@ export class ProductoListComponent implements OnInit {
   // ==========================================
 
   loading = false;
+  error = false;
 
 
   // ==========================================
@@ -151,7 +152,7 @@ export class ProductoListComponent implements OnInit {
       )
       .subscribe(valor => {
 
-        this.filter.buscar = valor;
+        this.filter.buscar = valor.trim();
 
         // Al buscar, volver a la primera página
         this.filter.pageNumber = 1;
@@ -170,6 +171,7 @@ export class ProductoListComponent implements OnInit {
   cargarProductos(): void {
 
     this.loading = true;
+    this.error = false;
 
     this.productoService
       .getAll(this.filter)
@@ -182,6 +184,7 @@ export class ProductoListComponent implements OnInit {
 
         next: (response) => {
 
+          this.error = false;
           this.productos = response.data;
 
           this.meta = response.meta;
@@ -193,14 +196,11 @@ export class ProductoListComponent implements OnInit {
             producto => producto.manejaLotes
           ).length;
 
-          console.log('Productos:', this.productos);
-
-          console.log('Meta:', this.meta);
-
         },
 
         error: () => {
 
+          this.error = true;
           this.notificationService.error(
             'No se pudo cargar la lista de productos.'
           );

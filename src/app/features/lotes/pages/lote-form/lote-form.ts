@@ -9,13 +9,14 @@ import {
   Validators
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { finalize, forkJoin, of } from 'rxjs';
+import { EMPTY, finalize, forkJoin, map, of, switchMap } from 'rxjs';
 
 import { NotificationService } from '../../../../core/services/notification.service';
 import { Producto } from '../../../productos/models/producto.model';
 import { ProductoService } from '../../../productos/services/producto';
 import { Sucursal } from '../../../sucursales/models/sucursal.model';
 import { SucursalService } from '../../../sucursales/services/sucursal';
+import { UsuarioService } from '../../../usuarios/services/usuario';
 import { Lote as LoteModel } from '../../models/lote.model';
 import { LoteCreate } from '../../models/lote-create.model';
 import { LoteUpdate } from '../../models/lote-update.model';
@@ -64,19 +65,21 @@ export class LoteForm implements OnInit {
   private loteService = inject(LoteService);
   private productoService = inject(ProductoService);
   private sucursalService = inject(SucursalService);
+  private usuarioService = inject(UsuarioService);
   private notificationService = inject(NotificationService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
   productos: Producto[] = [];
-  sucursales: Sucursal[] = [];
+  sucursalActual: Sucursal | null = null;
+  sucursalId = 0;
   loteId = 0;
   editando = false;
   loading = false;
+  errorCarga = false;
   titulo = 'Registrar lote';
 
   form = this.fb.group({
-    idSucursal: [0, [Validators.required, Validators.min(1)]],
     idProducto: [0, [Validators.required, Validators.min(1)]],
     numeroLote: ['', [Validators.required, Validators.maxLength(100)]],
     fechaFabricacion: ['', Validators.required],
@@ -99,29 +102,60 @@ export class LoteForm implements OnInit {
   }
 
   cargarDatos(id: number | null): void {
+    const usuarioId = Number(localStorage.getItem('Id'));
+    if (!Number.isInteger(usuarioId) || usuarioId <= 0) {
+      this.errorCarga = true;
+      this.notificationService.error('No se encontró el usuario de la sesión. Inicia sesión nuevamente.');
+      return;
+    }
+
     this.loading = true;
+    this.errorCarga = false;
 
     forkJoin({
+      usuario: this.usuarioService.getById(usuarioId),
       productos: this.productoService.gets(),
-      sucursales: this.sucursalService.gets(),
       lote: id ? this.loteService.getById(id) : of(null)
     })
-      .pipe(finalize(() => this.loading = false))
+      .pipe(
+        switchMap(({ usuario, productos, lote }) => {
+          if (!Number.isInteger(Number(usuario.idSucursal)) || Number(usuario.idSucursal) <= 0) {
+            this.errorCarga = true;
+            this.notificationService.error('El usuario no tiene una sucursal asignada.');
+            return EMPTY;
+          }
+
+          this.sucursalId = Number(usuario.idSucursal);
+          if (lote && Number(lote.idSucursal) !== this.sucursalId) {
+            this.errorCarga = true;
+            this.notificationService.error('No puedes gestionar lotes de otra sucursal.');
+            return EMPTY;
+          }
+
+          return this.sucursalService.getById(this.sucursalId).pipe(
+            map(sucursal => ({ productos, lote, sucursal }))
+          );
+        }),
+        finalize(() => this.loading = false)
+      )
       .subscribe({
-        next: ({ productos, sucursales, lote }) => {
-          this.productos = productos;
-          this.sucursales = sucursales;
+        next: ({ productos, lote, sucursal }) => {
+          this.productos = productos.filter(producto =>
+            producto.manejaLotes || Number(producto.id) === Number(lote?.idProducto)
+          );
+          this.sucursalActual = sucursal;
 
           if (lote) {
             this.cargarLoteEnFormulario(lote);
-            this.form.controls.idSucursal.disable();
           }
         },
-        error: () => {
+        error: (error) => {
+          this.errorCarga = true;
+          console.error('Error al cargar los datos del formulario de lotes:', error);
           this.notificationService.error(
             id
-              ? 'No se pudieron cargar los datos del lote.'
-              : 'No se pudieron cargar productos o sucursales.'
+              ? 'No se pudieron cargar los datos del lote o la sucursal del usuario.'
+              : 'No se pudieron cargar los productos o la sucursal del usuario.'
           );
         }
       });
@@ -129,7 +163,6 @@ export class LoteForm implements OnInit {
 
   private cargarLoteEnFormulario(lote: LoteModel): void {
     this.form.patchValue({
-      idSucursal: lote.idSucursal,
       idProducto: lote.idProducto,
       numeroLote: lote.numeroLote,
       fechaFabricacion: this.normalizarFecha(lote.fechaFabricacion),
@@ -146,6 +179,11 @@ export class LoteForm implements OnInit {
   }
 
   guardar(): void {
+    if (!this.sucursalId || !this.sucursalActual) {
+      this.notificationService.error('No se puede guardar el lote sin la sucursal asignada al usuario.');
+      return;
+    }
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       this.notificationService.error('Complete correctamente el formulario del lote.');
@@ -162,7 +200,7 @@ export class LoteForm implements OnInit {
   private crear(): void {
     const valores = this.form.getRawValue();
     const data: LoteCreate = {
-      idSucursal: valores.idSucursal!,
+      idSucursal: this.sucursalId,
       idProducto: valores.idProducto!,
       numeroLote: valores.numeroLote!.trim(),
       fechaFabricacion: valores.fechaFabricacion!,

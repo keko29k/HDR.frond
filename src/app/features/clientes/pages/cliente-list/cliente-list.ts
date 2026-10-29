@@ -59,6 +59,7 @@ export class ClienteListComponent implements OnInit {
   ];
 
   loading = false;
+  error = false;
 
   buscarControl = new FormControl('', {
     nonNullable: true
@@ -100,6 +101,7 @@ export class ClienteListComponent implements OnInit {
   cargarClientes(): void {
 
     this.loading = true;
+    this.error = false;
 
     this.clienteService
       .getAll(this.filter)
@@ -110,6 +112,7 @@ export class ClienteListComponent implements OnInit {
 
         next: (response) => {
 
+          this.error = false;
           this.clientes = response.data;
           this.meta = response.meta;
 
@@ -117,6 +120,7 @@ export class ClienteListComponent implements OnInit {
 
         error: () => {
 
+          this.error = true;
           this.notificationService.error(
             'No se pudo cargar la lista de clientes.'
           );

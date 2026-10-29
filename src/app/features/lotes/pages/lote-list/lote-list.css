@@ -76,6 +76,26 @@
   font-size: 13px;
 }
 
+.branch-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 6px 10px;
+  border: 1px solid rgba(205, 164, 94, 0.25);
+  border-radius: 999px;
+  background: rgba(205, 164, 94, 0.08);
+  color: var(--gold-strong);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.branch-badge mat-icon {
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+}
+
 .btn {
   display: inline-flex;
   min-height: 42px;
@@ -108,7 +128,7 @@
 
 .summary {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
   gap: 14px;
   margin-bottom: 18px;
 }
@@ -143,6 +163,11 @@
 .summary-icon.stock {
   background: rgba(112, 146, 255, 0.12);
   color: #9db3ff;
+}
+
+.summary-icon.depleted {
+  background: rgba(169, 173, 187, 0.12);
+  color: var(--text-dim);
 }
 
 .summary-label {
@@ -233,6 +258,70 @@ tr.mat-mdc-row:hover td {
   color: #e58b7e;
 }
 
+.status.depleted {
+  background: rgba(169, 173, 187, 0.12);
+  color: var(--text-dim);
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 4px 0 14px;
+}
+
+.filters button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 11px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-dim);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.filters button.active {
+  border-color: rgba(205, 164, 94, 0.5);
+  background: rgba(205, 164, 94, 0.1);
+  color: var(--gold-strong);
+}
+
+.filters button span {
+  color: var(--text-faint);
+  font-size: 11px;
+}
+
+.state-panel {
+  display: flex;
+  min-height: 240px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 9px;
+  color: var(--text-dim);
+  text-align: center;
+}
+
+.state-panel mat-icon {
+  color: var(--red);
+}
+
+.state-panel strong {
+  color: var(--text);
+}
+
+.btn.secondary {
+  min-height: 34px;
+  margin-top: 5px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+}
+
 .actions-heading {
   text-align: right;
 }
@@ -281,7 +370,7 @@ tr.mat-mdc-row:hover td {
   }
 
   .summary {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
   }
 }
@@ -298,5 +387,9 @@ tr.mat-mdc-row:hover td {
 
   .card {
     padding: 14px 12px;
+  }
+
+  .summary {
+    grid-template-columns: 1fr;
   }
 }

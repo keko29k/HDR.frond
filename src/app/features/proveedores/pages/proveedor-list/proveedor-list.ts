@@ -91,6 +91,7 @@ export class ProveedorListComponent implements OnInit {
   // ==========================================
 
   loading = false;
+  error = false;
 
 
   // ==========================================
@@ -166,6 +167,7 @@ export class ProveedorListComponent implements OnInit {
   cargarProveedores(): void {
 
     this.loading = true;
+    this.error = false;
 
     this.proveedorService
       .getAll(this.filter)
@@ -178,24 +180,16 @@ export class ProveedorListComponent implements OnInit {
 
         next: (response) => {
 
+          this.error = false;
           this.proveedores = response.data;
 
           this.meta = response.meta;
-
-          console.log(
-            'Proveedores:',
-            this.proveedores
-          );
-
-          console.log(
-            'Meta:',
-            this.meta
-          );
 
         },
 
         error: () => {
 
+          this.error = true;
           this.notificationService.error(
             'No se pudo cargar la lista de proveedores.'
           );

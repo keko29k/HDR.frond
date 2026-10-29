@@ -93,6 +93,7 @@ export class SucursalListComponent implements OnInit {
   // ==========================================
 
   loading = false;
+  error = false;
 
 
   // ==========================================
@@ -164,6 +165,7 @@ export class SucursalListComponent implements OnInit {
   cargarSucursales(): void {
 
     this.loading = true;
+    this.error = false;
 
     this.sucursalService
       .getAll(this.filter)
@@ -174,6 +176,7 @@ export class SucursalListComponent implements OnInit {
 
         next: (response) => {
 
+          this.error = false;
           this.sucursales = response.data;
 
           this.meta = response.meta;
@@ -182,6 +185,7 @@ export class SucursalListComponent implements OnInit {
 
         error: () => {
 
+          this.error = true;
           this.notificationService.error(
             'No se pudo cargar la lista de sucursales.'
           );

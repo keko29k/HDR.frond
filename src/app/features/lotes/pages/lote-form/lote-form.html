@@ -2,16 +2,28 @@
   <header class="header">
     <button class="back" type="button" (click)="cancelar()">
       <mat-icon>arrow_back</mat-icon>
-      Volver a lotes
+      Inventario de lotes
     </button>
     <h2>{{ titulo }}</h2>
-    <p>Registra la sucursal, el producto, la trazabilidad y las cantidades del lote.</p>
+    <p>Completa la información del lote y mantén su trazabilidad actualizada.</p>
   </header>
 
   <mat-card class="card">
     @if (loading) {
       <div class="loading" role="status" aria-label="Cargando datos del lote">
         <mat-spinner diameter="36"></mat-spinner>
+      </div>
+    } @else if (errorCarga) {
+      <div class="error-state" role="alert">
+        <mat-icon>cloud_off</mat-icon>
+        <strong>No se puede abrir el formulario de lotes.</strong>
+        <span>Verifica que tu usuario tenga una sucursal asignada y vuelve a intentarlo.</span>
+        <div class="actions">
+          <button class="btn ghost" type="button" (click)="cancelar()">Volver a lotes</button>
+          <button class="btn primary" type="button" (click)="cargarDatos(editando ? loteId : null)">
+            Reintentar
+          </button>
+        </div>
       </div>
     } @else {
       <form [formGroup]="form" (ngSubmit)="guardar()" class="form">
@@ -20,15 +32,9 @@
         <div class="grid-2">
           <mat-form-field appearance="outline">
             <mat-label>Sucursal</mat-label>
-            <mat-select formControlName="idSucursal">
-              <mat-option [value]="0">Seleccione una sucursal</mat-option>
-              @for (sucursal of sucursales; track sucursal.id) {
-                <mat-option [value]="sucursal.id">{{ sucursal.nombre }}</mat-option>
-              }
-            </mat-select>
-            @if (form.controls.idSucursal.invalid && form.controls.idSucursal.touched) {
-              <mat-error>Seleccione una sucursal.</mat-error>
-            }
+            <mat-icon matPrefix>storefront</mat-icon>
+            <input matInput [value]="sucursalActual?.nombre ?? ''" readonly>
+            <mat-hint>Sucursal asignada a tu usuario.</mat-hint>
           </mat-form-field>
 
           <mat-form-field appearance="outline">
@@ -39,6 +45,9 @@
                 <mat-option [value]="producto.id">{{ producto.nombre }} · {{ producto.codigo }}</mat-option>
               }
             </mat-select>
+            @if (!productos.length) {
+              <mat-hint>No hay productos habilitados para manejo por lotes.</mat-hint>
+            }
             @if (form.controls.idProducto.invalid && form.controls.idProducto.touched) {
               <mat-error>Seleccione un producto.</mat-error>
             }
@@ -108,12 +117,12 @@
           <button class="btn ghost" type="button" (click)="cancelar()" [disabled]="loading">
             Cancelar
           </button>
-          <button class="btn primary" type="submit" [disabled]="loading">
+          <button class="btn primary" type="submit" [disabled]="loading || !productos.length">
             @if (loading) {
               <mat-spinner diameter="20"></mat-spinner>
               Guardando...
             } @else {
-              {{ editando ? 'Actualizar lote' : 'Registrar lote' }}
+              {{ editando ? 'Guardar cambios' : 'Registrar lote' }}
             }
           </button>
         </div>

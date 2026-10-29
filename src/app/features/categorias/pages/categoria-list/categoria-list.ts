@@ -47,6 +47,7 @@ export class CategoriaListComponent implements OnInit {
   categorias: Categoria[] = [];
   displayedColumns: string[] = ['id', 'nombre', 'descripcion', 'acciones'];
   loading = false;
+  error = false;
 
   buscarControl = new FormControl('', { nonNullable: true });
 
@@ -82,15 +83,18 @@ export class CategoriaListComponent implements OnInit {
 
   cargarCategorias(): void {
     this.loading = true;
+    this.error = false;
 
     this.categoriaService.getAll(this.filter)
       .pipe(finalize(() => this.loading = false))
       .subscribe({
         next: (response) => {
+          this.error = false;
           this.categorias = response.data;
           this.meta = response.meta;
         },
         error: () => {
+          this.error = true;
           this.notificationService.error('No se pudo cargar la lista de categorias.');
         }
       });

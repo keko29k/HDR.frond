@@ -104,6 +104,7 @@ export class UsuarioListComponent implements OnInit {
   // ==========================================
 
   loading = false;
+  error = false;
 
 
   // ==========================================
@@ -201,6 +202,7 @@ export class UsuarioListComponent implements OnInit {
   cargarUsuarios(): void {
 
     this.loading = true;
+    this.error = false;
 
     this.usuarioService
       .getAll(this.filter)
@@ -213,24 +215,16 @@ export class UsuarioListComponent implements OnInit {
 
         next: (response) => {
 
+          this.error = false;
           this.usuarios = response.data;
 
           this.meta = response.meta;
-
-          console.log(
-            'Usuarios:',
-            this.usuarios
-          );
-
-          console.log(
-            'Meta:',
-            this.meta
-          );
 
         },
 
         error: () => {
 
+          this.error = true;
           this.notificationService.error(
             'No se pudo cargar la lista de usuarios.'
           );

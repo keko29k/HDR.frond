@@ -3,11 +3,17 @@
     <div>
       <span class="eyebrow">Inventario y trazabilidad</span>
       <h2>Lotes</h2>
-      <p>{{ lotes.length }} {{ lotes.length === 1 ? 'lote registrado' : 'lotes registrados' }}</p>
+      <p>Consulta y administra los lotes de tu sucursal.</p>
+      @if (sucursalActual) {
+        <span class="branch-badge">
+          <mat-icon>storefront</mat-icon>
+          {{ sucursalActual.nombre }}
+        </span>
+      }
     </div>
     <button class="btn primary" type="button" (click)="nuevo()">
       <mat-icon>add</mat-icon>
-      Registrar lote
+      Nuevo lote
     </button>
   </header>
 
@@ -15,22 +21,36 @@
     <article class="summary-card">
       <span class="summary-icon"><mat-icon>inventory</mat-icon></span>
       <div>
-        <span class="summary-label">Lotes registrados</span>
-        <strong>{{ lotes.length }}</strong>
+        <span class="summary-label">Total de lotes</span>
+        <strong>{{ loading || error ? '—' : lotes.length }}</strong>
+      </div>
+    </article>
+    <article class="summary-card">
+      <span class="summary-icon stock"><mat-icon>task_alt</mat-icon></span>
+      <div>
+        <span class="summary-label">Lotes vigentes</span>
+        <strong>{{ loading || error ? '—' : lotesVigentes }}</strong>
       </div>
     </article>
     <article class="summary-card">
       <span class="summary-icon warning"><mat-icon>event_busy</mat-icon></span>
       <div>
         <span class="summary-label">Lotes vencidos</span>
-        <strong>{{ lotesVencidos }}</strong>
+        <strong>{{ loading || error ? '—' : lotesVencidos }}</strong>
+      </div>
+    </article>
+    <article class="summary-card">
+      <span class="summary-icon depleted"><mat-icon>remove_shopping_cart</mat-icon></span>
+      <div>
+        <span class="summary-label">Lotes agotados</span>
+        <strong>{{ loading || error ? '—' : lotesAgotados }}</strong>
       </div>
     </article>
     <article class="summary-card">
       <span class="summary-icon stock"><mat-icon>widgets</mat-icon></span>
       <div>
-        <span class="summary-label">Unidades disponibles</span>
-        <strong>{{ existenciasTotales | number:'1.0-2' }}</strong>
+        <span class="summary-label">Unidades vigentes</span>
+        <strong>{{ loading || error ? '—' : (existenciasTotales | number:'1.0-2') }}</strong>
       </div>
     </article>
   </section>
@@ -43,14 +63,36 @@
         <input
           matInput
           [formControl]="buscarControl"
-          placeholder="Número de lote, producto o sucursal">
+          placeholder="Número de lote o producto">
       </mat-form-field>
     </div>
+
+    <nav class="filters" aria-label="Filtrar lotes por estado">
+      <button type="button" [class.active]="filtroEstado === 'TODOS'" (click)="filtroEstado = 'TODOS'">
+        Todos <span>{{ lotes.length }}</span>
+      </button>
+      <button type="button" [class.active]="filtroEstado === 'VIGENTES'" (click)="filtroEstado = 'VIGENTES'">
+        Vigentes <span>{{ lotesVigentes }}</span>
+      </button>
+      <button type="button" [class.active]="filtroEstado === 'VENCIDOS'" (click)="filtroEstado = 'VENCIDOS'">
+        Vencidos <span>{{ lotesVencidos }}</span>
+      </button>
+      <button type="button" [class.active]="filtroEstado === 'AGOTADOS'" (click)="filtroEstado = 'AGOTADOS'">
+        Agotados <span>{{ lotesAgotados }}</span>
+      </button>
+    </nav>
 
     <div class="table-wrap">
       @if (loading) {
         <div class="loading" role="status" aria-label="Cargando lotes">
           <mat-spinner diameter="34"></mat-spinner>
+        </div>
+      } @else if (error) {
+        <div class="state-panel" role="alert">
+          <mat-icon>cloud_off</mat-icon>
+          <strong>No se pudo cargar el inventario de lotes.</strong>
+          <span>Comprueba la conexión e inténtalo otra vez.</span>
+          <button class="btn secondary" type="button" (click)="cargarLotes()">Reintentar</button>
         </div>
       } @else {
         <table mat-table [dataSource]="lotesFiltrados" class="table">
@@ -92,8 +134,10 @@
           <ng-container matColumnDef="estado">
             <th mat-header-cell *matHeaderCellDef>Estado</th>
             <td mat-cell *matCellDef="let lote">
-              <span class="status" [class.expired]="estaVencido(lote.fechaVencimiento)">
-                {{ estaVencido(lote.fechaVencimiento) ? 'Vencido' : 'Vigente' }}
+              <span class="status"
+                    [class.expired]="estadoLote(lote) === 'VENCIDO'"
+                    [class.depleted]="estadoLote(lote) === 'AGOTADO'">
+                {{ estadoLote(lote) === 'AGOTADO' ? 'Agotado' : estadoLote(lote) === 'VENCIDO' ? 'Vencido' : 'Vigente' }}
               </span>
             </td>
           </ng-container>
@@ -115,7 +159,11 @@
           <tr class="empty-row" *matNoDataRow>
             <td [attr.colspan]="displayedColumns.length">
               <mat-icon>inventory_2</mat-icon>
-              <span>{{ lotes.length ? 'No hay lotes que coincidan con la búsqueda.' : 'Todavía no hay lotes registrados.' }}</span>
+              <span>
+                {{ lotes.length
+                  ? 'No hay lotes que coincidan con los filtros.'
+                  : 'Todavía no hay lotes registrados para esta sucursal.' }}
+              </span>
             </td>
           </tr>
         </table>

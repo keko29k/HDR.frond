@@ -2,13 +2,14 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { finalize, forkJoin } from 'rxjs';
+import { EMPTY, finalize, forkJoin, switchMap } from 'rxjs';
 
 import { NotificationService } from '../../../../core/services/notification.service';
 import { Producto } from '../../../productos/models/producto.model';
 import { ProductoService } from '../../../productos/services/producto';
 import { Sucursal } from '../../../sucursales/models/sucursal.model';
 import { SucursalService } from '../../../sucursales/services/sucursal';
+import { UsuarioService } from '../../../usuarios/services/usuario';
 import { Lote as LoteModel } from '../../models/lote.model';
 import { LoteService } from '../../services/lote';
 
@@ -41,13 +42,17 @@ export class LoteList implements OnInit {
   private loteService = inject(LoteService);
   private productoService = inject(ProductoService);
   private sucursalService = inject(SucursalService);
+  private usuarioService = inject(UsuarioService);
   private notificationService = inject(NotificationService);
   private router = inject(Router);
 
   lotes: LoteModel[] = [];
   productos: Producto[] = [];
-  sucursales: Sucursal[] = [];
+  sucursalActual: Sucursal | null = null;
+  sucursalId = 0;
   loading = false;
+  error = false;
+  filtroEstado: 'TODOS' | 'VIGENTES' | 'VENCIDOS' | 'AGOTADOS' = 'TODOS';
   buscarControl = new FormControl('', { nonNullable: true });
 
   displayedColumns = [
@@ -64,26 +69,36 @@ export class LoteList implements OnInit {
 
   get lotesFiltrados(): LoteModel[] {
     const termino = this.buscarControl.value.trim().toLocaleLowerCase();
-    if (!termino) {
-      return this.lotes;
-    }
-
-    return this.lotes.filter(lote =>
-      lote.numeroLote.toLocaleLowerCase().includes(termino) ||
-      this.nombreProducto(lote.idProducto).toLocaleLowerCase().includes(termino) ||
-      this.nombreSucursal(lote.idSucursal).toLocaleLowerCase().includes(termino)
-    );
+    return this.lotes.filter(lote => {
+      const coincideBusqueda = !termino ||
+        lote.numeroLote.toLocaleLowerCase().includes(termino) ||
+        this.nombreProducto(lote.idProducto).toLocaleLowerCase().includes(termino) ||
+        this.nombreSucursal(lote.idSucursal).toLocaleLowerCase().includes(termino);
+      const estado = this.estadoLote(lote);
+      const coincideEstado = this.filtroEstado === 'TODOS' ||
+        (this.filtroEstado === 'VIGENTES' && estado === 'VIGENTE') ||
+        (this.filtroEstado === 'VENCIDOS' && estado === 'VENCIDO') ||
+        (this.filtroEstado === 'AGOTADOS' && estado === 'AGOTADO');
+      return coincideBusqueda && coincideEstado;
+    });
   }
 
   get lotesVencidos(): number {
-    const hoy = this.fechaLocal(new Date());
-    return this.lotes.filter(lote =>
-      this.fechaCorta(lote.fechaVencimiento) < hoy
-    ).length;
+    return this.lotes.filter(lote => this.estadoLote(lote) === 'VENCIDO').length;
+  }
+
+  get lotesVigentes(): number {
+    return this.lotes.filter(lote => this.estadoLote(lote) === 'VIGENTE').length;
+  }
+
+  get lotesAgotados(): number {
+    return this.lotes.filter(lote => this.estadoLote(lote) === 'AGOTADO').length;
   }
 
   get existenciasTotales(): number {
-    return this.lotes.reduce((total, lote) => total + lote.cantidadDisponible, 0);
+    return this.lotes
+      .filter(lote => this.estadoLote(lote) === 'VIGENTE')
+      .reduce((total, lote) => total + Number(lote.cantidadDisponible), 0);
   }
 
   ngOnInit(): void {
@@ -91,20 +106,41 @@ export class LoteList implements OnInit {
   }
 
   cargarLotes(): void {
+    const usuarioId = Number(localStorage.getItem('Id'));
+    if (!Number.isInteger(usuarioId) || usuarioId <= 0) {
+      this.error = true;
+      this.notificationService.error('No se encontró el usuario de la sesión. Inicia sesión nuevamente.');
+      return;
+    }
+
     this.loading = true;
-    forkJoin({
-      lotes: this.loteService.gets(),
-      productos: this.productoService.gets(),
-      sucursales: this.sucursalService.gets()
-    })
-      .pipe(finalize(() => this.loading = false))
+    this.error = false;
+    this.usuarioService.getById(usuarioId)
+      .pipe(
+        switchMap(usuario => {
+          if (!Number.isInteger(Number(usuario.idSucursal)) || Number(usuario.idSucursal) <= 0) {
+            this.error = true;
+            this.notificationService.error('El usuario no tiene una sucursal asignada.');
+            return EMPTY;
+          }
+
+          this.sucursalId = Number(usuario.idSucursal);
+          return forkJoin({
+            lotes: this.loteService.gets(),
+            productos: this.productoService.gets(),
+            sucursal: this.sucursalService.getById(this.sucursalId)
+          });
+        }),
+        finalize(() => this.loading = false)
+      )
       .subscribe({
-        next: ({ lotes, productos, sucursales }) => {
-          this.lotes = lotes;
+        next: ({ lotes, productos, sucursal }) => {
+          this.lotes = lotes.filter(lote => Number(lote.idSucursal) === this.sucursalId);
           this.productos = productos;
-          this.sucursales = sucursales;
+          this.sucursalActual = sucursal;
         },
         error: (error) => {
+          this.error = true;
           console.error('Error al cargar lotes:', error);
           this.notificationService.error('No se pudo cargar el listado de lotes.');
         }
@@ -112,14 +148,24 @@ export class LoteList implements OnInit {
   }
 
   nombreProducto(id: number): string {
-    return this.productos.find(producto => producto.id === id)?.nombre ?? `Producto ${id}`;
+    return this.productos.find(producto => Number(producto.id) === Number(id))?.nombre
+      ?? `Producto ${id}`;
   }
 
   nombreSucursal(id: number): string {
-    return this.sucursales.find(sucursal => sucursal.id === id)?.nombre ?? `Sucursal ${id}`;
+    return Number(id) === this.sucursalId
+      ? this.sucursalActual?.nombre ?? `Sucursal ${id}`
+      : `Sucursal ${id}`;
   }
 
-  estaVencido(fecha: Date | string): boolean {
+  estadoLote(lote: LoteModel): 'VIGENTE' | 'VENCIDO' | 'AGOTADO' {
+    const producto = this.productos.find(item => Number(item.id) === Number(lote.idProducto));
+    if (Number(lote.cantidadDisponible) <= 0) return 'AGOTADO';
+    if (producto?.tieneVencimiento && this.fechaVencido(lote.fechaVencimiento)) return 'VENCIDO';
+    return 'VIGENTE';
+  }
+
+  private fechaVencido(fecha: Date | string): boolean {
     return this.fechaCorta(fecha) < this.fechaLocal(new Date());
   }
 

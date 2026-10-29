@@ -1,83 +1,109 @@
-<div class="page">
-
-  <header class="header">
-    <div>
-      <h2>Categorías</h2>
-      <p>{{ meta.totalCount }} {{ meta.totalCount === 1 ? 'categoría registrada' : 'categorías registradas' }}</p>
+<main class="page">
+  <header class="page-header">
+    <div class="heading">
+      <span class="eyebrow">Catálogo de productos</span>
+      <h1>Categorías</h1>
+      <p>Organiza los productos en grupos fáciles de consultar.</p>
+      @if (loading) {
+        <span class="record-count"><mat-icon>category</mat-icon>Cargando categorías</span>
+      } @else if (error) {
+        <span class="record-count"><mat-icon>category</mat-icon>Conteo no disponible</span>
+      } @else {
+        <span class="record-count">
+          <mat-icon>category</mat-icon>
+          {{ meta.totalCount }} {{ meta.totalCount === 1 ? 'categoría' : 'categorías' }}
+        </span>
+      }
     </div>
-
-    <button type="button" class="btn primary" (click)="nuevo()">
+    <button class="btn primary" type="button" (click)="nuevo()">
       <mat-icon>add</mat-icon>
       Nueva categoría
     </button>
   </header>
 
-  <mat-card class="card">
-
+  <mat-card class="list-card">
     <div class="toolbar">
+      <div class="toolbar-copy">
+        <h2>Clasificación</h2>
+        <p>Busca categorías por nombre o descripción.</p>
+      </div>
       <mat-form-field appearance="outline" class="search" subscriptSizing="dynamic">
-        <mat-label>Buscar categoría</mat-label>
+        <mat-label>Buscar categorías</mat-label>
         <mat-icon matPrefix>search</mat-icon>
         <input matInput [formControl]="buscarControl" placeholder="Nombre o descripción">
+        @if (buscarControl.value) {
+          <button mat-icon-button matSuffix type="button" aria-label="Limpiar búsqueda" (click)="buscarControl.setValue('')">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
       </mat-form-field>
     </div>
 
     <div class="table-wrap">
-
-      <div class="loading-overlay" *ngIf="loading">
-        <mat-spinner diameter="32"></mat-spinner>
-      </div>
-
-      <table mat-table [dataSource]="categorias" class="table" *ngIf="!loading">
-
-        <ng-container matColumnDef="id">
-          <th mat-header-cell *matHeaderCellDef>#</th>
-          <td mat-cell *matCellDef="let categoria" class="mono faint">{{ categoria.id }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="nombre">
-          <th mat-header-cell *matHeaderCellDef>Nombre</th>
-          <td mat-cell *matCellDef="let categoria" class="strong">{{ categoria.nombre }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="descripcion">
-          <th mat-header-cell *matHeaderCellDef>Descripción</th>
-          <td mat-cell *matCellDef="let categoria" class="wrap">{{ categoria.descripcion || 'Sin descripción' }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="acciones">
-          <th mat-header-cell *matHeaderCellDef class="right">Acciones</th>
-          <td mat-cell *matCellDef="let categoria" class="acciones right">
-            <button mat-icon-button type="button" class="icon-btn" [attr.aria-label]="'Editar ' + categoria.nombre" (click)="editar(categoria.id)">
-              <mat-icon>edit</mat-icon>
-            </button>
-            <button mat-icon-button type="button" class="icon-btn danger" [attr.aria-label]="'Eliminar ' + categoria.nombre" (click)="eliminar(categoria.id)">
-              <mat-icon>delete_outline</mat-icon>
-            </button>
-          </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-
-        <tr *ngIf="categorias.length === 0">
-          <td [attr.colspan]="displayedColumns.length" class="empty">
-            <mat-icon>category</mat-icon>
-            <span>No se encontraron categorías.</span>
-          </td>
-        </tr>
-      </table>
+      @if (loading) {
+        <div class="state-panel" role="status">
+          <mat-spinner diameter="34"></mat-spinner>
+          <span>Cargando categorías...</span>
+        </div>
+      } @else if (error) {
+        <div class="state-panel" role="alert">
+          <mat-icon class="state-icon error-icon">cloud_off</mat-icon>
+          <h3>No se pudieron cargar las categorías</h3>
+          <p>Comprueba la conexión e inténtalo nuevamente.</p>
+          <button class="btn secondary" type="button" (click)="cargarCategorias()">Reintentar</button>
+        </div>
+      } @else if (categorias.length) {
+        <table mat-table [dataSource]="categorias" class="table">
+          <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef>ID</th>
+            <td mat-cell *matCellDef="let categoria" class="mono faint">{{ categoria.id }}</td>
+          </ng-container>
+          <ng-container matColumnDef="nombre">
+            <th mat-header-cell *matHeaderCellDef>Categoría</th>
+            <td mat-cell *matCellDef="let categoria" class="strong">
+              <span class="entity-icon"><mat-icon>category</mat-icon></span>
+              {{ categoria.nombre }}
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="descripcion">
+            <th mat-header-cell *matHeaderCellDef>Descripción</th>
+            <td mat-cell *matCellDef="let categoria" class="wrap">{{ categoria.descripcion || '—' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef class="right">Acciones</th>
+            <td mat-cell *matCellDef="let categoria" class="actions-cell">
+              <button mat-icon-button type="button" [attr.aria-label]="'Editar ' + categoria.nombre" (click)="editar(categoria.id)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button type="button" class="danger" [attr.aria-label]="'Eliminar ' + categoria.nombre" (click)="eliminar(categoria.id)">
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      } @else {
+        <div class="state-panel">
+          <mat-icon class="state-icon">category</mat-icon>
+          <h3>{{ filter.buscar ? 'No hay resultados' : 'Aún no hay categorías' }}</h3>
+          <p>{{ filter.buscar ? 'Prueba con otros términos de búsqueda.' : 'Crea una categoría para organizar el catálogo.' }}</p>
+          @if (!filter.buscar) {
+            <button class="btn secondary" type="button" (click)="nuevo()">Crear categoría</button>
+          }
+        </div>
+      }
     </div>
 
-    <mat-paginator
-      *ngIf="!loading"
-      [length]="meta.totalCount"
-      [pageSize]="meta.pageSize"
-      [pageIndex]="meta.currentPage - 1"
-      [pageSizeOptions]="[5, 10, 20, 50]"
-      showFirstLastButtons
-      (page)="cambiarPagina($event)">
-    </mat-paginator>
-
+    @if (!loading && !error && categorias.length) {
+      <mat-paginator
+        [length]="meta.totalCount"
+        [pageSize]="meta.pageSize"
+        [pageIndex]="meta.currentPage - 1"
+        [pageSizeOptions]="[5, 10, 20, 50]"
+        showFirstLastButtons
+        (page)="cambiarPagina($event)">
+      </mat-paginator>
+    }
   </mat-card>
-</div>
+</main>

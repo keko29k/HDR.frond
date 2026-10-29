@@ -79,6 +79,7 @@ export class MarcaListComponent implements OnInit {
   // ==========================================
 
   loading = false;
+  error = false;
 
 
   // ==========================================
@@ -148,6 +149,7 @@ export class MarcaListComponent implements OnInit {
   CargarMarca(): void {
 
     this.loading = true;
+    this.error = false;
 
     this.marcaService
       .getAll(this.filter)
@@ -160,16 +162,15 @@ export class MarcaListComponent implements OnInit {
 
         next: (response) => {
 
+          this.error = false;
           this.marcas = response.data;
 
           this.meta = response.meta;
-
-          console.log('Marcas:', this.marcas);
-          console.log('Meta:', this.meta);
         },
 
         error: () => {
 
+          this.error = true;
           this.notificationService.error(
             'No se pudo cargar la lista de marcas.'
           );

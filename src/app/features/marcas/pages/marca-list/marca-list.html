@@ -1,90 +1,109 @@
-<div class="page">
-
-  <header class="header">
-    <div>
-      <h2>Marcas</h2>
-      <p>{{ meta.totalCount }} {{ meta.totalCount === 1 ? 'marca registrada' : 'marcas registradas' }}</p>
+<main class="page">
+  <header class="page-header">
+    <div class="heading">
+      <span class="eyebrow">Catálogo de productos</span>
+      <h1>Marcas</h1>
+      <p>Administra las marcas asociadas a los productos.</p>
+      @if (loading) {
+        <span class="record-count"><mat-icon>sell</mat-icon>Cargando marcas</span>
+      } @else if (error) {
+        <span class="record-count"><mat-icon>sell</mat-icon>Conteo no disponible</span>
+      } @else {
+        <span class="record-count">
+          <mat-icon>sell</mat-icon>
+          {{ meta.totalCount }} {{ meta.totalCount === 1 ? 'marca' : 'marcas' }}
+        </span>
+      }
     </div>
-
-    <button type="button" class="btn primary" (click)="nuevo()">
+    <button class="btn primary" type="button" (click)="nuevo()">
       <mat-icon>add</mat-icon>
-      Nueva Marca
+      Nueva marca
     </button>
   </header>
 
-  <mat-card class="card">
-
+  <mat-card class="list-card">
     <div class="toolbar">
+      <div class="toolbar-copy">
+        <h2>Marcas registradas</h2>
+        <p>Busca marcas por nombre o descripción.</p>
+      </div>
       <mat-form-field appearance="outline" class="search" subscriptSizing="dynamic">
-        <mat-label>Buscar marca</mat-label>
+        <mat-label>Buscar marcas</mat-label>
         <mat-icon matPrefix>search</mat-icon>
-        <input matInput type="text" [formControl]="buscarControl" placeholder="Buscar por nombre o descripción">
+        <input matInput [formControl]="buscarControl" placeholder="Nombre o descripción">
+        @if (buscarControl.value) {
+          <button mat-icon-button matSuffix type="button" aria-label="Limpiar búsqueda" (click)="buscarControl.setValue('')">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
       </mat-form-field>
     </div>
 
     <div class="table-wrap">
-
-      <div class="loading-overlay" *ngIf="loading">
-        <mat-spinner diameter="32"></mat-spinner>
-      </div>
-
-      <table mat-table [dataSource]="marcas" class="table" *ngIf="!loading">
-
-        <ng-container matColumnDef="id">
-          <th mat-header-cell *matHeaderCellDef>#</th>
-          <td mat-cell *matCellDef="let marca" class="mono faint">{{ marca.id }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="nombre">
-          <th mat-header-cell *matHeaderCellDef>Nombre</th>
-          <td mat-cell *matCellDef="let marca" class="strong">{{ marca.nombre }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="descripcion">
-          <th mat-header-cell *matHeaderCellDef>Descripción</th>
-          <td mat-cell *matCellDef="let marca" class="wrap">
-            <span *ngIf="marca.descripcion; else sinDescripcion">{{ marca.descripcion }}</span>
-            <ng-template #sinDescripcion>
-              <span class="texto-vacio">Sin descripción</span>
-            </ng-template>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="acciones">
-          <th mat-header-cell *matHeaderCellDef class="right">Acciones</th>
-          <td mat-cell *matCellDef="let marca" class="acciones right">
-            <button mat-stroked-button color="primary" type="button" (click)="editar(marca.id)">
-              <mat-icon>edit</mat-icon>
-              Editar
-            </button>
-            <button mat-stroked-button color="warn" type="button" (click)="eliminar(marca.id)">
-              <mat-icon>delete</mat-icon>
-              Eliminar
-            </button>
-          </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-
-        <tr *ngIf="marcas.length === 0">
-          <td [attr.colspan]="displayedColumns.length" class="empty">
-            <mat-icon>branding_watermark</mat-icon>
-            <span>No se encontraron marcas.</span>
-          </td>
-        </tr>
-      </table>
+      @if (loading) {
+        <div class="state-panel" role="status">
+          <mat-spinner diameter="34"></mat-spinner>
+          <span>Cargando marcas...</span>
+        </div>
+      } @else if (error) {
+        <div class="state-panel" role="alert">
+          <mat-icon class="state-icon error-icon">cloud_off</mat-icon>
+          <h3>No se pudieron cargar las marcas</h3>
+          <p>Comprueba la conexión e inténtalo nuevamente.</p>
+          <button class="btn secondary" type="button" (click)="CargarMarca()">Reintentar</button>
+        </div>
+      } @else if (marcas.length) {
+        <table mat-table [dataSource]="marcas" class="table">
+          <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef>ID</th>
+            <td mat-cell *matCellDef="let marca" class="mono faint">{{ marca.id }}</td>
+          </ng-container>
+          <ng-container matColumnDef="nombre">
+            <th mat-header-cell *matHeaderCellDef>Marca</th>
+            <td mat-cell *matCellDef="let marca" class="strong">
+              <span class="entity-icon"><mat-icon>sell</mat-icon></span>
+              {{ marca.nombre }}
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="descripcion">
+            <th mat-header-cell *matHeaderCellDef>Descripción</th>
+            <td mat-cell *matCellDef="let marca" class="wrap">{{ marca.descripcion || '—' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef class="right">Acciones</th>
+            <td mat-cell *matCellDef="let marca" class="actions-cell">
+              <button mat-icon-button type="button" [attr.aria-label]="'Editar ' + marca.nombre" (click)="editar(marca.id)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button type="button" class="danger" [attr.aria-label]="'Eliminar ' + marca.nombre" (click)="eliminar(marca.id)">
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      } @else {
+        <div class="state-panel">
+          <mat-icon class="state-icon">sell</mat-icon>
+          <h3>{{ filter.buscar ? 'No hay resultados' : 'Aún no hay marcas' }}</h3>
+          <p>{{ filter.buscar ? 'Prueba con otros términos de búsqueda.' : 'Registra una marca para completar el catálogo.' }}</p>
+          @if (!filter.buscar) {
+            <button class="btn secondary" type="button" (click)="nuevo()">Crear marca</button>
+          }
+        </div>
+      }
     </div>
 
-    <mat-paginator
-      *ngIf="!loading"
-      [length]="meta.totalCount"
-      [pageSize]="meta.pageSize"
-      [pageIndex]="meta.currentPage - 1"
-      [pageSizeOptions]="[5, 10, 20, 50]"
-      showFirstLastButtons
-      (page)="cambiarPagina($event)">
-    </mat-paginator>
-
+    @if (!loading && !error && marcas.length) {
+      <mat-paginator
+        [length]="meta.totalCount"
+        [pageSize]="meta.pageSize"
+        [pageIndex]="meta.currentPage - 1"
+        [pageSizeOptions]="[5, 10, 20, 50]"
+        showFirstLastButtons
+        (page)="cambiarPagina($event)">
+      </mat-paginator>
+    }
   </mat-card>
-</div>
+</main>

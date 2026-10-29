@@ -1,115 +1,126 @@
-<div class="page">
-
-  <header class="header">
-    <div>
-      <h2>Proveedores</h2>
-      <p>{{ meta.totalCount }} {{ meta.totalCount === 1 ? 'proveedor registrado' : 'proveedores registrados' }}</p>
+<main class="page">
+  <header class="page-header">
+    <div class="heading">
+      <span class="eyebrow">Abastecimiento</span>
+      <h1>Proveedores</h1>
+      <p>Organiza tus contactos y la información de abastecimiento.</p>
+      @if (loading) {
+        <span class="record-count"><mat-icon>local_shipping</mat-icon>Cargando proveedores</span>
+      } @else if (error) {
+        <span class="record-count"><mat-icon>local_shipping</mat-icon>Conteo no disponible</span>
+      } @else {
+        <span class="record-count">
+          <mat-icon>local_shipping</mat-icon>
+          {{ meta.totalCount }} {{ meta.totalCount === 1 ? 'proveedor' : 'proveedores' }}
+        </span>
+      }
     </div>
-
-    <button type="button" class="btn primary" (click)="nuevo()">
-      <mat-icon>add</mat-icon>
-      Nuevo Proveedor
+    <button class="btn primary" type="button" (click)="nuevo()">
+      <mat-icon>person_add</mat-icon>
+      Nuevo proveedor
     </button>
   </header>
 
-  <mat-card class="card">
-
+  <mat-card class="list-card">
     <div class="toolbar">
+      <div class="toolbar-copy">
+        <h2>Directorio de proveedores</h2>
+        <p>Busca por razón social, identificación o información de contacto.</p>
+      </div>
       <mat-form-field appearance="outline" class="search" subscriptSizing="dynamic">
-        <mat-label>Buscar proveedor</mat-label>
+        <mat-label>Buscar proveedores</mat-label>
         <mat-icon matPrefix>search</mat-icon>
-        <input matInput type="text" [formControl]="buscarControl" placeholder="Nombre, NIT, teléfono o correo">
+        <input matInput [formControl]="buscarControl" placeholder="Nombre, NIT, teléfono o correo">
+        @if (buscarControl.value) {
+          <button mat-icon-button matSuffix type="button" aria-label="Limpiar búsqueda" (click)="buscarControl.setValue('')">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
       </mat-form-field>
     </div>
 
     <div class="table-wrap">
-
-      <div class="loading-overlay" *ngIf="loading">
-        <mat-spinner diameter="32"></mat-spinner>
-      </div>
-
-      <table mat-table [dataSource]="proveedores" class="table" *ngIf="!loading">
-
-        <ng-container matColumnDef="id">
-          <th mat-header-cell *matHeaderCellDef>#</th>
-          <td mat-cell *matCellDef="let proveedor" class="mono faint">{{ proveedor.id }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="nombre">
-          <th mat-header-cell *matHeaderCellDef>Nombre</th>
-          <td mat-cell *matCellDef="let proveedor" class="strong">{{ proveedor.nombre }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="telefono">
-          <th mat-header-cell *matHeaderCellDef>Teléfono</th>
-          <td mat-cell *matCellDef="let proveedor" class="mono">{{ proveedor.telefono || 'Sin registro' }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="contacto">
-          <th mat-header-cell *matHeaderCellDef>Contacto</th>
-          <td mat-cell *matCellDef="let proveedor">{{ proveedor.contacto || 'Sin registro' }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="nit">
-          <th mat-header-cell *matHeaderCellDef>NIT</th>
-          <td mat-cell *matCellDef="let proveedor" class="mono">{{ proveedor.nit || 'Sin registro' }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="correo">
-          <th mat-header-cell *matHeaderCellDef>Correo</th>
-          <td mat-cell *matCellDef="let proveedor">
-            <span *ngIf="proveedor.correo; else sinCorreo">{{ proveedor.correo }}</span>
-            <ng-template #sinCorreo>
-              <span class="texto-vacio">Sin correo</span>
-            </ng-template>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="direccion">
-          <th mat-header-cell *matHeaderCellDef>Dirección</th>
-          <td mat-cell *matCellDef="let proveedor" class="wrap">{{ proveedor.direccion || 'Sin registro' }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="observacion">
-          <th mat-header-cell *matHeaderCellDef>Observación</th>
-          <td mat-cell *matCellDef="let proveedor" class="wrap">{{ proveedor.observacion || 'Sin observación' }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="acciones">
-          <th mat-header-cell *matHeaderCellDef class="right">Acciones</th>
-          <td mat-cell *matCellDef="let proveedor" class="acciones right">
-            <button mat-stroked-button color="primary" type="button" (click)="editar(proveedor.id)">
-              <mat-icon>edit</mat-icon>
-              Editar
-            </button>
-            <button mat-stroked-button color="warn" type="button" (click)="eliminar(proveedor.id)">
-              <mat-icon>delete</mat-icon>
-              Eliminar
-            </button>
-          </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-
-        <tr *ngIf="proveedores.length === 0">
-          <td [attr.colspan]="displayedColumns.length" class="empty">
-            <mat-icon>local_shipping</mat-icon>
-            <span>No se encontraron proveedores.</span>
-          </td>
-        </tr>
-      </table>
+      @if (loading) {
+        <div class="state-panel" role="status">
+          <mat-spinner diameter="34"></mat-spinner>
+          <span>Cargando proveedores...</span>
+        </div>
+      } @else if (error) {
+        <div class="state-panel" role="alert">
+          <mat-icon class="state-icon error-icon">cloud_off</mat-icon>
+          <h3>No se pudo cargar el directorio</h3>
+          <p>Comprueba la conexión e inténtalo nuevamente.</p>
+          <button class="btn secondary" type="button" (click)="cargarProveedores()">Reintentar</button>
+        </div>
+      } @else if (proveedores.length) {
+        <table mat-table [dataSource]="proveedores" class="table wide-table">
+          <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef>ID</th>
+            <td mat-cell *matCellDef="let proveedor" class="mono faint">{{ proveedor.id }}</td>
+          </ng-container>
+          <ng-container matColumnDef="nombre">
+            <th mat-header-cell *matHeaderCellDef>Proveedor</th>
+            <td mat-cell *matCellDef="let proveedor" class="strong">{{ proveedor.nombre }}</td>
+          </ng-container>
+          <ng-container matColumnDef="telefono">
+            <th mat-header-cell *matHeaderCellDef>Teléfono</th>
+            <td mat-cell *matCellDef="let proveedor">{{ proveedor.telefono || '—' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="contacto">
+            <th mat-header-cell *matHeaderCellDef>Contacto</th>
+            <td mat-cell *matCellDef="let proveedor">{{ proveedor.contacto || '—' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="nit">
+            <th mat-header-cell *matHeaderCellDef>NIT</th>
+            <td mat-cell *matCellDef="let proveedor" class="mono">{{ proveedor.nit || '—' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="correo">
+            <th mat-header-cell *matHeaderCellDef>Correo</th>
+            <td mat-cell *matCellDef="let proveedor">{{ proveedor.correo || '—' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="direccion">
+            <th mat-header-cell *matHeaderCellDef>Dirección</th>
+            <td mat-cell *matCellDef="let proveedor" class="wrap">{{ proveedor.direccion || '—' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="observacion">
+            <th mat-header-cell *matHeaderCellDef>Observación</th>
+            <td mat-cell *matCellDef="let proveedor" class="wrap">{{ proveedor.observacion || '—' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef class="right">Acciones</th>
+            <td mat-cell *matCellDef="let proveedor" class="actions-cell">
+              <button mat-icon-button type="button" aria-label="Editar proveedor" (click)="editar(proveedor.id)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button type="button" class="danger" aria-label="Eliminar proveedor" (click)="eliminar(proveedor.id)">
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      } @else {
+        <div class="state-panel">
+          <mat-icon class="state-icon">local_shipping</mat-icon>
+          <h3>{{ filter.buscar ? 'No hay resultados' : 'Aún no hay proveedores' }}</h3>
+          <p>{{ filter.buscar ? 'Prueba con otros términos de búsqueda.' : 'Registra el primer proveedor para comenzar.' }}</p>
+          @if (!filter.buscar) {
+            <button class="btn secondary" type="button" (click)="nuevo()">Crear proveedor</button>
+          }
+        </div>
+      }
     </div>
 
-    <mat-paginator
-      *ngIf="!loading"
-      [length]="meta.totalCount"
-      [pageSize]="meta.pageSize"
-      [pageIndex]="meta.currentPage - 1"
-      [pageSizeOptions]="[5, 10, 20, 50]"
-      showFirstLastButtons
-      (page)="cambiarPagina($event)">
-    </mat-paginator>
-
+    @if (!loading && !error && proveedores.length) {
+      <mat-paginator
+        [length]="meta.totalCount"
+        [pageSize]="meta.pageSize"
+        [pageIndex]="meta.currentPage - 1"
+        [pageSizeOptions]="[5, 10, 20, 50]"
+        showFirstLastButtons
+        (page)="cambiarPagina($event)">
+      </mat-paginator>
+    }
   </mat-card>
-</div>
+</main>

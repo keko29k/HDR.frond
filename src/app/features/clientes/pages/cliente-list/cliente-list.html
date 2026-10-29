@@ -1,25 +1,36 @@
-<div class="page">
-
-  <header class="header">
-    <div>
-      <h2>Clientes</h2>
-      <p>{{ meta.totalCount }} {{ meta.totalCount === 1 ? 'cliente registrado' : 'clientes registrados' }}</p>
+<main class="page">
+  <header class="page-header">
+    <div class="heading">
+      <span class="eyebrow">Relaciones comerciales</span>
+      <h1>Clientes</h1>
+      <p>Consulta y administra la información de tus clientes.</p>
+      @if (loading) {
+        <span class="record-count"><mat-icon>groups</mat-icon>Cargando clientes</span>
+      } @else if (error) {
+        <span class="record-count"><mat-icon>groups</mat-icon>Conteo no disponible</span>
+      } @else {
+        <span class="record-count">
+          <mat-icon>groups</mat-icon>
+          {{ meta.totalCount }} {{ meta.totalCount === 1 ? 'cliente' : 'clientes' }}
+        </span>
+      }
     </div>
-
-    <button type="button" class="btn primary" (click)="nuevo()">
+    <button class="btn primary" type="button" (click)="nuevo()">
       <mat-icon>person_add</mat-icon>
       Nuevo cliente
     </button>
   </header>
 
-  <mat-card class="card">
-
+  <mat-card class="list-card">
     <div class="toolbar">
+      <div class="toolbar-copy">
+        <h2>Directorio de clientes</h2>
+        <p>Encuentra registros por nombre, documento o contacto.</p>
+      </div>
       <mat-form-field appearance="outline" class="search" subscriptSizing="dynamic">
-        <mat-label>Buscar cliente</mat-label>
+        <mat-label>Buscar clientes</mat-label>
         <mat-icon matPrefix>search</mat-icon>
-        <input matInput [formControl]="buscarControl" placeholder="Nombre, apellido, NIT/CI, teléfono o correo">
-
+        <input matInput [formControl]="buscarControl" placeholder="Nombre, NIT/CI, teléfono o correo">
         @if (buscarControl.value) {
           <button mat-icon-button matSuffix type="button" aria-label="Limpiar búsqueda" (click)="buscarControl.setValue('')">
             <mat-icon>close</mat-icon>
@@ -29,94 +40,80 @@
     </div>
 
     <div class="table-wrap">
-
       @if (loading) {
-        <div class="loading-overlay">
-          <mat-spinner diameter="32"></mat-spinner>
+        <div class="state-panel" role="status">
+          <mat-spinner diameter="34"></mat-spinner>
+          <span>Cargando clientes...</span>
         </div>
-      }
-
-      @if (!loading && clientes.length > 0) {
-        <table mat-table [dataSource]="clientes" class="table">
-
+      } @else if (error) {
+        <div class="state-panel" role="alert">
+          <mat-icon class="state-icon error-icon">cloud_off</mat-icon>
+          <h3>No se pudo cargar el directorio</h3>
+          <p>Comprueba la conexión e inténtalo nuevamente.</p>
+          <button class="btn secondary" type="button" (click)="cargarClientes()">Reintentar</button>
+        </div>
+      } @else if (clientes.length) {
+        <table mat-table [dataSource]="clientes" class="table wide-table">
           <ng-container matColumnDef="id">
-            <th mat-header-cell *matHeaderCellDef>#</th>
+            <th mat-header-cell *matHeaderCellDef>ID</th>
             <td mat-cell *matCellDef="let cliente" class="mono faint">{{ cliente.id }}</td>
           </ng-container>
-
           <ng-container matColumnDef="nombres">
-            <th mat-header-cell *matHeaderCellDef>Nombres</th>
+            <th mat-header-cell *matHeaderCellDef>Nombre</th>
             <td mat-cell *matCellDef="let cliente" class="strong">
-              <div class="cliente-nombre">
-                <div class="avatar">{{ cliente.nombres.charAt(0).toUpperCase() }}</div>
-                <span>{{ cliente.nombres }}</span>
+              <div class="person-cell">
+                <span class="avatar">{{ cliente.nombres.charAt(0).toUpperCase() }}</span>
+                {{ cliente.nombres }}
               </div>
             </td>
           </ng-container>
-
           <ng-container matColumnDef="apellidos">
             <th mat-header-cell *matHeaderCellDef>Apellidos</th>
             <td mat-cell *matCellDef="let cliente">{{ cliente.apellidos }}</td>
           </ng-container>
-
           <ng-container matColumnDef="nitCi">
             <th mat-header-cell *matHeaderCellDef>NIT / CI</th>
-            <td mat-cell *matCellDef="let cliente" class="mono">{{ cliente.nitCi || 'Sin registro' }}</td>
+            <td mat-cell *matCellDef="let cliente" class="mono">{{ cliente.nitCi || '—' }}</td>
           </ng-container>
-
           <ng-container matColumnDef="telefono">
             <th mat-header-cell *matHeaderCellDef>Teléfono</th>
-            <td mat-cell *matCellDef="let cliente" class="mono">{{ cliente.telefono || 'Sin registro' }}</td>
+            <td mat-cell *matCellDef="let cliente">{{ cliente.telefono || '—' }}</td>
           </ng-container>
-
           <ng-container matColumnDef="correo">
             <th mat-header-cell *matHeaderCellDef>Correo</th>
-            <td mat-cell *matCellDef="let cliente">
-              @if (cliente.correo) {
-                <span class="mail">{{ cliente.correo }}</span>
-              } @else {
-                <span class="faint">Sin registro</span>
-              }
-            </td>
+            <td mat-cell *matCellDef="let cliente">{{ cliente.correo || '—' }}</td>
           </ng-container>
-
           <ng-container matColumnDef="direccion">
             <th mat-header-cell *matHeaderCellDef>Dirección</th>
-            <td mat-cell *matCellDef="let cliente" class="wrap">{{ cliente.direccion || 'Sin registro' }}</td>
+            <td mat-cell *matCellDef="let cliente" class="wrap">{{ cliente.direccion || '—' }}</td>
           </ng-container>
-
           <ng-container matColumnDef="acciones">
             <th mat-header-cell *matHeaderCellDef class="right">Acciones</th>
-            <td mat-cell *matCellDef="let cliente" class="acciones right">
-              <button mat-icon-button type="button" class="icon-btn" [attr.aria-label]="'Editar ' + cliente.nombres" (click)="editar(cliente.id)">
+            <td mat-cell *matCellDef="let cliente" class="actions-cell">
+              <button mat-icon-button type="button" [attr.aria-label]="'Editar ' + cliente.nombres" (click)="editar(cliente.id)">
                 <mat-icon>edit</mat-icon>
               </button>
-              <button mat-icon-button type="button" class="icon-btn danger" [attr.aria-label]="'Eliminar ' + cliente.nombres" (click)="eliminar(cliente.id)">
+              <button mat-icon-button type="button" class="danger" [attr.aria-label]="'Eliminar ' + cliente.nombres" (click)="eliminar(cliente.id)">
                 <mat-icon>delete_outline</mat-icon>
               </button>
             </td>
           </ng-container>
-
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
         </table>
-      }
-
-      @if (!loading && clientes.length === 0) {
-        <div class="empty-container">
-          <mat-icon>people_outline</mat-icon>
-          <h3>No se encontraron clientes</h3>
-          <p>No existen clientes que coincidan con la búsqueda.</p>
-          <button mat-stroked-button color="primary" type="button" (click)="nuevo()">
-            <mat-icon>person_add</mat-icon>
-            Registrar cliente
-          </button>
+      } @else {
+        <div class="state-panel">
+          <mat-icon class="state-icon">person_search</mat-icon>
+          <h3>{{ filter.buscar ? 'No hay resultados' : 'Aún no hay clientes' }}</h3>
+          <p>{{ filter.buscar ? 'Prueba con otros términos de búsqueda.' : 'Registra el primer cliente para comenzar.' }}</p>
+          @if (!filter.buscar) {
+            <button class="btn secondary" type="button" (click)="nuevo()">Crear cliente</button>
+          }
         </div>
       }
-
     </div>
 
-    @if (!loading && clientes.length > 0) {
+    @if (!loading && !error && clientes.length) {
       <mat-paginator
         [length]="meta.totalCount"
         [pageSize]="meta.pageSize"
@@ -126,8 +123,5 @@
         showFirstLastButtons>
       </mat-paginator>
     }
-
   </mat-card>
-
-</div>
-```
+</main>

@@ -41,8 +41,8 @@ export class VentaService {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
-  ventaDetalle(dto: VentaDetalleDto): Observable<any> {
-    return this.http.post(`${this.apiUrl}/venta-detalle`, dto);
+  ventaDetalle(dto: VentaDetalleDto): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.apiUrl}/venta-detalle`, dto);
   }
 
 }
