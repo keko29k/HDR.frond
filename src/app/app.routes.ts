@@ -112,6 +112,10 @@ const loadLoteFormComponent = () =>
 import('./features/lotes/pages/lote-form/lote-form')
 .then(m => m.LoteForm);
 
+const loadInventarioListComponent = () =>
+import('./features/inventarioSucursales/pages/inventario-sucursal-list/inventario-sucursal-list')
+.then(m => m.InventarioSucursalList);
+
 /* =========================================================
 CLIENTES
 ========================================================= */
@@ -205,6 +209,11 @@ path: 'editar/:id',
 loadComponent: loadLoteFormComponent
 }
 ]
+},
+
+{
+path: 'inventario',
+loadComponent: loadInventarioListComponent
 },
 
 /* =======================================================

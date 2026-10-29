@@ -1,1 +1,164 @@
-<p>inventario-sucursal-list works!</p>
+<main class="inventory-page">
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">CONTROL DE EXISTENCIAS</span>
+      <h1>Inventario por sucursal</h1>
+      <p>Consulta existencias y alertas según la sucursal seleccionada.</p>
+    </div>
+    <button class="refresh-button" type="button" (click)="cargarInventario()" [disabled]="loading">
+      Actualizar
+    </button>
+  </header>
+
+  <div class="filters">
+    <select [formControl]="filtroSucursal" aria-label="Seleccionar sucursal">
+      <option value="todas">General · Todas las sucursales</option>
+      @for (sucursal of sucursales; track sucursal.id) {
+        <option [value]="sucursal.id">{{ sucursal.nombre }}</option>
+      }
+    </select>
+    <label class="search-box">
+      <span aria-hidden="true">⌕</span>
+      <input [formControl]="buscarControl" placeholder="Producto, sucursal o ubicación">
+    </label>
+    <select [formControl]="filtroEstado" aria-label="Filtrar por estado de stock">
+      <option value="todos">Todos los estados</option>
+      <option value="BAJO">Stock bajo</option>
+      <option value="SIN_EXISTENCIAS">Sin existencias</option>
+      <option value="NORMAL">Normal</option>
+      <option value="SOBRESTOCK">Sobrestock</option>
+    </select>
+  </div>
+
+  @if (loading) {
+    <section class="panel loading-state" role="status">Cargando inventario y resumen…</section>
+  } @else if (errorCarga) {
+    <section class="panel error-state" role="alert">
+      <p>No se pudo cargar el inventario desde el servidor.</p>
+      <button class="refresh-button" type="button" (click)="cargarInventario()">Reintentar</button>
+    </section>
+  } @else {
+    <section class="summary-grid" aria-label="Resumen de inventario">
+      <article class="summary-card">
+        <span class="summary-label">Unidades en inventario</span>
+        <strong>{{ resumen?.unidadesEnInventario | number:'1.0-2' }}</strong>
+      </article>
+      <article class="summary-card warning-card">
+        <span class="summary-label">Stock bajo</span>
+        <strong>{{ resumen?.stockBajo }}</strong>
+      </article>
+      <article class="summary-card danger-card">
+        <span class="summary-label">Sin existencias</span>
+        <strong>{{ resumen?.sinExistencias }}</strong>
+      </article>
+      <article class="summary-card expiry-card">
+        <span class="summary-label">Lotes por vencer</span>
+        <strong>{{ resumen?.lotesPorVencer }}</strong>
+      </article>
+    </section>
+
+    <section class="alerts-grid" aria-label="Alertas de inventario">
+      <article class="panel">
+        <header class="panel-header">
+          <div>
+            <span class="panel-kicker">REABASTECIMIENTO</span>
+            <h2>Productos con stock bajo</h2>
+          </div>
+          <strong>{{ resumen?.stockBajo }}</strong>
+        </header>
+        @if (resumen?.productosStockBajo?.length) {
+          <ul class="alert-list">
+            @for (item of resumen?.productosStockBajo; track item.id) {
+              <li>
+                <span><strong>{{ item.nombreProducto }}</strong><small>{{ item.nombreSucursal }}</small></span>
+                <span class="alert-stock">{{ item.stockActual | number:'1.0-2' }} / {{ item.stockMinimo | number:'1.0-2' }}</span>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="empty-message">No hay productos con stock bajo.</p>
+        }
+      </article>
+
+      <article class="panel">
+        <header class="panel-header">
+          <div>
+            <span class="panel-kicker expiry-kicker">FECHAS DE VENCIMIENTO</span>
+            <h2>Lotes por vencer</h2>
+          </div>
+          <strong>{{ resumen?.lotesPorVencer }}</strong>
+        </header>
+        @if (resumen?.detalleLotesPorVencer?.length) {
+          <ul class="alert-list">
+            @for (lote of resumen?.detalleLotesPorVencer; track lote.id) {
+              <li>
+                <span>
+                  <strong>{{ lote.nombreProducto }}</strong>
+                  <small>{{ lote.nombreSucursal }} · Lote {{ lote.numeroLote }}</small>
+                </span>
+                <span class="expiry-detail">
+                  <strong>{{ lote.diasParaVencer }} días</strong>
+                  <small>{{ lote.fechaVencimiento | date:'dd/MM/yyyy' }} · {{ lote.cantidadDisponible }} un.</small>
+                </span>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="empty-message">No hay lotes próximos a vencer.</p>
+        }
+      </article>
+    </section>
+
+    <section class="panel stock-panel">
+      <header class="panel-header">
+        <div>
+          <span class="panel-kicker">EXISTENCIAS</span>
+          <h2>Stock por sucursal</h2>
+        </div>
+        <span class="result-count">{{ meta.totalCount }} registros</span>
+      </header>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Sucursal</th>
+              <th>Ubicación</th>
+              <th>Stock actual</th>
+              <th>Mínimo</th>
+              <th>Máximo</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of inventarios; track item.id) {
+              <tr>
+                <td><strong>{{ item.nombreProducto }}</strong></td>
+                <td>{{ item.nombreSucursal }}</td>
+                <td>{{ item.ubicacion || '—' }}</td>
+                <td class="quantity">{{ item.stockActual | number:'1.0-2' }}</td>
+                <td>{{ item.stockMinimo | number:'1.0-2' }}</td>
+                <td>{{ item.stockMaximo | number:'1.0-2' }}</td>
+                <td>
+                  <span class="status" [ngClass]="estadoClase(item.estadoStock)">
+                    {{ estadoTexto(item.estadoStock) }}
+                  </span>
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="7" class="empty-row">No hay existencias para los filtros seleccionados.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <mat-paginator
+        [length]="meta.totalCount"
+        [pageSize]="meta.pageSize"
+        [pageIndex]="meta.currentPage - 1"
+        [pageSizeOptions]="pageSizeOptions"
+        showFirstLastButtons
+        (page)="cambiarPagina($event)">
+      </mat-paginator>
+    </section>
+  }
+</main>
