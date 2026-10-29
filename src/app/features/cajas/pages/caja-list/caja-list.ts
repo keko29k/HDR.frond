@@ -17,7 +17,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatIcon, MatIconModule } from '@angular/material/icon';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { CajaService } from '../../services/caja';
 import { Caja } from '../../models/caja.model';
 
@@ -34,7 +35,8 @@ import { Caja } from '../../models/caja.model';
     MatInputModule,
     MatPaginatorModule,
     MatProgressSpinnerModule,
-    MatIconModule
+    MatIconModule,
+    MatTooltipModule
   ],
   templateUrl: './caja-list.html',
   styleUrl: './caja-list.css'
@@ -61,6 +63,7 @@ export class CajaListComponent implements OnInit {
   ];
 
   loading = false;
+  error = false;
 
   buscarControl = new FormControl('', {
     nonNullable: true
@@ -102,6 +105,7 @@ export class CajaListComponent implements OnInit {
   cargarCajas(): void {
 
     this.loading = true;
+    this.error = false;
 
     this.cajaService
       .getAll(this.filter)
@@ -114,13 +118,12 @@ export class CajaListComponent implements OnInit {
 
           this.cajas = response.data;
           this.meta = response.meta;
-
-          console.log('Cajas cargadas:', this.cajas);
         },
 
         error: (error) => {
 
           console.error('Error al cargar cajas:', error);
+          this.error = true;
 
           this.notificationService.error(
             'No se pudo cargar la lista de cajas.'

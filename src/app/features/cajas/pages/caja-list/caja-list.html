@@ -1,378 +1,168 @@
-
-<div class="caja-container">
-
-  <!-- Encabezado -->
-  <div class="header">
-    <div>
-      <h2>Gestión de Cajas</h2>
-      <p>Administra las cajas registradas en el sistema</p>
+<main class="page">
+  <header class="page-header">
+    <div class="heading">
+      <span class="eyebrow">Operaciones</span>
+      <h1>Cajas</h1>
+      <p>Supervisa las aperturas, cierres y movimientos de caja.</p>
+      @if (loading) {
+        <span class="record-count"><mat-icon>point_of_sale</mat-icon>Cargando cajas</span>
+      } @else if (error) {
+        <span class="record-count"><mat-icon>point_of_sale</mat-icon>Conteo no disponible</span>
+      } @else {
+        <span class="record-count">
+          <mat-icon>point_of_sale</mat-icon>
+          {{ meta.totalCount }} {{ meta.totalCount === 1 ? 'caja registrada' : 'cajas registradas' }}
+        </span>
+      }
     </div>
-
-    <button
-      mat-raised-button
-      color="primary"
-      class="btn-nuevo"
-      (click)="nuevo()">
-
+    <button class="btn primary" type="button" (click)="nuevo()">
       <mat-icon>add</mat-icon>
       Nueva caja
-
     </button>
-  </div>
+  </header>
 
-
-  <!-- Buscador -->
-  <mat-card class="search-card">
-
-    <mat-form-field appearance="outline" class="search-field">
-
-      <mat-label>Buscar caja</mat-label>
-
-      <input
-        matInput
-        [formControl]="buscarControl"
-        placeholder="Buscar por caja, sucursal o estado">
-
-      <mat-icon matSuffix>search</mat-icon>
-
-    </mat-form-field>
-
-  </mat-card>
-
-
-  <!-- Tabla -->
-  <mat-card class="table-card">
-
-    <!-- Loading -->
-    <div class="loading-container" *ngIf="loading">
-
-      <mat-spinner diameter="40"></mat-spinner>
-
-      <span>Cargando cajas...</span>
-
+  <mat-card class="list-card">
+    <div class="toolbar">
+      <div class="toolbar-copy">
+        <h2>Registro de cajas</h2>
+        <p>Consulta la sucursal, responsable, saldos y estado de cada caja.</p>
+      </div>
+      <mat-form-field appearance="outline" class="search" subscriptSizing="dynamic">
+        <mat-label>Buscar cajas</mat-label>
+        <mat-icon matPrefix>search</mat-icon>
+        <input matInput [formControl]="buscarControl" placeholder="Sucursal, usuario o estado">
+        @if (buscarControl.value) {
+          <button mat-icon-button matSuffix type="button" aria-label="Limpiar búsqueda" (click)="buscarControl.setValue('')">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+      </mat-form-field>
     </div>
 
-
-    <!-- Tabla -->
-    <div class="table-container" *ngIf="!loading">
-
-      <table mat-table [dataSource]="cajas" class="caja-table">
-
-
-        <!-- ID -->
-        <ng-container matColumnDef="id">
-
-          <th mat-header-cell *matHeaderCellDef>
-            ID
-          </th>
-
-          <td mat-cell *matCellDef="let caja">
-            <span class="id-badge">
-              #{{ caja.id }}
-            </span>
-          </td>
-
-        </ng-container>
-
-
-        <!-- Sucursal -->
-        <ng-container matColumnDef="idSucursal">
-
-          <th mat-header-cell *matHeaderCellDef>
-            Sucursal
-          </th>
-
-          <td mat-cell *matCellDef="let caja">
-
-            <div class="cell-with-icon">
-
-              <mat-icon>store</mat-icon>
-
-              <span>
+    <div class="table-wrap">
+      @if (loading) {
+        <div class="state-panel" role="status">
+          <mat-spinner diameter="34"></mat-spinner>
+          <span>Cargando cajas...</span>
+        </div>
+      } @else if (error) {
+        <div class="state-panel" role="alert">
+          <mat-icon class="state-icon error-icon">cloud_off</mat-icon>
+          <h3>No se pudieron cargar las cajas</h3>
+          <p>Comprueba la conexión e inténtalo nuevamente.</p>
+          <button class="btn secondary" type="button" (click)="cargarCajas()">Reintentar</button>
+        </div>
+      } @else if (cajas.length) {
+        <table mat-table [dataSource]="cajas" class="table wide-table">
+          <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef>ID</th>
+            <td mat-cell *matCellDef="let caja" class="mono faint">#{{ caja.id }}</td>
+          </ng-container>
+          <ng-container matColumnDef="idSucursal">
+            <th mat-header-cell *matHeaderCellDef>Sucursal</th>
+            <td mat-cell *matCellDef="let caja" class="strong">
+              <div class="entity-cell">
+                <span class="entity-icon"><mat-icon>storefront</mat-icon></span>
                 {{ caja.nombreSucursal }}
-              </span>
-
-            </div>
-
-          </td>
-
-        </ng-container>
-
-
-        <!-- Usuario Apertura -->
-        <ng-container matColumnDef="idUsuarioApertura">
-
-          <th mat-header-cell *matHeaderCellDef>
-            Apertura
-          </th>
-
-          <td mat-cell *matCellDef="let caja">
-
-            <div class="cell-with-icon">
-
-              <mat-icon>person</mat-icon>
-
-              <span>
+              </div>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="idUsuarioApertura">
+            <th mat-header-cell *matHeaderCellDef>Responsable</th>
+            <td mat-cell *matCellDef="let caja">
+              <div class="detail-cell">
+                <mat-icon>person</mat-icon>
                 {{ caja.nombreUsuario }}
-              </span>
-
-            </div>
-
-          </td>
-
-        </ng-container>
-
-
-
-        <!-- Fecha Apertura -->
-        <ng-container matColumnDef="fechaApertura">
-
-          <th mat-header-cell *matHeaderCellDef>
-            Fecha apertura
-          </th>
-
-          <td mat-cell *matCellDef="let caja">
-
-            <div class="date-cell">
-
-              <mat-icon>calendar_today</mat-icon>
-
-              <span>
-                {{ caja.fechaApertura | date:'dd/MM/yyyy HH:mm' }}
-              </span>
-
-            </div>
-
-          </td>
-
-        </ng-container>
-
-
-        <!-- Fecha Cierre -->
-        <ng-container matColumnDef="fechaCierre">
-
-          <th mat-header-cell *matHeaderCellDef>
-            Fecha cierre
-          </th>
-
-          <td mat-cell *matCellDef="let caja">
-
-            <span *ngIf="caja.fechaCierre">
-              {{ caja.fechaCierre | date:'dd/MM/yyyy HH:mm' }}
-            </span>
-
-            <span
-              *ngIf="!caja.fechaCierre"
-              class="sin-dato">
-              Caja abierta
-            </span>
-
-          </td>
-
-        </ng-container>
-
-
-        <!-- Monto Inicial -->
-        <ng-container matColumnDef="montoInicial">
-
-          <th mat-header-cell *matHeaderCellDef>
-            Monto inicial
-          </th>
-
-          <td mat-cell *matCellDef="let caja">
-
-            <span class="money">
+              </div>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="fechaApertura">
+            <th mat-header-cell *matHeaderCellDef>Apertura</th>
+            <td mat-cell *matCellDef="let caja" class="date-cell">
+              {{ caja.fechaApertura | date:'dd/MM/yyyy, HH:mm' }}
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="fechaCierre">
+            <th mat-header-cell *matHeaderCellDef>Cierre</th>
+            <td mat-cell *matCellDef="let caja" class="date-cell">
+              @if (caja.fechaCierre) {
+                {{ caja.fechaCierre | date:'dd/MM/yyyy, HH:mm' }}
+              } @else {
+                <span class="muted-value">Pendiente</span>
+              }
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="montoInicial">
+            <th mat-header-cell *matHeaderCellDef>Monto inicial</th>
+            <td mat-cell *matCellDef="let caja" class="money">
               Bs. {{ caja.montoInicial | number:'1.2-2' }}
-            </span>
-
-          </td>
-
-        </ng-container>
-
-
-        <!-- Monto Final -->
-        <ng-container matColumnDef="montoFinal">
-
-          <th mat-header-cell *matHeaderCellDef>
-            Monto final
-          </th>
-
-          <td mat-cell *matCellDef="let caja">
-
-            <span
-              *ngIf="caja.montoFinal !== null && caja.montoFinal !== undefined"
-              class="money final">
-
-              Bs. {{ caja.montoFinal | number:'1.2-2' }}
-
-            </span>
-
-            <span
-              *ngIf="caja.montoFinal === null || caja.montoFinal === undefined"
-              class="sin-dato">
-
-              —
-
-            </span>
-
-          </td>
-
-        </ng-container>
-
-
-        <!-- Estado -->
-        <ng-container matColumnDef="estadoCaja">
-
-          <th mat-header-cell *matHeaderCellDef>
-            Estado
-          </th>
-
-          <td mat-cell *matCellDef="let caja">
-
-            <span
-              class="estado"
-              [ngClass]="{
-                'abierta': caja.estadoCaja === 'ABIERTA',
-                'cerrada': caja.estadoCaja === 'CERRADA'
-              }">
-
-              <span class="estado-dot"></span>
-
-              {{ caja.estadoCaja }}
-
-            </span>
-
-          </td>
-
-        </ng-container>
-
-
-        <!-- Observación -->
-        <ng-container matColumnDef="observacion">
-
-          <th mat-header-cell *matHeaderCellDef>
-            Observación
-          </th>
-
-          <td mat-cell *matCellDef="let caja">
-
-            <span
-              class="observacion"
-              [title]="caja.observacion">
-
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="montoFinal">
+            <th mat-header-cell *matHeaderCellDef>Monto final</th>
+            <td mat-cell *matCellDef="let caja" class="money">
+              @if (caja.montoFinal !== null && caja.montoFinal !== undefined) {
+                Bs. {{ caja.montoFinal | number:'1.2-2' }}
+              } @else {
+                <span class="muted-value">—</span>
+              }
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="estadoCaja">
+            <th mat-header-cell *matHeaderCellDef>Estado</th>
+            <td mat-cell *matCellDef="let caja">
+              <span class="status" [class.open]="caja.estadoCaja === 'ABIERTA'" [class.closed]="caja.estadoCaja === 'CERRADA'">
+                <span class="status-dot"></span>
+                {{ caja.estadoCaja === 'ABIERTA' ? 'Abierta' : (caja.estadoCaja === 'CERRADA' ? 'Cerrada' : caja.estadoCaja) }}
+              </span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="observacion">
+            <th mat-header-cell *matHeaderCellDef>Observación</th>
+            <td mat-cell *matCellDef="let caja" class="observation" [title]="caja.observacion || ''">
               {{ caja.observacion || 'Sin observación' }}
-
-            </span>
-
-          </td>
-
-        </ng-container>
-
-
-        <!-- Acciones -->
-        <ng-container matColumnDef="acciones">
-
-          <th mat-header-cell *matHeaderCellDef>
-            Acciones
-          </th>
-
-          <td mat-cell *matCellDef="let caja">
-
-            <div class="acciones">
-
-
-              <!-- Editar -->
-              <button
-                mat-icon-button
-                class="btn-editar"
-                matTooltip="Editar"
-                (click)="editar(caja.id)">
-
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef class="right">Acciones</th>
+            <td mat-cell *matCellDef="let caja" class="actions-cell">
+              <button mat-icon-button type="button" [attr.aria-label]="'Editar caja ' + caja.id" matTooltip="Editar" (click)="editar(caja.id)">
                 <mat-icon>edit</mat-icon>
-
               </button>
-
-
-              <!-- Cerrar -->
-              <button
-                mat-icon-button
-                class="btn-cerrar"
-                matTooltip="Cerrar caja"
-                *ngIf="caja.estadoCaja === 'ABIERTA'"
-                (click)="cerrar(caja.id)">
-
-                <mat-icon>lock</mat-icon>
-
+              @if (caja.estadoCaja === 'ABIERTA') {
+                <button mat-icon-button type="button" class="close-action" [attr.aria-label]="'Cerrar caja ' + caja.id" matTooltip="Cerrar caja" (click)="cerrar(caja.id)">
+                  <mat-icon>lock</mat-icon>
+                </button>
+              }
+              <button mat-icon-button type="button" class="danger" [attr.aria-label]="'Eliminar caja ' + caja.id" matTooltip="Eliminar" (click)="eliminar(caja.id)">
+                <mat-icon>delete_outline</mat-icon>
               </button>
-
-
-              <!-- Eliminar -->
-              <button
-                mat-icon-button
-                class="btn-eliminar"
-                matTooltip="Eliminar"
-                (click)="eliminar(caja.id)">
-
-                <mat-icon>delete</mat-icon>
-
-              </button>
-
-            </div>
-
-          </td>
-
-        </ng-container>
-
-
-        <!-- Header -->
-        <tr
-          mat-header-row
-          *matHeaderRowDef="displayedColumns">
-        </tr>
-
-
-        <!-- Filas -->
-        <tr
-          mat-row
-          *matRowDef="let row; columns: displayedColumns;">
-        </tr>
-
-
-        <!-- Sin registros -->
-        <tr
-          class="mat-row"
-          *matNoDataRow>
-
-          <td
-            class="mat-cell no-data"
-            [attr.colspan]="displayedColumns.length">
-
-            <mat-icon>inventory_2</mat-icon>
-
-            <span>
-              No se encontraron cajas.
-            </span>
-
-          </td>
-
-        </tr>
-
-      </table>
-
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      } @else {
+        <div class="state-panel">
+          <mat-icon class="state-icon">point_of_sale</mat-icon>
+          <h3>{{ filter.buscar ? 'No hay resultados' : 'Aún no hay cajas' }}</h3>
+          <p>{{ filter.buscar ? 'Prueba con otros términos de búsqueda.' : 'Abre una caja para comenzar a registrar operaciones.' }}</p>
+          @if (!filter.buscar) {
+            <button class="btn secondary" type="button" (click)="nuevo()">Abrir caja</button>
+          }
+        </div>
+      }
     </div>
 
-
-    <!-- Paginación -->
-    <mat-paginator
-      [length]="meta.totalCount"
-      [pageSize]="meta.pageSize"
-      [pageIndex]="meta.currentPage - 1"
-      [pageSizeOptions]="[5, 10, 20, 50]"
-      (page)="cambiarPagina($event)"
-      showFirstLastButtons>
-    </mat-paginator>
-
+    @if (!loading && !error && cajas.length) {
+      <mat-paginator
+        [length]="meta.totalCount"
+        [pageSize]="meta.pageSize"
+        [pageIndex]="meta.currentPage - 1"
+        [pageSizeOptions]="[5, 10, 20, 50]"
+        (page)="cambiarPagina($event)"
+        showFirstLastButtons>
+      </mat-paginator>
+    }
   </mat-card>
-
-</div>
-```
+</main>
