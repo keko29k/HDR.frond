@@ -8,6 +8,7 @@ import { QueryFilter } from '../../../core/models/query-filter.model';
 import { CompraCreate } from '../models/compraCreate.model';
 import { CompraUpdate } from '../models/compraUpdate.model';
 import { CompraDetalleDto } from '../models/compraDetalleDto';
+import { RegistrarCompraDto } from '../models/registrar-compra.model';
 
 @Injectable({
   providedIn: 'root',
@@ -44,5 +45,10 @@ export class CompraService {
   compraDetalle(dto: CompraDetalleDto): Observable<any> {
       return this.http.post(`${this.apiUrl}/compra-detalle`, dto);
     }
+
+
+    registrar(dto: RegistrarCompraDto): Observable<any> {
+  return this.http.post(`${this.apiUrl}/Registrar`, dto);
+}
 
 }

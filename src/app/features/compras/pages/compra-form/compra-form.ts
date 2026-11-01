@@ -1,10 +1,17 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { finalize, forkJoin } from 'rxjs';
 
 import { NotificationService } from '../../../../core/services/notification.service';
+import { CompraService } from '../../services/compra';
+import { ProveedorService } from '../../../proveedores/services/proveedor';
+import { ProductoService } from '../../../productos/services/producto';
+
+import { Proveedor } from '../../../proveedores/models/proveedor.model';
+import { Producto } from '../../../productos/models/producto.model';
+import { RegistrarCompraDto } from '../../models/registrar-compra.model';
 
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -12,17 +19,19 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDividerModule } from '@angular/material/divider';
+import { MatToolbarModule } from '@angular/material/toolbar';
 
-import { UsuarioService } from '../../../usuarios/services/usuario';
-import { CompraService } from '../../services/compra';
-import { ProveedorService } from '../../../proveedores/services/proveedor';
-import { ProductoService } from '../../../productos/services/producto';
-
-import { Usuario } from '../../../usuarios/models/usuario.model';
-import { Proveedor } from '../../../proveedores/models/proveedor.model';
-import { Producto } from '../../../productos/models/producto.model';
-import { MatDivider } from '@angular/material/divider';
-import { MatToolbar } from '@angular/material/toolbar';
+interface DetalleCompraFormulario {
+  idProducto: number;
+  nombreProducto: string;
+  codigo: string;
+  cantidad: number;
+  precioCompra: number;
+  descuento: number;
+  impuesto: number;
+  subtotal: number;
+}
 
 @Component({
   selector: 'app-compra-form',
@@ -36,8 +45,8 @@ import { MatToolbar } from '@angular/material/toolbar';
     MatButtonModule,
     MatSelectModule,
     MatProgressSpinnerModule,
-    MatDivider,
-    MatToolbar
+    MatDividerModule,
+    MatToolbarModule
   ],
   templateUrl: './compra-form.html',
   styleUrl: './compra-form.css'
@@ -46,83 +55,111 @@ export class CompraFormComponent implements OnInit {
 
   private fb = inject(FormBuilder);
   private compraService = inject(CompraService);
-  private usuarioService = inject(UsuarioService);
   private proveedorService = inject(ProveedorService);
   private productoService = inject(ProductoService);
   private notificationService = inject(NotificationService);
   private router = inject(Router);
 
-  // =========================
-  // DATA
-  // =========================
-  usuarios: Usuario[] = [];
   proveedores: Proveedor[] = [];
   productos: Producto[] = [];
-
-  detalles: any[] = [];
+  detalles: DetalleCompraFormulario[] = [];
 
   loading = false;
 
-  // =========================
-  // FORM
-  // =========================
   form = this.fb.group({
-    fecha: [new Date(), Validators.required],
-    descripcion: ['', Validators.required],
-    proveedorId: [0, Validators.required],
-    usuarioId: [Number(localStorage.getItem('Id')), Validators.required],
-    total: [0]
+    idProveedor: [null as number | null, Validators.required],
+    tipoDocumento: ['Factura', Validators.required],
+    numeroDocumento: [''],
+    fechaCompra: [this.obtenerFechaActual(), Validators.required],
+    observacion: ['']
   });
 
   ngOnInit(): void {
-    this.cargarListar();
+    this.cargarDatos();
   }
 
-  // =========================
-  // CARGAR LISTAS
-  // =========================
-  cargarListar(): void {
+  private obtenerFechaActual(): string {
+    const fecha = new Date();
+    const anio = fecha.getFullYear();
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+    const dia = String(fecha.getDate()).padStart(2, '0');
 
+    return `${anio}-${mes}-${dia}`;
+  }
+
+  cargarDatos(): void {
     this.loading = true;
 
     forkJoin({
-      usuarios: this.usuarioService.gets(),
       proveedores: this.proveedorService.gets(),
       productos: this.productoService.gets()
     })
-    .pipe(finalize(() => this.loading = false))
-    .subscribe({
-      next: (res) => {
-        this.usuarios = res.usuarios;
-        this.proveedores = res.proveedores;
-        this.productos = res.productos;
-      },
-      error: () => {
-        this.notificationService.error('Error al cargar datos');
-      }
-    });
+      .pipe(finalize(() => this.loading = false))
+      .subscribe({
+        next: (res) => {
+          this.proveedores = res.proveedores;
+          this.productos = res.productos;
+        },
+        error: () => {
+          this.notificationService.error('Error al cargar proveedores y productos');
+        }
+      });
   }
 
-  // =========================
-  // AGREGAR PRODUCTO (CARRITO)
-  // =========================
-  agregarProducto(producto: Producto, cantidad: number = 1): void {
+  agregarProducto(producto: Producto): void {
 
-    const existente = this.detalles.find(d => d.productoId === producto.id);
+    const existente = this.detalles.find(
+      d => d.idProducto === producto.id
+    );
 
     if (existente) {
-      existente.cantidad += cantidad;
-      existente.subtotal = existente.cantidad * existente.precio;
+      existente.cantidad++;
+      this.actualizarSubtotal(existente);
     } else {
       this.detalles.push({
-        productoId: producto.id,
-        cantidad: cantidad,
-        precio: producto.precioCompra,
-        subtotal: cantidad * producto.precioCompra
+        idProducto: producto.id,
+        nombreProducto: producto.nombre,
+        codigo: producto.codigo,
+        cantidad: 1,
+        precioCompra: producto.precioCompra,
+        descuento: 0,
+        impuesto: 0,
+        subtotal: producto.precioCompra
       });
     }
 
     this.calcularTotal();
+  }
+
+  actualizarCantidad(index: number, valor: string): void {
+    const cantidad = Number(valor);
+
+    if (!Number.isFinite(cantidad) || cantidad <= 0) {
+      return;
+    }
+
+    this.detalles[index].cantidad = cantidad;
+    this.actualizarSubtotal(this.detalles[index]);
+    this.calcularTotal();
+  }
+
+  actualizarPrecio(index: number, valor: string): void {
+    const precio = Number(valor);
+
+    if (!Number.isFinite(precio) || precio < 0) {
+      return;
+    }
+
+    this.detalles[index].precioCompra = precio;
+    this.actualizarSubtotal(this.detalles[index]);
+    this.calcularTotal();
+  }
+
+  private actualizarSubtotal(detalle: DetalleCompraFormulario): void {
+    detalle.subtotal =
+      (detalle.cantidad * detalle.precioCompra)
+      - detalle.descuento
+      + detalle.impuesto;
   }
 
   eliminarDetalle(index: number): void {
@@ -130,63 +167,69 @@ export class CompraFormComponent implements OnInit {
     this.calcularTotal();
   }
 
-  limpiar(): void {
+  limpiarDetalles(): void {
     this.detalles = [];
     this.calcularTotal();
   }
 
-  // =========================
-  // TOTAL
-  // =========================
   calcularTotal(): number {
-    const total = this.detalles.reduce((sum, d) => sum + d.subtotal, 0);
-    this.form.patchValue({ total });
-    return total;
+    return this.detalles.reduce(
+      (total, detalle) => total + detalle.subtotal,
+      0
+    );
   }
 
-  // =========================
-  // GUARDAR COMPRA
-  // =========================
   guardar(): void {
 
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      this.notificationService.error('Formulario incompleto');
+      this.notificationService.error('Completa los datos de la compra');
       return;
     }
 
     if (this.detalles.length === 0) {
-      this.notificationService.error('Agrega productos a la compra');
+      this.notificationService.error('Agrega al menos un producto');
       return;
     }
 
-    const compra = {
-      id: 0,
-      fecha: new Date(),
-      total: this.calcularTotal(),
-      descripcion: this.form.value.descripcion!,
-      proveedorId: this.form.value.proveedorId!,
-      usuarioId: Number(localStorage.getItem('Id')),
-      
-    };
+    const valores = this.form.getRawValue();
 
-    const dto = {
-      compra: compra,
-      detalle: this.detalles
+    const dto: RegistrarCompraDto = {
+      idProveedor: valores.idProveedor!,
+      tipoDocumento: valores.tipoDocumento!,
+      numeroDocumento: valores.numeroDocumento || null,
+      fechaCompra: new Date(`${valores.fechaCompra}T12:00:00`).toISOString(),
+      observacion: valores.observacion || null,
+      detalles: this.detalles.map(detalle => ({
+        idProducto: detalle.idProducto,
+        cantidad: detalle.cantidad,
+        precioCompra: detalle.precioCompra,
+        descuento: detalle.descuento,
+        impuesto: detalle.impuesto,
+        numeroLote: null,
+        fechaFabricacion: null,
+        fechaVencimiento: null
+      }))
     };
 
     this.loading = true;
 
-    this.compraService.compraDetalle(dto)
+    this.compraService.registrar(dto)
       .pipe(finalize(() => this.loading = false))
       .subscribe({
         next: () => {
           this.notificationService.success('Compra registrada correctamente');
-          this.limpiar();
           this.router.navigate(['/compras']);
         },
-        error: () => {
-          this.notificationService.error('Error al registrar compra');
+        error: (error) => {
+          console.error('Error al registrar compra:', error);
+
+          const mensaje =
+            error?.error?.message ||
+            error?.error?.mensaje ||
+            'No se pudo registrar la compra';
+
+          this.notificationService.error(mensaje);
         }
       });
   }

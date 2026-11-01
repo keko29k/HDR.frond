@@ -1,108 +1,202 @@
 <div class="page-container">
+
   <mat-card class="table-card">
 
     <!-- HEADER -->
     <div class="header">
+
       <h2>Lista de compras</h2>
 
-      <button mat-raised-button color="primary" (click)="nuevo()">
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="nuevo()">
+
+        <mat-icon>add</mat-icon>
         Nueva compra
+
       </button>
+
     </div>
 
     <!-- FILTRO -->
     <div class="filters">
+
       <mat-form-field appearance="outline" class="search-field">
+
         <mat-label>Buscar compra</mat-label>
-        <input matInput [formControl]="buscarControl" placeholder="Descripción, proveedor..." />
+
+        <input
+          matInput
+          [formControl]="buscarControl"
+          placeholder="Proveedor, sucursal, documento..." />
+
+        <mat-icon matSuffix>search</mat-icon>
+
       </mat-form-field>
+
     </div>
 
     <!-- LOADING -->
     <div class="loading-container" *ngIf="loading">
+
       <mat-spinner diameter="42"></mat-spinner>
+
     </div>
 
     <!-- TABLA -->
     <div class="table-container" *ngIf="!loading">
-      <table mat-table [dataSource]="compras" class="full-width-table mat-elevation-z1">
+
+      <table
+        mat-table
+        [dataSource]="compras"
+        class="full-width-table mat-elevation-z1">
 
         <!-- ID -->
         <ng-container matColumnDef="id">
-          <th mat-header-cell *matHeaderCellDef>ID</th>
-          <td mat-cell *matCellDef="let compra">{{ compra.id }}</td>
+
+          <th mat-header-cell *matHeaderCellDef>
+            ID
+          </th>
+
+          <td mat-cell *matCellDef="let compra">
+            {{ compra.id }}
+          </td>
+
         </ng-container>
 
         <!-- FECHA -->
-        <ng-container matColumnDef="fecha">
-          <th mat-header-cell *matHeaderCellDef>Fecha</th>
+        <ng-container matColumnDef="fechaCompra">
+
+          <th mat-header-cell *matHeaderCellDef>
+            Fecha
+          </th>
+
           <td mat-cell *matCellDef="let compra">
-            {{ compra.fecha | date:'dd/MM/yyyy' }}
+            {{ compra.fechaCompra | date:'dd/MM/yyyy' }}
           </td>
+
+        </ng-container>
+
+        <!-- SUCURSAL -->
+        <ng-container matColumnDef="sucursal">
+
+          <th mat-header-cell *matHeaderCellDef>
+            Sucursal
+          </th>
+
+          <td mat-cell *matCellDef="let compra">
+            {{ compra.sucursal || '-' }}
+          </td>
+
+        </ng-container>
+
+        <!-- PROVEEDOR -->
+        <ng-container matColumnDef="proveedor">
+
+          <th mat-header-cell *matHeaderCellDef>
+            Proveedor
+          </th>
+
+          <td mat-cell *matCellDef="let compra">
+            {{ compra.proveedor || '-' }}
+          </td>
+
+        </ng-container>
+
+        <!-- USUARIO -->
+        <ng-container matColumnDef="usuario">
+
+          <th mat-header-cell *matHeaderCellDef>
+            Usuario
+          </th>
+
+          <td mat-cell *matCellDef="let compra">
+            {{ compra.usuario || '-' }}
+          </td>
+
         </ng-container>
 
         <!-- TOTAL -->
         <ng-container matColumnDef="total">
-          <th mat-header-cell *matHeaderCellDef>Total</th>
+
+          <th mat-header-cell *matHeaderCellDef>
+            Total
+          </th>
+
           <td mat-cell *matCellDef="let compra">
-            {{ compra.total | currency }}
+            {{ compra.total | number:'1.2-2' }} Bs
           </td>
+
         </ng-container>
 
-        <!-- DESCRIPCION -->
-        <ng-container matColumnDef="descripcion">
-          <th mat-header-cell *matHeaderCellDef>Descripción</th>
-          <td mat-cell *matCellDef="let compra">
-            {{ compra.descripcion || '-' }}
-          </td>
-        </ng-container>
+        <!-- ESTADO -->
+        <ng-container matColumnDef="estadoCompra">
 
-        <!-- PROVEEDOR -->
-        <ng-container matColumnDef="proveedorId">
-          <th mat-header-cell *matHeaderCellDef>Proveedor</th>
-          <td mat-cell *matCellDef="let compra">
-            {{ compra.nombreProveedor}}
-          </td>
-        </ng-container>
+          <th mat-header-cell *matHeaderCellDef>
+            Estado
+          </th>
 
-        <!-- USUARIO -->
-        <ng-container matColumnDef="usuarioId">
-          <th mat-header-cell *matHeaderCellDef>Usuario</th>
           <td mat-cell *matCellDef="let compra">
-            {{ compra.nombreUsuario }}
+            {{ compra.estadoCompra }}
           </td>
+
         </ng-container>
 
         <!-- ACCIONES -->
         <ng-container matColumnDef="acciones">
-          <th mat-header-cell *matHeaderCellDef>Acciones</th>
+
+          <th mat-header-cell *matHeaderCellDef>
+            Acciones
+          </th>
 
           <td mat-cell *matCellDef="let compra" class="actions-cell">
 
-            <button mat-icon-button color="primary"
-                    (click)="editar(compra.id)"
-                    matTooltip="Editar">
+            <button
+              mat-icon-button
+              color="primary"
+              (click)="editar(compra.id)"
+              matTooltip="Editar">
+
               <mat-icon>edit</mat-icon>
+
             </button>
 
-            <button mat-icon-button color="warn"
-                    (click)="eliminar(compra.id)"
-                    matTooltip="Eliminar">
+            <button
+              mat-icon-button
+              color="warn"
+              (click)="eliminar(compra.id)"
+              matTooltip="Eliminar">
+
               <mat-icon>delete</mat-icon>
+
             </button>
 
           </td>
+
         </ng-container>
 
         <!-- FILAS -->
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="table-row"></tr>
+        <tr
+          mat-header-row
+          *matHeaderRowDef="displayedColumns">
+        </tr>
+
+        <tr
+          mat-row
+          *matRowDef="let row; columns: displayedColumns;"
+          class="table-row">
+        </tr>
+
       </table>
 
       <!-- EMPTY -->
       <div class="empty-state" *ngIf="compras.length === 0">
+
         No se encontraron compras.
+
       </div>
+
     </div>
 
     <!-- PAGINADOR -->
@@ -113,7 +207,9 @@
       [pageSizeOptions]="[5, 10, 20, 50]"
       showFirstLastButtons
       (page)="cambiarPagina($event)">
+
     </mat-paginator>
 
   </mat-card>
+
 </div>

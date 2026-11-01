@@ -1,4 +1,3 @@
-
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -16,7 +15,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatIcon } from '@angular/material/icon';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
+
 import { CompraService } from '../../services/compra';
 import { Compra } from '../../models/compra.model';
 
@@ -33,18 +34,31 @@ import { Compra } from '../../models/compra.model';
     MatInputModule,
     MatPaginatorModule,
     MatProgressSpinnerModule,
-    MatIcon
+    MatIconModule,
+    MatTooltipModule
   ],
   templateUrl: './compra-list.html',
   styleUrl: './compra-list.css'
 })
 export class CompraListComponent implements OnInit {
+
   private compraService = inject(CompraService);
   private notificationService = inject(NotificationService);
   private router = inject(Router);
 
   compras: Compra[] = [];
-  displayedColumns: string[] = ['id', 'fecha', 'total', 'descripcion','proveedorId','usuarioId', 'acciones'];
+
+  displayedColumns: string[] = [
+    'id',
+    'fechaCompra',
+    'sucursal',
+    'proveedor',
+    'usuario',
+    'total',
+    'estadoCompra',
+    'acciones'
+  ];
+
   loading = false;
 
   buscarControl = new FormControl('', { nonNullable: true });
@@ -90,10 +104,13 @@ export class CompraListComponent implements OnInit {
           this.meta = response.meta;
 
           
+
           console.log('Compras cargadas:', this.compras);
         },
         error: () => {
-          this.notificationService.error('No se pudo cargar la lista de compras.');
+          this.notificationService.error(
+            'No se pudo cargar la lista de compras.'
+          );
         }
       });
   }
@@ -101,6 +118,7 @@ export class CompraListComponent implements OnInit {
   cambiarPagina(event: PageEvent): void {
     this.filter.pageNumber = event.pageIndex + 1;
     this.filter.pageSize = event.pageSize;
+
     this.cargarCompras();
   }
 
@@ -113,7 +131,9 @@ export class CompraListComponent implements OnInit {
   }
 
   eliminar(id: number): void {
-    const confirmado = confirm('¿Está seguro de eliminar esta compra?');
+    const confirmado = confirm(
+      '¿Está seguro de eliminar esta compra?'
+    );
 
     if (!confirmado) {
       return;
@@ -125,16 +145,23 @@ export class CompraListComponent implements OnInit {
       .pipe(finalize(() => this.loading = false))
       .subscribe({
         next: () => {
-          this.notificationService.success('Compra eliminada correctamente.');
+          this.notificationService.success(
+            'Compra eliminada correctamente.'
+          );
 
-          if (this.compras.length === 1 && this.filter.pageNumber > 1) {
+          if (
+            this.compras.length === 1 &&
+            this.filter.pageNumber > 1
+          ) {
             this.filter.pageNumber--;
           }
 
           this.cargarCompras();
         },
         error: () => {
-          this.notificationService.error('No se pudo eliminar la compra.');
+          this.notificationService.error(
+            'No se pudo eliminar la compra.'
+          );
         }
       });
   }

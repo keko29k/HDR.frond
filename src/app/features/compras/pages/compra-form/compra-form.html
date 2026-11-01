@@ -1,128 +1,200 @@
 <div class="container">
 
-  <!-- LOADING -->
-  <div class="loading" *ngIf="loading">
-    <mat-spinner></mat-spinner>
-  </div>
-
   <mat-card class="card">
 
-    <!-- HEADER -->
     <mat-toolbar color="primary" class="toolbar">
-      🛒 Nueva Compra
+      Nueva Compra
     </mat-toolbar>
 
-    <!-- FORM -->
-    <form [formGroup]="form" class="form">
+    <div class="loading" *ngIf="loading">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
 
-      <div class="grid">
+    <form [formGroup]="form" (ngSubmit)="guardar()">
 
+      <!-- DATOS GENERALES -->
+      <h3 class="section-title">Datos generales</h3>
 
-        <!-- PROVEEDOR -->
+      <div class="form-grid">
+
         <mat-form-field appearance="outline">
           <mat-label>Proveedor</mat-label>
-          <mat-select formControlName="proveedorId">
-            <mat-option *ngFor="let p of proveedores" [value]="p.id">
-              {{ p.nombre }}
+
+          <mat-select formControlName="idProveedor">
+            <mat-option *ngFor="let proveedor of proveedores"
+                        [value]="proveedor.id">
+              {{ proveedor.nombre }}
             </mat-option>
+          </mat-select>
+
+          <mat-error>Selecciona un proveedor</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Tipo de documento</mat-label>
+
+          <mat-select formControlName="tipoDocumento">
+            <mat-option value="Factura">Factura</mat-option>
+            <mat-option value="Nota de venta">Nota de venta</mat-option>
+            <mat-option value="Recibo">Recibo</mat-option>
+            <mat-option value="Otro">Otro</mat-option>
           </mat-select>
         </mat-form-field>
 
-    
-        <!-- DESCRIPCION -->
+        <mat-form-field appearance="outline">
+          <mat-label>Número de documento</mat-label>
+          <input matInput formControlName="numeroDocumento"
+                 placeholder="Ej. 001-000123">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Fecha de compra</mat-label>
+          <input matInput type="date" formControlName="fechaCompra">
+          <mat-error>Selecciona la fecha</mat-error>
+        </mat-form-field>
+
         <mat-form-field appearance="outline" class="full">
-          <mat-label>Descripción</mat-label>
-          <input matInput formControlName="descripcion">
+          <mat-label>Observación</mat-label>
+          <textarea matInput
+                    formControlName="observacion"
+                    rows="2"
+                    placeholder="Observaciones de la compra">
+          </textarea>
         </mat-form-field>
 
       </div>
 
       <mat-divider></mat-divider>
 
-      <!-- ========================= -->
-      <!-- PRODUCTOS -->
-      <!-- ========================= -->
-      <h3 class="title">📦 Productos</h3>
+      <!-- PRODUCTOS DISPONIBLES -->
+      <h3 class="section-title">Productos disponibles</h3>
 
-      <div class="productos">
+      <div class="productos" *ngIf="productos.length > 0">
 
-        <div class="producto-card" *ngFor="let p of productos">
+        <div class="producto-card" *ngFor="let producto of productos">
 
-          <div class="info">
-            <strong>{{ p.nombre }}</strong>
-            
-            <span>Bs {{ p.precioCompra }}</span>
+          <div class="producto-info">
+            <strong>{{ producto.nombre }}</strong>
+            <span>Código: {{ producto.codigo }}</span>
+            <span>Precio de compra: Bs {{ producto.precioCompra | number:'1.2-2' }}</span>
           </div>
 
-          <div class="acciones">
-            <button mat-stroked-button color="primary"
-                    (click)="agregarProducto(p, 1)">
-              ➕ Agregar
-            </button>
-          </div>
+          <button type="button"
+                  mat-stroked-button
+                  color="primary"
+                  [disabled]="loading"
+                  (click)="agregarProducto(producto)">
+            Agregar
+          </button>
 
         </div>
 
       </div>
 
+      <p class="empty" *ngIf="productos.length === 0">
+        No hay productos disponibles.
+      </p>
+
       <mat-divider></mat-divider>
 
-      <!-- ========================= -->
-      <!-- CARRITO -->
-      <!-- ========================= -->
-      <h3 class="title">🧾 Detalle de Compra</h3>
+      <!-- DETALLE DE COMPRA -->
+      <h3 class="section-title">Detalle de compra</h3>
 
-      <table class="table" *ngIf="detalles.length > 0">
-        <thead>
-          <tr>
-            <th>Producto</th>
-            <th>Cant.</th>
-            <th>Precio</th>
-            <th>Subtotal</th>
-            <th></th>
-          </tr>
-        </thead>
+      <div class="table-container" *ngIf="detalles.length > 0">
 
-        <tbody>
-          <tr *ngFor="let d of detalles; let i = index">
-            <td>{{ d.productoId }}</td>
-            <td>{{ d.cantidad }}</td>
-            <td>{{ d.precio }}</td>
-            <td>{{ d.subtotal }}</td>
-            <td>
-              <button mat-icon-button color="warn"
-                      (click)="eliminarDetalle(i)">
-                ❌
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+        <table class="table">
 
-      <p *ngIf="detalles.length === 0" class="empty">
-        No hay productos agregados
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Cantidad</th>
+              <th>Precio compra</th>
+              <th>Subtotal</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            <tr *ngFor="let detalle of detalles; let i = index">
+
+              <td class="product-name">
+                {{ detalle.nombreProducto }}
+                <small>{{ detalle.codigo }}</small>
+              </td>
+
+              <td>
+                <input class="table-input"
+                       type="number"
+                       min="1"
+                       step="1"
+                       [value]="detalle.cantidad"
+                       (change)="actualizarCantidad(i, $any($event.target).value)">
+              </td>
+
+              <td>
+                <input class="table-input"
+                       type="number"
+                       min="0"
+                       step="0.01"
+                       [value]="detalle.precioCompra"
+                       (change)="actualizarPrecio(i, $any($event.target).value)">
+              </td>
+
+              <td class="subtotal">
+                Bs {{ detalle.subtotal | number:'1.2-2' }}
+              </td>
+
+              <td>
+                <button type="button"
+                        mat-button
+                        color="warn"
+                        (click)="eliminarDetalle(i)">
+                  Eliminar
+                </button>
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+      <p class="empty" *ngIf="detalles.length === 0">
+        Todavía no agregaste productos a esta compra.
       </p>
 
       <!-- TOTAL -->
-      <div class="total">
-        💰 Total: <strong>Bs {{ form.value.total }}</strong>
+      <div class="total-container">
+        <span>Total de la compra</span>
+        <strong>Bs {{ calcularTotal() | number:'1.2-2' }}</strong>
       </div>
 
       <!-- BOTONES -->
       <div class="buttons">
 
-        <button mat-raised-button color="primary"
-                (click)="guardar()">
-          Guardar Compra
+        <button type="button"
+                mat-stroked-button
+                color="warn"
+                [disabled]="loading"
+                (click)="limpiarDetalles()">
+          Limpiar productos
         </button>
 
-        <button mat-stroked-button color="warn"
-                (click)="limpiar()">
-          Limpiar
-        </button>
-
-        <button mat-button (click)="cancelar()">
+        <button type="button"
+                mat-button
+                (click)="cancelar()"
+                [disabled]="loading">
           Cancelar
+        </button>
+
+        <button type="submit"
+                mat-raised-button
+                color="primary"
+                [disabled]="loading">
+          {{ loading ? 'Registrando...' : 'Registrar compra' }}
         </button>
 
       </div>
@@ -130,4 +202,5 @@
     </form>
 
   </mat-card>
+
 </div>

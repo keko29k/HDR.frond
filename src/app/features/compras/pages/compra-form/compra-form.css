@@ -6,86 +6,192 @@
 
 .card {
   width: 100%;
-  max-width: 1100px;
+  max-width: 1250px;
   padding: 20px;
 }
 
 .toolbar {
+  margin-bottom: 25px;
   font-size: 20px;
-  font-weight: bold;
+  font-weight: 600;
+}
+
+.section-title {
+  margin: 22px 0 15px;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 15px;
   margin-bottom: 20px;
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 15px;
+.form-grid mat-form-field {
+  width: 100%;
 }
 
 .full {
-  grid-column: span 3;
+  grid-column: 1 / -1;
 }
 
 .productos {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 15px;
-  margin: 15px 0;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 15px 0 25px;
 }
 
 .producto-card {
-  border: 1px solid #ddd;
-  padding: 10px;
-  border-radius: 10px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
 }
 
-.producto-card span {
-  display: block;
-  font-weight: bold;
-  color: #1976d2;
+.producto-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
 }
 
-.title {
-  margin-top: 20px;
-  font-weight: bold;
+.producto-info strong {
+  overflow-wrap: anywhere;
+}
+
+.producto-info span {
+  color: #666;
+  font-size: 13px;
+}
+
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 15px;
 }
 
 .table {
   width: 100%;
-  margin-top: 10px;
   border-collapse: collapse;
+  min-width: 700px;
 }
 
-.table th, .table td {
-  border-bottom: 1px solid #ddd;
-  padding: 8px;
+.table th,
+.table td {
+  padding: 12px 10px;
   text-align: center;
+  border-bottom: 1px solid #e0e0e0;
 }
 
-.total {
-  margin-top: 15px;
-  font-size: 18px;
-  text-align: right;
+.table th {
+  background: #f5f5f5;
+  font-weight: 600;
+}
+
+.product-name {
+  text-align: left !important;
+  font-weight: 500;
+}
+
+.product-name small {
+  display: block;
+  color: #777;
+  font-weight: normal;
+  margin-top: 4px;
+}
+
+.table-input {
+  width: 90px;
+  box-sizing: border-box;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  text-align: center;
+  font: inherit;
+}
+
+.subtotal {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.total-container {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 25px;
+  margin-top: 25px;
+  padding: 18px;
+  background: #f5f7fa;
+  border-radius: 8px;
+}
+
+.total-container span {
+  font-size: 16px;
+}
+
+.total-container strong {
+  font-size: 22px;
+  color: #1976d2;
 }
 
 .buttons {
-  margin-top: 20px;
   display: flex;
-  gap: 10px;
   justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 25px;
 }
 
 .empty {
   text-align: center;
-  color: gray;
-  margin-top: 10px;
+  color: #777;
+  padding: 20px;
 }
 
 .loading {
-  position: absolute;
-  top: 50%;
-  left: 50%;
+  display: flex;
+  justify-content: center;
+  padding: 15px;
+}
+
+@media (max-width: 900px) {
+  .productos {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .container {
+    padding: 10px;
+  }
+
+  .card {
+    padding: 12px;
+  }
+
+  .form-grid,
+  .productos {
+    grid-template-columns: 1fr;
+  }
+
+  .buttons {
+    flex-direction: column;
+  }
+
+  .buttons button {
+    width: 100%;
+  }
+
+  .total-container {
+    justify-content: space-between;
+    gap: 10px;
+  }
 }
