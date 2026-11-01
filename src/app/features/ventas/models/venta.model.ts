@@ -1,3 +1,4 @@
+
 export interface Venta {
   id: number;
   idSucursal: number;

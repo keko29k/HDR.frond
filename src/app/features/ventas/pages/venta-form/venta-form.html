@@ -1,3 +1,4 @@
+
 <form class="page" [formGroup]="form" (ngSubmit)="guardar()">
 
   <header class="header">
@@ -6,16 +7,23 @@
       <h2>Nueva venta</h2>
       <p>Selecciona los productos y confirma la forma de pago.</p>
     </div>
+
     <div class="date-chip">
       <span>Fecha</span>
       <strong>{{ hoy | date:'dd/MM/yyyy' }}</strong>
     </div>
   </header>
 
-  <section class="branch-banner" [class.branch-error]="errorSucursal" aria-live="polite">
+  <!-- SUCURSAL -->
+  <section class="branch-banner"
+           [class.branch-error]="errorSucursal"
+           aria-live="polite">
+
     <div class="branch-icon" aria-hidden="true">S</div>
+
     <div class="branch-copy">
       <span class="branch-label">Sucursal operativa</span>
+
       @if (cargandoSucursal) {
         <strong>Consultando sucursal...</strong>
         <span>Estamos leyendo la sucursal asignada a tu usuario.</span>
@@ -24,21 +32,32 @@
         <span>Verifica la sesión y la sucursal asignada al usuario.</span>
       } @else {
         <strong>{{ nombreSucursalSesion }}</strong>
-        <span>{{ sucursalActual?.direccion || 'La venta se registrará en esta sucursal.' }}</span>
+        <span>
+          {{ sucursalActual?.direccion || 'La venta se registrará en esta sucursal.' }}
+        </span>
       }
     </div>
+
     @if (errorSucursal) {
-      <button type="button" class="btn ghost small" (click)="reintentarCargaSucursal()">
+      <button type="button"
+              class="btn ghost small"
+              (click)="reintentarCargaSucursal()">
         Reintentar
       </button>
     } @else if (sucursalId && !cargandoSucursal) {
       <span class="branch-id">Sucursal #{{ sucursalId }}</span>
     }
+
   </section>
 
   <div class="layout">
+
+    <!-- COLUMNA IZQUIERDA -->
     <section class="left">
+
+      <!-- DATOS DE LA VENTA -->
       <mat-card class="card">
+
         <div class="section-heading">
           <div>
             <span class="eyebrow">Paso 1</span>
@@ -47,266 +66,512 @@
         </div>
 
         <div class="sale-fields">
-          <mat-form-field appearance="outline" class="client-field">
+
+          <mat-form-field appearance="outline"
+                          class="client-field">
+
             <mat-label>Cliente</mat-label>
-            <mat-select formControlName="idCliente" panelClass="hr-dark-panel">
+
+            <mat-select formControlName="idCliente"
+                        panelClass="hr-dark-panel">
+
               @if (cargandoClientes) {
-                <mat-option disabled>Cargando clientes...</mat-option>
+                <mat-option disabled>
+                  Cargando clientes...
+                </mat-option>
               }
+
               @for (c of clientes; track c.id) {
-                <mat-option [value]="c.id">{{ c.nombres }} {{ c.apellidos }}</mat-option>
+                <mat-option [value]="c.id">
+                  {{ c.nombres }} {{ c.apellidos }}
+                </mat-option>
               }
+
             </mat-select>
+
             @if (errorClientes) {
               <mat-hint class="error-hint">
                 No se pudieron cargar los clientes.
-                <button type="button" class="inline-action" (click)="cargarClientes()">Reintentar</button>
+
+                <button type="button"
+                        class="inline-action"
+                        (click)="cargarClientes()">
+                  Reintentar
+                </button>
               </mat-hint>
             } @else if (!cargandoClientes && !clientes.length) {
-              <mat-hint>No hay clientes registrados todavía.</mat-hint>
+              <mat-hint>
+                No hay clientes registrados todavía.
+              </mat-hint>
             }
-            @if (form.controls.idCliente.invalid && form.controls.idCliente.touched) {
+
+            @if (form.controls.idCliente.invalid &&
+                 form.controls.idCliente.touched) {
               <mat-error>Elige un cliente</mat-error>
             }
+
           </mat-form-field>
+
         </div>
 
         <mat-form-field appearance="outline" class="full">
           <mat-label>Observación</mat-label>
-          <textarea matInput rows="2" formControlName="observacion"></textarea>
+          <textarea matInput
+                    rows="2"
+                    formControlName="observacion">
+          </textarea>
         </mat-form-field>
+
       </mat-card>
 
+      <!-- PRODUCTOS -->
       <mat-card class="card">
+
         <div class="products-head">
+
           <div>
             <span class="eyebrow">Paso 2</span>
             <h3 class="card-title">Productos</h3>
           </div>
 
-          <mat-form-field appearance="outline" class="search" subscriptSizing="dynamic">
+          <mat-form-field appearance="outline"
+                          class="search"
+                          subscriptSizing="dynamic">
+
             <mat-label>Buscar producto</mat-label>
-            <input matInput #buscador
+
+            <input matInput
+                   #buscador
                    (input)="onBuscar(buscador.value)"
                    (keydown.enter)="$event.preventDefault()">
+
           </mat-form-field>
+
         </div>
 
         @if (cargandoProductos) {
+
           <div class="loading">
             <mat-spinner diameter="28"></mat-spinner>
             <span>Cargando productos...</span>
           </div>
+
         } @else if (errorProductos) {
+
           <div class="state-panel state-error" role="alert">
+
             <strong>No pudimos cargar los productos.</strong>
-            <span>Revisa tu conexión e inténtalo nuevamente.</span>
-            <button type="button" class="btn ghost small" (click)="cargarProductos()">Reintentar</button>
+
+            <span>
+              Revisa tu conexión e inténtalo nuevamente.
+            </span>
+
+            <button type="button"
+                    class="btn ghost small"
+                    (click)="cargarProductos()">
+              Reintentar
+            </button>
+
           </div>
+
         } @else {
+
           <div class="products">
+
             @for (p of productos; track p.id) {
+
               <button type="button"
                       class="product"
                       [class.in-cart]="enCarrito(p) > 0"
                       [disabled]="!p.permiteVenta"
                       (click)="agregarProducto(p)">
-                <span class="name">{{ p.nombre }}</span>
-                <span class="price">Bs {{ p.precioVenta | number:'1.2-2' }}</span>
+
+                <span class="name">
+                  {{ p.nombre }}
+                </span>
+
+                <span class="price">
+                  Bs {{ p.precioVenta | number:'1.2-2' }}
+                </span>
 
                 <span class="product-status">
+
                   @if (!p.permiteVenta) {
                     No disponible
                   } @else if (p.manejaLotes) {
-                    Requiere lote
+                    Lote automático FEFO/FIFO
                   }
+
                 </span>
+
                 @if (enCarrito(p) > 0) {
-                  <span class="badge">{{ enCarrito(p) }}</span>
+                  <span class="badge">
+                    {{ enCarrito(p) }}
+                  </span>
                 }
+
               </button>
+
             } @empty {
-              <p class="empty">No hay productos que coincidan con «{{ buscar }}».</p>
+
+              <p class="empty">
+                No hay productos que coincidan con «{{ buscar }}».
+              </p>
+
             }
+
           </div>
 
           @if (productos.length) {
+
             <div class="pager">
-              <button type="button" class="btn ghost small"
+
+              <button type="button"
+                      class="btn ghost small"
                       [disabled]="pageNumber === 1"
-                      (click)="cambiarPagina(-1)">Anterior</button>
+                      (click)="cambiarPagina(-1)">
+                Anterior
+              </button>
+
               <span>Página {{ pageNumber }}</span>
-              <button type="button" class="btn ghost small"
+
+              <button type="button"
+                      class="btn ghost small"
                       [disabled]="!hayMasPaginas"
-                      (click)="cambiarPagina(1)">Siguiente</button>
+                      (click)="cambiarPagina(1)">
+                Siguiente
+              </button>
+
             </div>
+
           }
+
         }
+
       </mat-card>
 
     </section>
 
+    <!-- COLUMNA DERECHA -->
     <aside class="right">
+
       <mat-card class="card sticky">
+
+        <!-- RESUMEN -->
         <div class="cart-header">
+
           <div>
             <span class="eyebrow">Paso 3</span>
             <h3 class="card-title">Resumen de venta</h3>
           </div>
+
           @if (detalles.length) {
-            <button type="button" class="link" (click)="limpiarCarrito()">Vaciar</button>
+            <button type="button"
+                    class="link"
+                    (click)="limpiarCarrito()">
+              Vaciar
+            </button>
           }
+
         </div>
 
+        <!-- CARRITO -->
         <div class="cart">
+
           @for (d of detalles; track d.productoId; let i = $index) {
+
             <div class="item">
+
               <div class="item-info">
-                <span class="title">{{ d.nombre }}</span>
-                <span class="unit">Bs {{ d.precioUnitario | number:'1.2-2' }} c/u</span>
+
+                <span class="title">
+                  {{ d.nombre }}
+                </span>
+
+                <span class="unit">
+                  Bs {{ d.precioUnitario | number:'1.2-2' }} c/u
+                </span>
+
+                @if (d.manejaLotes) {
+                  <span class="product-status">
+                    Lote automático FEFO/FIFO
+                  </span>
+                }
+
               </div>
 
-              @if (d.manejaLotes) {
-                <mat-form-field appearance="outline" class="full">
-                  <mat-label>Lote</mat-label>
-                  <mat-select [value]="d.idLote ?? 0"
-                              [disabled]="cargandoLotes || errorLotes"
-                              (selectionChange)="asignarLote(d, $event.value)"
-                              panelClass="hr-dark-panel">
-                    <mat-option [value]="0" disabled>Selecciona un lote</mat-option>
-                    @for (lote of lotesDisponibles(d.productoId, d.tieneVencimiento); track lote.id) {
-                      <mat-option [value]="lote.id">
-                        {{ lote.numeroLote }} · {{ lote.cantidadDisponible }} disponibles
-                      </mat-option>
-                    } @empty {
-                      <mat-option disabled>No hay lotes disponibles para este producto</mat-option>
-                    }
-                  </mat-select>
-                  @if (cargandoLotes) {
-                    <mat-hint>Cargando lotes disponibles...</mat-hint>
-                  } @else if (errorLotes) {
-                    <mat-hint class="error-hint">
-                      No se pudieron cargar los lotes.
-                      <button type="button" class="inline-action" (click)="cargarLotes()">Reintentar</button>
-                    </mat-hint>
-                  } @else if (!lotesDisponibles(d.productoId, d.tieneVencimiento).length) {
-                    <mat-hint>
-                      No hay lotes en {{ nombreSucursalSesion }} con existencias
-                      {{ d.tieneVencimiento ? 'y vigentes' : '' }}.
-                    </mat-hint>
-                  }
-                </mat-form-field>
-              }
-
+              <!-- CANTIDAD -->
               <div class="qty">
-                <button type="button" (click)="cambiarCantidad(d, -1)"
-                        [disabled]="d.cantidad <= 1" aria-label="Quitar uno">−</button>
+
+                <button type="button"
+                        (click)="cambiarCantidad(d, -1)"
+                        [disabled]="d.cantidad <= 1"
+                        aria-label="Quitar uno">
+                  −
+                </button>
+
                 <span>{{ d.cantidad }}</span>
-                <button type="button" (click)="cambiarCantidad(d, 1)"
-                        aria-label="Agregar uno">+</button>
+
+                <button type="button"
+                        (click)="cambiarCantidad(d, 1)"
+                        aria-label="Agregar uno">
+                  +
+                </button>
+
               </div>
 
-              <span class="subtotal">Bs {{ d.subtotal | number:'1.2-2' }}</span>
+              <!-- SUBTOTAL -->
+              <span class="subtotal">
+                Bs {{ d.subtotal | number:'1.2-2' }}
+              </span>
 
-              <button type="button" class="delete" (click)="eliminarDetalle(i)"
-                      aria-label="Eliminar producto">✕</button>
+              <!-- ELIMINAR -->
+              <button type="button"
+                      class="delete"
+                      (click)="eliminarDetalle(i)"
+                      aria-label="Eliminar producto">
+                ✕
+              </button>
+
             </div>
+
           } @empty {
+
             <div class="empty-cart">
               <strong>Tu carrito está vacío</strong>
-              <span>Selecciona productos para comenzar la venta.</span>
+              <span>
+                Selecciona productos para comenzar la venta.
+              </span>
             </div>
+
           }
+
         </div>
 
+        <!-- TOTAL -->
         <div class="total">
-          <span>Total · {{ cantidadItems }} {{ cantidadItems === 1 ? 'unidad' : 'unidades' }}</span>
-          <strong>Bs {{ total | number:'1.2-2' }}</strong>
+
+          <span>
+            Total · {{ cantidadItems }}
+            {{ cantidadItems === 1 ? 'unidad' : 'unidades' }}
+          </span>
+
+          <strong>
+            Bs {{ total | number:'1.2-2' }}
+          </strong>
+
         </div>
 
+        <!-- FORMA DE PAGO -->
         <div class="payment-heading">
           <span class="eyebrow">Forma de pago</span>
           <span class="cash-method">Efectivo</span>
         </div>
-        <div class="segmented" role="group" aria-label="Forma de pago">
-          <button type="button" [class.on]="!esCredito" [attr.aria-pressed]="!esCredito"
-                  (click)="setCredito(false)">Contado</button>
-          <button type="button" [class.on]="esCredito" [attr.aria-pressed]="esCredito"
-                  (click)="setCredito(true)">Crédito</button>
+
+        <div class="segmented"
+             role="group"
+             aria-label="Forma de pago">
+
+          <button type="button"
+                  [class.on]="!esCredito"
+                  [attr.aria-pressed]="!esCredito"
+                  (click)="setCredito(false)">
+            Contado
+          </button>
+
+          <button type="button"
+                  [class.on]="esCredito"
+                  [attr.aria-pressed]="esCredito"
+                  (click)="setCredito(true)">
+            Crédito
+          </button>
+
         </div>
 
+        <!-- CAJA -->
         <mat-form-field appearance="outline" class="full">
+
           <mat-label>Caja abierta</mat-label>
+
           <mat-select formControlName="idCaja"
                       panelClass="hr-dark-panel">
-            @for (caja of cajasAbiertas; track caja.id) {
-              <mat-option [value]="caja.id">Caja #{{ caja.id }}</mat-option>
-            }
-          </mat-select>
-          @if (cargandoCaja) {
-            <mat-hint>Buscando cajas abiertas en esta sucursal...</mat-hint>
-          } @else if (errorCaja) {
-            <mat-hint class="error-hint">
-              No se pudieron consultar las cajas.
-              <button type="button" class="inline-action" (click)="cargarCajasAbiertas()">Reintentar</button>
-            </mat-hint>
-          } @else if (!cajasAbiertas.length) {
-            <mat-hint>No hay cajas abiertas en {{ nombreSucursalSesion }}.</mat-hint>
-          }
-        </mat-form-field>
-        <p class="payment-note">El pago de esta venta se registrará en efectivo.</p>
 
+            @for (caja of cajasAbiertas; track caja.id) {
+              <mat-option [value]="caja.id">
+                Caja #{{ caja.id }}
+              </mat-option>
+            }
+
+          </mat-select>
+
+          @if (cargandoCaja) {
+
+            <mat-hint>
+              Buscando cajas abiertas en esta sucursal...
+            </mat-hint>
+
+          } @else if (errorCaja) {
+
+            <mat-hint class="error-hint">
+
+              No se pudieron consultar las cajas.
+
+              <button type="button"
+                      class="inline-action"
+                      (click)="cargarCajasAbiertas()">
+                Reintentar
+              </button>
+
+            </mat-hint>
+
+          } @else if (!cajasAbiertas.length) {
+
+            <mat-hint>
+              No hay cajas abiertas en {{ nombreSucursalSesion }}.
+            </mat-hint>
+
+          }
+
+        </mat-form-field>
+
+        <p class="payment-note">
+          El pago de esta venta se registrará en efectivo.
+        </p>
+
+        <!-- DATOS DE CRÉDITO -->
         @if (esCredito) {
+
           <div class="credit">
+
             <mat-form-field appearance="outline">
+
               <mat-label>Monto pagado ahora</mat-label>
+
               <span matTextPrefix>Bs&nbsp;</span>
-              <input matInput type="number" min="0" step="0.01" formControlName="montoPagado">
+
+              <input matInput
+                     type="number"
+                     min="0"
+                     step="0.01"
+                     formControlName="montoPagado">
+
               @if (form.controls.montoPagado.hasError('min')) {
-                <mat-error>El monto no puede ser negativo.</mat-error>
+                <mat-error>
+                  El monto no puede ser negativo.
+                </mat-error>
               }
+
             </mat-form-field>
 
             <mat-form-field appearance="outline">
+
               <mat-label>Fecha límite de pago</mat-label>
-              <input matInput [matDatepicker]="picker" [min]="hoy" formControlName="fechaLimitePago">
-              <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-              <mat-datepicker #picker panelClass="hr-dark-panel"></mat-datepicker>
+
+              <input matInput
+                     [matDatepicker]="picker"
+                     [min]="hoy"
+                     formControlName="fechaLimitePago">
+
+              <mat-datepicker-toggle matIconSuffix
+                                     [for]="picker">
+              </mat-datepicker-toggle>
+
+              <mat-datepicker #picker
+                              panelClass="hr-dark-panel">
+              </mat-datepicker>
+
               @if (form.controls.fechaLimitePago.hasError('required')) {
-                <mat-error>Indica hasta cuándo puede pagar</mat-error>
+                <mat-error>
+                  Indica hasta cuándo puede pagar.
+                </mat-error>
               }
+
             </mat-form-field>
 
             <div class="saldo">
+
               <span>Saldo pendiente</span>
-              <strong>Bs {{ saldoPendiente | number:'1.2-2' }}</strong>
+
+              <strong>
+                Bs {{ saldoPendiente | number:'1.2-2' }}
+              </strong>
+
             </div>
+
           </div>
+
         }
 
+        <!-- ACCIONES -->
         <div class="actions">
-          <button type="submit" class="btn primary"
-                  [disabled]="guardando || detalles.length === 0 || cargandoSucursal || !sucursalId ||
-                    (errorClientes || cargandoClientes) ||
-                    (requiereLotes && (errorLotes || cargandoLotes)) ||
-                    (montoPagado > 0 && (cargandoCaja || errorCaja || !cajasAbiertas.length))">
+
+          <button type="submit"
+                  class="btn primary"
+                  [disabled]="
+                    guardando ||
+                    detalles.length === 0 ||
+                    cargandoSucursal ||
+                    !sucursalId ||
+                    errorSucursal ||
+                    errorClientes ||
+                    cargandoClientes ||
+                    (
+                      montoPagado > 0 &&
+                      (
+                        cargandoCaja ||
+                        errorCaja ||
+                        !cajasAbiertas.length
+                      )
+                    )">
+
             @if (guardando) {
+
               <mat-spinner diameter="18"></mat-spinner>
+
             } @else {
-              {{ esCredito ? 'Registrar venta a crédito' : 'Cobrar Bs ' + (total | number:'1.2-2') }}
+
+              {{
+                esCredito
+                  ? 'Registrar venta a crédito'
+                  : 'Cobrar Bs ' + (total | number:'1.2-2')
+              }}
+
             }
+
           </button>
 
-          <button type="button" class="btn ghost" (click)="cancelar()">Cancelar</button>
+          <button type="button"
+                  class="btn ghost"
+                  (click)="cancelar()">
+            Cancelar
+          </button>
+
         </div>
-        @if (detalles.length && (cargandoSucursal || !sucursalId || errorSucursal)) {
-          <p class="submit-note" role="status">La sucursal debe estar disponible para registrar la venta.</p>
-        } @else if (montoPagado > 0 && !cajasAbiertas.length && !cargandoCaja) {
-          <p class="submit-note" role="status">Abre una caja en esta sucursal para registrar el pago.</p>
+
+        <!-- MENSAJES -->
+        @if (detalles.length &&
+             (cargandoSucursal || !sucursalId || errorSucursal)) {
+
+          <p class="submit-note" role="status">
+            La sucursal debe estar disponible para registrar la venta.
+          </p>
+
+        } @else if (
+          montoPagado > 0 &&
+          !cajasAbiertas.length &&
+          !cargandoCaja
+        ) {
+
+          <p class="submit-note" role="status">
+            Abre una caja en esta sucursal para registrar el pago.
+          </p>
+
         }
 
       </mat-card>
+
     </aside>
 
   </div>
+
 </form>
