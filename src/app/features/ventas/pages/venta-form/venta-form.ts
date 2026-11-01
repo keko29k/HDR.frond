@@ -38,7 +38,6 @@ import { Caja } from '../../../cajas/models/caja.model';
 
 import { VentaDetalleDto } from '../../models/VentaDetalle.model';
 
-/** Elemento del carrito. Solo se utiliza en el frontend. */
 interface ItemCarrito {
   productoId: number;
   cantidad: number;
@@ -46,7 +45,10 @@ interface ItemCarrito {
   subtotal: number;
   nombre: string;
   manejaLotes: boolean;
+  stockDisponible: number
 }
+
+type MetodoPago = 'EFECTIVO' | 'QR';
 
 const redondear = (n: number): number =>
   Math.round(n * 100) / 100;
@@ -117,7 +119,7 @@ export class VentaFormComponent implements OnInit {
   readonly hoy = new Date();
 
   // =====================================
-  // PAGINACIÓN Y BÚSQUEDA DE PRODUCTOS
+  // PAGINACIÓN Y BÚSQUEDA
   // =====================================
 
   pageNumber = 1;
@@ -143,9 +145,14 @@ export class VentaFormComponent implements OnInit {
 
     acredito: [false],
 
+    metodoPago: [
+      'EFECTIVO' as MetodoPago,
+      Validators.required
+    ],
+
     montoPagado: [
       { value: 0, disabled: true },
-      [Validators.min(0)]
+      [Validators.required, Validators.min(0)]
     ],
 
     fechaLimitePago: [null as Date | null],
@@ -163,13 +170,12 @@ export class VentaFormComponent implements OnInit {
 
     this.cargarClientes();
 
-    this.cargarProductos();
-
+    // Primero se obtiene la sucursal.
+    // Los productos se cargarán después de conocerla.
     this.cargarSucursalDeSesion();
 
     this.cargarMiCajaAbierta();
 
-    // Búsqueda de productos con espera de 300 ms.
     this.buscar$
       .pipe(
         debounceTime(300),
@@ -185,13 +191,11 @@ export class VentaFormComponent implements OnInit {
         this.cargarProductos();
       });
 
-    // Detectar cambios entre contado y crédito.
     this.form.controls.acredito.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(credito => {
 
         this.configurarCredito(!!credito);
-
       });
   }
 
@@ -220,10 +224,7 @@ export class VentaFormComponent implements OnInit {
 
           this.errorClientes = true;
 
-          console.error(
-            'Error al cargar clientes:',
-            error
-          );
+          console.error('Error al cargar clientes:', error);
 
           this.notificationService.error(
             'No se pudieron cargar los clientes.'
@@ -232,8 +233,19 @@ export class VentaFormComponent implements OnInit {
       });
   }
 
+  get nombreClienteSeleccionado(): string {
+
+    const id = this.form.controls.idCliente.value;
+
+    const cliente = this.clientes.find(c => c.id === id);
+
+    return cliente
+      ? `${cliente.nombres} ${cliente.apellidos}`
+      : 'Cliente no identificado';
+  }
+
   // =====================================
-  // SUCURSAL DEL USUARIO
+  // SUCURSAL
   // =====================================
 
   cargarSucursalDeSesion(): void {
@@ -291,6 +303,12 @@ export class VentaFormComponent implements OnInit {
           this.errorSucursal = false;
 
           this.sucursalActual = sucursal;
+
+          // Ya conocemos la sucursal.
+          // Ahora cargamos solamente sus productos.
+          this.pageNumber = 1;
+
+          this.cargarProductos();
         },
 
         error: error => {
@@ -299,10 +317,11 @@ export class VentaFormComponent implements OnInit {
 
           this.sucursalActual = null;
 
-          console.error(
-            'Error al consultar la sucursal:',
-            error
-          );
+          this.sucursalId = 0;
+
+          this.productos = [];
+
+          console.error('Error al consultar la sucursal:', error);
 
           this.notificationService.error(
             'No se pudo consultar la sucursal asignada a tu usuario.'
@@ -331,13 +350,15 @@ export class VentaFormComponent implements OnInit {
 
     this.sucursalId = 0;
 
+    this.productos = [];
+
     this.errorSucursal = false;
 
     this.cargarSucursalDeSesion();
   }
 
   // =====================================
-  // MI CAJA ABIERTA
+  // CAJA ABIERTA
   // =====================================
 
   cargarMiCajaAbierta(): void {
@@ -352,9 +373,7 @@ export class VentaFormComponent implements OnInit {
 
     this.cajaService.obtenerMiCajaAbierta()
       .pipe(
-
         finalize(() => this.cargandoCaja = false)
-
       )
       .subscribe({
 
@@ -383,9 +402,7 @@ export class VentaFormComponent implements OnInit {
 
           this.cajaActual = caja;
 
-          // Asignar automáticamente la caja del usuario.
           this.form.controls.idCaja.setValue(caja.id);
-
         },
 
         error: error => {
@@ -394,10 +411,7 @@ export class VentaFormComponent implements OnInit {
 
           this.form.controls.idCaja.setValue(0);
 
-          console.error(
-            'Error al consultar mi caja:',
-            error
-          );
+          console.error('Error al consultar mi caja:', error);
 
           if (error.status === 404) {
 
@@ -420,12 +434,27 @@ export class VentaFormComponent implements OnInit {
   }
 
   // =====================================
-  // PRODUCTOS
+  // PRODUCTOS POR SUCURSAL
   // =====================================
 
   cargarProductos(): void {
 
+    // No consultar productos si todavía no conocemos
+    // la sucursal del usuario.
+    if (!this.sucursalId || this.sucursalId <= 0) {
+
+      this.productos = [];
+
+      this.productosHasNextPage = false;
+
+      this.cargandoProductos = false;
+
+      return;
+    }
+
     this.cargandoProductos = true;
+
+    this.errorProductos = false;
 
     const filter = {
       pageNumber: this.pageNumber,
@@ -433,7 +462,8 @@ export class VentaFormComponent implements OnInit {
       buscar: this.buscar
     };
 
-    this.productoService.getAll(filter)
+    this.productoService
+      .getBySucursal(this.sucursalId, filter)
       .pipe(
         finalize(() => this.cargandoProductos = false)
       )
@@ -445,21 +475,24 @@ export class VentaFormComponent implements OnInit {
 
           this.productos = res.data;
 
-          this.productosHasNextPage =
-            res.meta.hasNextPage;
+          this.productosHasNextPage = res.meta.hasNextPage;
         },
 
         error: error => {
 
           this.errorProductos = true;
 
+          this.productos = [];
+
+          this.productosHasNextPage = false;
+
           console.error(
-            'Error al cargar productos:',
+            'Error al cargar productos de la sucursal:',
             error
           );
 
           this.notificationService.error(
-            'No se pudieron cargar los productos.'
+            'No se pudieron cargar los productos de esta sucursal.'
           );
         }
       });
@@ -501,6 +534,17 @@ export class VentaFormComponent implements OnInit {
       return;
     }
 
+    const stockDisponible = Number(producto.stockActual ?? 0);
+
+    if (stockDisponible <= 0) {
+
+      this.notificationService.error(
+        `${producto.nombre} no tiene stock disponible en esta sucursal.`
+      );
+
+      return;
+    }
+
     const existente = this.detalles.find(
       d => d.productoId === producto.id
     );
@@ -524,30 +568,34 @@ export class VentaFormComponent implements OnInit {
 
       subtotal: redondear(producto.precioVenta),
 
-      manejaLotes: producto.manejaLotes
+      manejaLotes: producto.manejaLotes,
 
+      stockDisponible
     });
 
     this.sincronizarMonto();
   }
 
-  cambiarCantidad(
-    item: ItemCarrito,
-    delta: number
-  ): void {
+  cambiarCantidad(item: ItemCarrito, delta: number): void {
 
     const nueva = item.cantidad + delta;
 
     if (nueva < 1) return;
+
+    if (nueva > item.stockDisponible) {
+
+      this.notificationService.error(
+        `Stock insuficiente para ${item.nombre}. Disponible: ${item.stockDisponible}.`
+      );
+
+      return;
+    }
 
     item.cantidad = nueva;
 
     item.subtotal = redondear(
       nueva * item.precioUnitario
     );
-
-    // El backend validará el stock real de la sucursal
-    // y distribuirá la cantidad entre los lotes disponibles.
 
     this.sincronizarMonto();
   }
@@ -604,9 +652,7 @@ export class VentaFormComponent implements OnInit {
 
     return this.esCredito
       ? redondear(
-          Number(
-            this.form.controls.montoPagado.value ?? 0
-          )
+          Number(this.form.controls.montoPagado.value ?? 0)
         )
       : this.total;
   }
@@ -636,9 +682,7 @@ export class VentaFormComponent implements OnInit {
 
       monto.setValue(0);
 
-      fecha.setValidators([
-        Validators.required
-      ]);
+      fecha.setValidators([Validators.required]);
 
     } else {
 
@@ -671,7 +715,8 @@ export class VentaFormComponent implements OnInit {
 
   guardar(): void {
 
-    // Validar carrito.
+    if (this.guardando) return;
+
     if (this.detalles.length === 0) {
 
       this.notificationService.error(
@@ -681,7 +726,6 @@ export class VentaFormComponent implements OnInit {
       return;
     }
 
-    // Validar formulario.
     if (this.form.invalid) {
 
       this.form.markAllAsTouched();
@@ -693,7 +737,6 @@ export class VentaFormComponent implements OnInit {
       return;
     }
 
-    // Validar clientes.
     if (
       this.cargandoClientes ||
       this.errorClientes ||
@@ -707,11 +750,7 @@ export class VentaFormComponent implements OnInit {
       return;
     }
 
-    // Validar crédito.
-    if (
-      this.esCredito &&
-      this.montoPagado >= this.total
-    ) {
+    if (this.esCredito && this.montoPagado >= this.total) {
 
       this.notificationService.error(
         'El cliente paga el total: regístrala como venta al contado.'
@@ -720,7 +759,6 @@ export class VentaFormComponent implements OnInit {
       return;
     }
 
-    // Validar sesión.
     if (!localStorage.getItem('token')) {
 
       this.notificationService.error(
@@ -730,7 +768,6 @@ export class VentaFormComponent implements OnInit {
       return;
     }
 
-    // Validar sucursal.
     if (
       this.cargandoSucursal ||
       this.errorSucursal ||
@@ -738,13 +775,12 @@ export class VentaFormComponent implements OnInit {
     ) {
 
       this.notificationService.error(
-        'No se pudo determinar la sucursal de la sesión. Recarga la pantalla o inicia sesión nuevamente.'
+        'No se pudo determinar la sucursal de la sesión.'
       );
 
       return;
     }
 
-    // Validar monto pagado.
     if (
       !Number.isFinite(this.montoPagado) ||
       this.montoPagado < 0 ||
@@ -758,7 +794,9 @@ export class VentaFormComponent implements OnInit {
       return;
     }
 
-    // Validar que el usuario tenga su propia caja abierta.
+    // Validación interna de caja.
+    // No es necesario mostrar sus datos en pantalla.
+
     if (
       this.cargandoCaja ||
       this.errorCaja ||
@@ -773,14 +811,13 @@ export class VentaFormComponent implements OnInit {
       return;
     }
 
-    // La caja se obtiene de la sesión.
     const idCaja = this.cajaActual.id;
 
     const raw = this.form.getRawValue();
 
-    // =================================
-    // CABECERA DE LA VENTA
-    // =================================
+    const metodoPago = raw.metodoPago as MetodoPago;
+
+    // CABECERA
 
     const venta: VentaDetalleDto['venta'] = {
 
@@ -800,9 +837,7 @@ export class VentaFormComponent implements OnInit {
       estadoVenta: 'COMPLETADA'
     };
 
-    // =================================
-    // DETALLE DE LA VENTA
-    // =================================
+    // DETALLE
 
     const detalle: VentaDetalleDto['detalle'] =
       this.detalles.map(item => ({
@@ -810,12 +845,9 @@ export class VentaFormComponent implements OnInit {
         idProducto: item.productoId,
 
         cantidad: item.cantidad
-
       }));
 
-    // =================================
     // PAGOS
-    // =================================
 
     const pagos: VentaDetalleDto['pagos'] =
       this.montoPagado > 0
@@ -823,7 +855,7 @@ export class VentaFormComponent implements OnInit {
             {
               idCaja,
 
-              metodoPago: 'EFECTIVO',
+              metodoPago,
 
               monto: this.montoPagado,
 
@@ -834,10 +866,6 @@ export class VentaFormComponent implements OnInit {
           ]
         : [];
 
-    // =================================
-    // OBJETO COMPLETO
-    // =================================
-
     const dto: VentaDetalleDto = {
 
       venta,
@@ -845,12 +873,36 @@ export class VentaFormComponent implements OnInit {
       detalle,
 
       pagos
-
     };
 
-    // =================================
-    // ENVIAR AL BACKEND
-    // =================================
+    // Guardamos una copia para imprimirla después.
+
+    const datosComprobante = {
+      idCliente: raw.idCliente,
+      cliente: this.nombreClienteSeleccionado,
+      sucursal: this.nombreSucursalSesion,
+      fecha: new Date(),
+      detalles: this.detalles.map(item => ({ ...item })),
+      total: this.total,
+      cantidadItems: this.cantidadItems,
+      acredito: this.esCredito,
+      metodoPago,
+      montoPagado: this.montoPagado,
+      saldoPendiente: this.saldoPendiente,
+      fechaLimitePago: raw.fechaLimitePago
+        ? new Date(raw.fechaLimitePago)
+        : null,
+      observacion: raw.observacion ?? ''
+    };
+
+    // Reservar la ventana de impresión antes de la petición
+    // para reducir el riesgo de bloqueo de ventanas emergentes.
+
+    const ventana = window.open(
+      '',
+      '_blank',
+      'width=420,height=700'
+    );
 
     this.guardando = true;
 
@@ -863,15 +915,52 @@ export class VentaFormComponent implements OnInit {
         next: response => {
 
           this.notificationService.success(
-            response.message || 'Venta registrada.'
+            response.message || 'Venta registrada correctamente.'
           );
+
+          if (response.idVenta) {
+
+            this.imprimirComprobante(
+              ventana,
+              response.idVenta,
+              datosComprobante
+            );
+
+          } else {
+
+            ventana?.close();
+
+            this.notificationService.error(
+              'La venta se registró, pero el backend no devolvió el ID necesario para el comprobante.'
+            );
+          }
 
           this.limpiarCarrito();
 
-          this.router.navigate(['/ventas']);
+          this.form.reset({
+
+            idCliente: 0,
+
+            idCaja,
+
+            acredito: false,
+
+            metodoPago: 'EFECTIVO',
+
+            montoPagado: {
+              value: 0,
+              disabled: true
+            },
+
+            fechaLimitePago: null,
+
+            observacion: ''
+          });
         },
 
         error: error => {
+
+          ventana?.close();
 
           console.error(
             'Error al registrar la venta:',
@@ -905,6 +994,313 @@ export class VentaFormComponent implements OnInit {
   }
 
   // =====================================
+  // COMPROBANTE E IMPRESIÓN
+  // =====================================
+
+  private imprimirComprobante(
+    ventana: Window | null,
+    idVenta: number,
+    datos: {
+      cliente: string;
+      sucursal: string;
+      fecha: Date;
+      detalles: ItemCarrito[];
+      total: number;
+      cantidadItems: number;
+      acredito: boolean;
+      metodoPago: MetodoPago;
+      montoPagado: number;
+      saldoPendiente: number;
+      fechaLimitePago: Date | null;
+      observacion: string;
+    }
+  ): void {
+
+    if (!ventana || ventana.closed) {
+
+      this.notificationService.error(
+        'La venta se registró, pero el navegador bloqueó la ventana de impresión. Permite las ventanas emergentes para imprimir el comprobante.'
+      );
+
+      return;
+    }
+
+    const moneda = (valor: number) =>
+      `Bs ${valor.toFixed(2)}`;
+
+    const escapar = (valor: string) =>
+      valor
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+
+    const filas = datos.detalles.map(item => `
+      <tr>
+        <td class="producto">
+          ${escapar(item.nombre)}
+          <small>${item.cantidad} x ${moneda(item.precioUnitario)}</small>
+        </td>
+        <td class="importe">${moneda(item.subtotal)}</td>
+      </tr>
+    `).join('');
+
+    const fecha = datos.fecha.toLocaleDateString('es-BO');
+
+    const hora = datos.fecha.toLocaleTimeString('es-BO', {
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+
+    const creditoHtml = datos.acredito
+      ? `
+        <div class="linea">
+          <span>Pagado ahora</span>
+          <strong>${moneda(datos.montoPagado)}</strong>
+        </div>
+        <div class="linea">
+          <span>Saldo pendiente</span>
+          <strong>${moneda(datos.saldoPendiente)}</strong>
+        </div>
+        <div class="linea">
+          <span>Fecha límite</span>
+          <strong>
+            ${datos.fechaLimitePago
+              ? datos.fechaLimitePago.toLocaleDateString('es-BO')
+              : '-'}
+          </strong>
+        </div>
+      `
+      : `
+        <div class="linea">
+          <span>Pagado</span>
+          <strong>${moneda(datos.montoPagado)}</strong>
+        </div>
+      `;
+
+    const html = `
+      <!DOCTYPE html>
+      <html lang="es">
+      <head>
+        <meta charset="UTF-8">
+        <title>Comprobante de venta #${idVenta}</title>
+
+        <style>
+          @page {
+            size: 80mm auto;
+            margin: 4mm;
+          }
+
+          * {
+            box-sizing: border-box;
+          }
+
+          body {
+            width: 72mm;
+            margin: 0 auto;
+            padding: 0;
+            color: #111;
+            background: #fff;
+            font-family: Arial, sans-serif;
+            font-size: 11px;
+          }
+
+          .center {
+            text-align: center;
+          }
+
+          h1 {
+            margin: 0 0 4px;
+            font-size: 19px;
+            letter-spacing: 1px;
+          }
+
+          .subtitulo {
+            margin-bottom: 10px;
+            font-size: 10px;
+          }
+
+          .separador {
+            margin: 9px 0;
+            border-top: 1px dashed #555;
+          }
+
+          .datos {
+            line-height: 1.6;
+          }
+
+          .linea {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            margin: 5px 0;
+          }
+
+          table {
+            width: 100%;
+            border-collapse: collapse;
+          }
+
+          th {
+            padding: 5px 0;
+            border-bottom: 1px solid #333;
+            text-align: left;
+          }
+
+          td {
+            padding: 6px 0;
+            vertical-align: top;
+          }
+
+          .producto {
+            width: 65%;
+            overflow-wrap: anywhere;
+          }
+
+          .producto small {
+            display: block;
+            margin-top: 3px;
+            font-size: 9px;
+          }
+
+          .importe {
+            text-align: right;
+            white-space: nowrap;
+          }
+
+          .total {
+            margin-top: 8px;
+            font-size: 17px;
+            font-weight: bold;
+          }
+
+          .mensaje {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 10px;
+          }
+
+          .observacion {
+            margin-top: 8px;
+            overflow-wrap: anywhere;
+          }
+        </style>
+      </head>
+
+      <body>
+
+        <div class="center">
+          <h1>HEREDEROS DEL REY</h1>
+          <div class="subtitulo">COMPROBANTE DE VENTA</div>
+        </div>
+
+        <div class="separador"></div>
+
+        <div class="datos">
+          <div class="linea">
+            <span>Venta:</span>
+            <strong>#${idVenta}</strong>
+          </div>
+
+          <div class="linea">
+            <span>Fecha:</span>
+            <strong>${fecha} ${hora}</strong>
+          </div>
+
+          <div class="linea">
+            <span>Sucursal:</span>
+            <strong>${escapar(datos.sucursal)}</strong>
+          </div>
+
+          <div class="linea">
+            <span>Cliente:</span>
+            <strong>${escapar(datos.cliente)}</strong>
+          </div>
+        </div>
+
+        <div class="separador"></div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th style="text-align:right">Importe</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            ${filas}
+          </tbody>
+        </table>
+
+        <div class="separador"></div>
+
+        <div class="linea">
+          <span>Unidades:</span>
+          <strong>${datos.cantidadItems}</strong>
+        </div>
+
+        <div class="linea total">
+          <span>TOTAL</span>
+          <strong>${moneda(datos.total)}</strong>
+        </div>
+
+        <div class="separador"></div>
+
+        <div class="linea">
+          <span>Tipo de venta:</span>
+          <strong>${datos.acredito ? 'CRÉDITO' : 'CONTADO'}</strong>
+        </div>
+
+        <div class="linea">
+          <span>Método de pago:</span>
+          <strong>${datos.metodoPago}</strong>
+        </div>
+
+        ${creditoHtml}
+
+        ${datos.observacion
+          ? `<div class="observacion">
+              <strong>Observación:</strong>
+              ${escapar(datos.observacion)}
+            </div>`
+          : ''}
+
+        <div class="separador"></div>
+
+        <div class="mensaje">
+          ¡Gracias por su compra!
+          <br>
+          HEREDEROS DEL REY
+        </div>
+
+      </body>
+      </html>
+    `;
+
+    ventana.document.open();
+
+    ventana.document.write(html);
+
+    ventana.document.close();
+
+    // Esperar a que el documento esté listo antes de imprimir.
+    setTimeout(() => {
+
+      if (!ventana.closed) {
+
+        ventana.focus();
+
+        ventana.print();
+      }
+
+    }, 300);
+
+    this.router.navigate(['/ventas']);
+  }
+
+  // =====================================
   // CANCELAR
   // =====================================
 
@@ -919,9 +1315,7 @@ export class VentaFormComponent implements OnInit {
 
   private leerNumero(clave: string): number {
 
-    const valor = Number(
-      localStorage.getItem(clave)
-    );
+    const valor = Number(localStorage.getItem(clave));
 
     return Number.isInteger(valor) && valor > 0
       ? valor
@@ -932,14 +1326,13 @@ export class VentaFormComponent implements OnInit {
 
     const año = fecha.getFullYear();
 
-    const mes = String(
-      fecha.getMonth() + 1
-    ).padStart(2, '0');
+    const mes = String(fecha.getMonth() + 1)
+      .padStart(2, '0');
 
-    const dia = String(
-      fecha.getDate()
-    ).padStart(2, '0');
+    const dia = String(fecha.getDate())
+      .padStart(2, '0');
 
     return `${año}-${mes}-${dia}`;
   }
 }
+

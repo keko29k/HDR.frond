@@ -15,7 +15,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatIcon } from '@angular/material/icon';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
+
 import { VentaService } from '../../services/venta';
 import { Venta } from '../../models/venta.model';
 
@@ -32,7 +34,8 @@ import { Venta } from '../../models/venta.model';
     MatInputModule,
     MatPaginatorModule,
     MatProgressSpinnerModule,
-    MatIcon
+    MatIconModule,
+    MatTooltipModule
   ],
   templateUrl: './venta-list.html',
   styleUrl: './venta-list.css'
@@ -43,9 +46,21 @@ export class VentaListComponent implements OnInit {
   private router = inject(Router);
 
   ventas: Venta[] = [];
-  displayedColumns: string[] = ['id', 'fecha', 'total', 'metodoPago', 'observaciones','clienteId','usuarioId', 'acciones'];
-  loading = false;
+  displayedColumns: string[] = [
+    'id',
+    'fecha',
+    'cliente',
+    'vendedor',
+    'total',
+    'montoPagado',
+    'saldoPendiente',
+    'metodoPago',
+    'estadoPago',
+    'observaciones',
+    'acciones'
+  ];
 
+  loading = false;
   buscarControl = new FormControl('', { nonNullable: true });
 
   filter: QueryFilter = {
@@ -84,12 +99,9 @@ export class VentaListComponent implements OnInit {
     this.ventaService.getAll(this.filter)
       .pipe(finalize(() => this.loading = false))
       .subscribe({
-        next: (response) => {
+        next: response => {
           this.ventas = response.data;
           this.meta = response.meta;
-
-          console.log('Ventas cargadas:', this.ventas);
-
         },
         error: () => {
           this.notificationService.error('No se pudo cargar la lista de ventas.');
@@ -107,16 +119,10 @@ export class VentaListComponent implements OnInit {
     this.router.navigate(['/ventas/nuevo']);
   }
 
-  editar(id: number): void {
-    this.router.navigate(['/ventas/editar', id]);
-  }
-
   eliminar(id: number): void {
     const confirmado = confirm('¿Está seguro de eliminar esta venta?');
 
-    if (!confirmado) {
-      return;
-    }
+    if (!confirmado) return;
 
     this.loading = true;
 
@@ -136,5 +142,31 @@ export class VentaListComponent implements OnInit {
           this.notificationService.error('No se pudo eliminar la venta.');
         }
       });
+  }
+
+  esCreditoPendiente(venta: Venta): boolean {
+    return venta.acredito && venta.saldoPendiente > 0;
+  }
+
+  esCreditoCancelado(venta: Venta): boolean {
+    return venta.acredito && venta.saldoPendiente <= 0;
+  }
+
+  textoEstado(venta: Venta): string {
+    if (!venta.acredito) return 'CONTADO';
+    if (venta.saldoPendiente > 0) return 'CRÉDITO PENDIENTE';
+    return 'CRÉDITO CANCELADO';
+  }
+
+  claseEstado(venta: Venta): string {
+    if (this.esCreditoPendiente(venta)) return 'status-pending';
+    if (this.esCreditoCancelado(venta)) return 'status-paid';
+    return 'status-normal';
+  }
+
+  claseFila(venta: Venta): string {
+    if (this.esCreditoPendiente(venta)) return 'row-credit-pending';
+    if (this.esCreditoCancelado(venta)) return 'row-credit-paid';
+    return '';
   }
 }

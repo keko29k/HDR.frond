@@ -44,4 +44,16 @@ export class ProductoService {
           {
             return this.http.get<Producto[]>(`${this.apiUrl}`);
           }
+
+  getBySucursal(idSucursal: number,  filter: QueryFilter): Observable<ApiResponse<Producto[]>> {
+    const params = new HttpParams()
+      .set('PageNumber', filter.pageNumber)
+      .set('PageSize', filter.pageSize)
+      .set('Buscar', filter.buscar || '');
+
+    return this.http.get<ApiResponse<Producto[]>>(
+      `${this.apiUrl}/Sucursal/${idSucursal}/Paginacion`,
+      { params }
+    );
+  }
 }

@@ -92,44 +92,100 @@
 .products{grid-template-columns:repeat(auto-fill,minmax(145px,1fr))}
 .card{padding:17px 15px}
 }
-/* MI CAJA */
-.my-cashbox {
+
+/* SECCIONES DE PAGO */
+
+.payment-section {
   margin-top: 18px;
 }
 
-.cashbox-information {
+.payment-section > .eyebrow {
+  margin-bottom: 10px;
+}
+
+/* MÉTODOS DE PAGO */
+
+.payment-methods {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  padding: 15px;
-  border: 1px solid #dce8f1;
-  border-radius: 12px;
-  background: #f7fbfe;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
 
-.cashbox-item {
+.payment-option {
+  position: relative;
   display: flex;
-  flex-direction: column;
-  gap: 5px;
+  align-items: center;
+  gap: 10px;
   min-width: 0;
+  padding: 13px 11px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-2);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .2s, background .2s;
 }
 
-.cashbox-label {
-  color: #64748b;
+.payment-option:hover {
+  border-color: rgba(205,164,94,.55);
+}
+
+.payment-option.selected {
+  border-color: var(--gold);
+  background: var(--gold-soft);
+}
+
+.payment-icon {
+  display: grid;
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border-radius: 9px;
+  background: var(--surface-3);
+  color: var(--gold);
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.qr-icon {
+  font-size: 12px;
+  letter-spacing: .5px;
+}
+
+.payment-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.payment-copy strong {
   font-size: 12px;
 }
 
-.cashbox-item strong {
-  color: #173b5e;
-  font-size: 14px;
+.payment-copy small {
+  color: var(--muted);
+  font-size: 10px;
 }
 
-.cashbox-status {
-  color: #16834a !important;
+.payment-check {
+  position: absolute;
+  top: 7px;
+  right: 8px;
+  color: var(--gold);
+  font-size: 12px;
+  font-weight: 800;
 }
 
-@media (max-width: 480px) {
-  .cashbox-information {
+.payment-option:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+@media(max-width: 400px) {
+  .payment-methods {
     grid-template-columns: 1fr;
   }
 }
