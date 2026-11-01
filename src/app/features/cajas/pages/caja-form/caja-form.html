@@ -1,10 +1,18 @@
+
 <main class="page">
   <header class="header">
-    <button type="button" class="back" (click)="cancelar()" aria-label="Volver a cajas">
+    <button
+      type="button"
+      class="back"
+      (click)="cancelar()"
+      aria-label="Volver a cajas">
+
       <mat-icon>arrow_back</mat-icon>
       Cajas
     </button>
+
     <h2>{{ titulo }}</h2>
+
     <p>
       {{ editando
         ? 'Actualiza el estado y la observación de esta caja.'
@@ -13,90 +21,174 @@
   </header>
 
   <mat-card class="card">
+
     @if (loading && editando) {
+
       <div class="loading" role="status" aria-label="Cargando caja">
         <mat-spinner diameter="32"></mat-spinner>
       </div>
+
     } @else {
-      <form [formGroup]="form" (ngSubmit)="guardar()" class="form" novalidate>
+
+      <form
+        [formGroup]="form"
+        (ngSubmit)="guardar()"
+        class="form"
+        novalidate>
+
         @if (!editando) {
+
           <h3 class="section-title">Datos de apertura</h3>
-          <aside class="info-box" aria-live="polite">
-            <mat-icon>{{ cargandoContexto ? 'sync' : 'storefront' }}</mat-icon>
-            <div>
-              <strong>Sucursal asignada</strong>
-              @if (cargandoContexto) {
-                <p>Cargando el usuario y su sucursal…</p>
-              } @else if (sucursalAsignada) {
-                <p>{{ sucursalAsignada.nombre }}</p>
-              } @else {
-                <p>No se pudo confirmar la sucursal. No será posible abrir la caja.</p>
-              }
-            </div>
-          </aside>
 
           <mat-form-field appearance="outline" class="full">
-              <mat-label>Monto inicial</mat-label>
-              <mat-icon matIconPrefix>payments</mat-icon>
-              <span matTextPrefix>Bs.&nbsp;</span>
-              <input matInput type="number" min="0" step="0.01" formControlName="montoInicial" placeholder="0.00">
-              @if (form.controls.montoInicial.hasError('required') && form.controls.montoInicial.touched) {
-                <mat-error>El monto inicial es obligatorio.</mat-error>
-              }
-              @if (form.controls.montoInicial.hasError('min')) {
-                <mat-error>El monto no puede ser negativo.</mat-error>
-              }
-          </mat-form-field>
-        } @else {
-          <h3 class="section-title">Estado de caja</h3>
-          <mat-form-field appearance="outline" class="full">
-            <mat-label>Estado</mat-label>
-            <mat-icon matIconPrefix>point_of_sale</mat-icon>
-            <mat-select formControlName="estadoCaja">
-              <mat-option value="ABIERTA">Abierta</mat-option>
-              <mat-option value="CERRADA">Cerrada</mat-option>
-            </mat-select>
-            @if (form.controls.estadoCaja.hasError('required')) {
-              <mat-error>El estado es obligatorio.</mat-error>
+
+            <mat-label>Monto inicial</mat-label>
+
+            <mat-icon matIconPrefix>payments</mat-icon>
+
+            <span matTextPrefix>Bs.&nbsp;</span>
+
+            <input
+              matInput
+              type="number"
+              min="0"
+              step="0.01"
+              formControlName="montoInicial"
+              placeholder="0.00">
+
+            @if (
+              form.controls.montoInicial.hasError('required') &&
+              form.controls.montoInicial.touched
+            ) {
+              <mat-error>
+                El monto inicial es obligatorio.
+              </mat-error>
             }
+
+            @if (form.controls.montoInicial.hasError('min')) {
+              <mat-error>
+                El monto no puede ser negativo.
+              </mat-error>
+            }
+
           </mat-form-field>
+
+        } @else {
+
+          <h3 class="section-title">Estado de caja</h3>
+
+          <mat-form-field appearance="outline" class="full">
+
+            <mat-label>Estado</mat-label>
+
+            <mat-icon matIconPrefix>point_of_sale</mat-icon>
+
+            <mat-select formControlName="estadoCaja">
+
+              <mat-option value="ABIERTA">
+                Abierta
+              </mat-option>
+
+              <mat-option value="CERRADA">
+                Cerrada
+              </mat-option>
+
+            </mat-select>
+
+            @if (form.controls.estadoCaja.hasError('required')) {
+              <mat-error>
+                El estado es obligatorio.
+              </mat-error>
+            }
+
+          </mat-form-field>
+
         }
 
         <h3 class="section-title">Observaciones</h3>
+
         <mat-form-field appearance="outline" class="full">
+
           <mat-label>Observación</mat-label>
+
           <mat-icon matIconPrefix>notes</mat-icon>
-          <textarea matInput formControlName="observacion" rows="3" maxlength="500" placeholder="Ingrese una observación opcional"></textarea>
-          <mat-hint align="end">{{ form.controls.observacion.value?.length ?? 0 }}/500</mat-hint>
+
+          <textarea
+            matInput
+            formControlName="observacion"
+            rows="3"
+            maxlength="500"
+            placeholder="Ingrese una observación opcional">
+          </textarea>
+
+          <mat-hint align="end">
+            {{ form.controls.observacion.value?.length ?? 0 }}/500
+          </mat-hint>
+
           @if (form.controls.observacion.hasError('maxlength')) {
-            <mat-error>Máximo 500 caracteres.</mat-error>
+            <mat-error>
+              Máximo 500 caracteres.
+            </mat-error>
           }
+
         </mat-form-field>
 
         @if (!editando) {
+
           <aside class="info-box">
+
             <mat-icon>info</mat-icon>
+
             <div>
               <strong>Apertura de caja</strong>
-              <p>El usuario actual, su sucursal y la fecha se asignarán automáticamente. La caja se abrirá con estado <strong>ABIERTA</strong>.</p>
+
+              <p>
+                El usuario actual, su sucursal y la fecha se asignarán
+                automáticamente. La caja se abrirá con estado
+                <strong>ABIERTA</strong>.
+              </p>
             </div>
+
           </aside>
+
         }
 
         <div class="actions">
-          <button type="button" class="btn ghost" (click)="cancelar()" [disabled]="loading">
+
+          <button
+            type="button"
+            class="btn ghost"
+            (click)="cancelar()"
+            [disabled]="loading">
+
             Cancelar
+
           </button>
-          <button type="submit" class="btn primary" [disabled]="loading || (!editando && !contextoCargado)">
+
+          <button
+            type="submit"
+            class="btn primary"
+            [disabled]="loading">
+
             @if (loading) {
+
               <mat-spinner diameter="18"></mat-spinner>
+
               {{ editando ? 'Guardando...' : 'Abriendo...' }}
+
             } @else {
+
               {{ editando ? 'Guardar cambios' : 'Abrir caja' }}
+
             }
+
           </button>
+
         </div>
+
       </form>
+
     }
+
   </mat-card>
 </main>

@@ -92,3 +92,44 @@
 .products{grid-template-columns:repeat(auto-fill,minmax(145px,1fr))}
 .card{padding:17px 15px}
 }
+/* MI CAJA */
+.my-cashbox {
+  margin-top: 18px;
+}
+
+.cashbox-information {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding: 15px;
+  border: 1px solid #dce8f1;
+  border-radius: 12px;
+  background: #f7fbfe;
+}
+
+.cashbox-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.cashbox-label {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.cashbox-item strong {
+  color: #173b5e;
+  font-size: 14px;
+}
+
+.cashbox-status {
+  color: #16834a !important;
+}
+
+@media (max-width: 480px) {
+  .cashbox-information {
+    grid-template-columns: 1fr;
+  }
+}

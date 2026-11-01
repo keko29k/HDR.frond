@@ -25,27 +25,38 @@
       <span class="branch-label">Sucursal operativa</span>
 
       @if (cargandoSucursal) {
+
         <strong>Consultando sucursal...</strong>
         <span>Estamos leyendo la sucursal asignada a tu usuario.</span>
+
       } @else if (errorSucursal) {
+
         <strong>No se pudo determinar la sucursal</strong>
         <span>Verifica la sesión y la sucursal asignada al usuario.</span>
+
       } @else {
+
         <strong>{{ nombreSucursalSesion }}</strong>
+
         <span>
           {{ sucursalActual?.direccion || 'La venta se registrará en esta sucursal.' }}
         </span>
+
       }
     </div>
 
     @if (errorSucursal) {
+
       <button type="button"
               class="btn ghost small"
               (click)="reintentarCargaSucursal()">
         Reintentar
       </button>
+
     } @else if (sucursalId && !cargandoSucursal) {
+
       <span class="branch-id">Sucursal #{{ sucursalId }}</span>
+
     }
 
   </section>
@@ -82,14 +93,17 @@
               }
 
               @for (c of clientes; track c.id) {
+
                 <mat-option [value]="c.id">
                   {{ c.nombres }} {{ c.apellidos }}
                 </mat-option>
+
               }
 
             </mat-select>
 
             @if (errorClientes) {
+
               <mat-hint class="error-hint">
                 No se pudieron cargar los clientes.
 
@@ -99,15 +113,20 @@
                   Reintentar
                 </button>
               </mat-hint>
+
             } @else if (!cargandoClientes && !clientes.length) {
+
               <mat-hint>
                 No hay clientes registrados todavía.
               </mat-hint>
+
             }
 
             @if (form.controls.idCliente.invalid &&
                  form.controls.idCliente.touched) {
+
               <mat-error>Elige un cliente</mat-error>
+
             }
 
           </mat-form-field>
@@ -115,11 +134,14 @@
         </div>
 
         <mat-form-field appearance="outline" class="full">
+
           <mat-label>Observación</mat-label>
+
           <textarea matInput
                     rows="2"
                     formControlName="observacion">
           </textarea>
+
         </mat-form-field>
 
       </mat-card>
@@ -152,8 +174,11 @@
         @if (cargandoProductos) {
 
           <div class="loading">
+
             <mat-spinner diameter="28"></mat-spinner>
+
             <span>Cargando productos...</span>
+
           </div>
 
         } @else if (errorProductos) {
@@ -197,17 +222,23 @@
                 <span class="product-status">
 
                   @if (!p.permiteVenta) {
+
                     No disponible
+
                   } @else if (p.manejaLotes) {
+
                     Lote automático FEFO/FIFO
+
                   }
 
                 </span>
 
                 @if (enCarrito(p) > 0) {
+
                   <span class="badge">
                     {{ enCarrito(p) }}
                   </span>
+
                 }
 
               </button>
@@ -266,11 +297,13 @@
           </div>
 
           @if (detalles.length) {
+
             <button type="button"
                     class="link"
                     (click)="limpiarCarrito()">
               Vaciar
             </button>
+
           }
 
         </div>
@@ -293,9 +326,11 @@
                 </span>
 
                 @if (d.manejaLotes) {
+
                   <span class="product-status">
                     Lote automático FEFO/FIFO
                   </span>
+
                 }
 
               </div>
@@ -338,10 +373,13 @@
           } @empty {
 
             <div class="empty-cart">
+
               <strong>Tu carrito está vacío</strong>
+
               <span>
                 Selecciona productos para comenzar la venta.
               </span>
+
             </div>
 
           }
@@ -364,8 +402,11 @@
 
         <!-- FORMA DE PAGO -->
         <div class="payment-heading">
+
           <span class="eyebrow">Forma de pago</span>
+
           <span class="cash-method">Efectivo</span>
+
         </div>
 
         <div class="segmented"
@@ -388,51 +429,92 @@
 
         </div>
 
-        <!-- CAJA -->
-        <mat-form-field appearance="outline" class="full">
+        <!-- MI CAJA -->
+        <div class="my-cashbox">
 
-          <mat-label>Caja abierta</mat-label>
+          <div class="payment-heading">
 
-          <mat-select formControlName="idCaja"
-                      panelClass="hr-dark-panel">
+            <span class="eyebrow">Caja asignada a mi sesión</span>
 
-            @for (caja of cajasAbiertas; track caja.id) {
-              <mat-option [value]="caja.id">
-                Caja #{{ caja.id }}
-              </mat-option>
-            }
-
-          </mat-select>
+          </div>
 
           @if (cargandoCaja) {
 
-            <mat-hint>
-              Buscando cajas abiertas en esta sucursal...
-            </mat-hint>
+            <div class="loading">
+
+              <mat-spinner diameter="22"></mat-spinner>
+
+              <span>Consultando tu caja...</span>
+
+            </div>
 
           } @else if (errorCaja) {
 
-            <mat-hint class="error-hint">
+            <div class="state-panel state-error" role="alert">
 
-              No se pudieron consultar las cajas.
+              <strong>No se pudo consultar tu caja.</strong>
+
+              <span>
+                Verifica tu conexión e inténtalo nuevamente.
+              </span>
 
               <button type="button"
-                      class="inline-action"
-                      (click)="cargarCajasAbiertas()">
+                      class="btn ghost small"
+                      (click)="cargarMiCajaAbierta()">
                 Reintentar
               </button>
 
-            </mat-hint>
+            </div>
 
-          } @else if (!cajasAbiertas.length) {
+          } @else if (cajaActual) {
 
-            <mat-hint>
-              No hay cajas abiertas en {{ nombreSucursalSesion }}.
-            </mat-hint>
+            <div class="cashbox-information">
+
+              <div class="cashbox-item">
+
+                <span class="cashbox-label">Número de caja</span>
+
+                <strong>
+                  #{{ cajaActual.id }}
+                </strong>
+
+              </div>
+
+              <div class="cashbox-item">
+
+                <span class="cashbox-label">Monto inicial</span>
+
+                <strong>
+                  Bs {{ cajaActual.montoInicial | number:'1.2-2' }}
+                </strong>
+
+              </div>
+
+              <div class="cashbox-item">
+
+                <span class="cashbox-label">Fecha de apertura</span>
+
+                <strong>
+                  {{ cajaActual.fechaApertura | date:'dd/MM/yyyy HH:mm' }}
+                </strong>
+
+              </div>
+
+              <div class="cashbox-item">
+
+                <span class="cashbox-label">Estado</span>
+
+                <strong class="cashbox-status">
+                  ABIERTA
+                </strong>
+
+              </div>
+
+            </div>
 
           }
 
-        </mat-form-field>
+        </div>
 
         <p class="payment-note">
           El pago de esta venta se registrará en efectivo.
@@ -456,9 +538,11 @@
                      formControlName="montoPagado">
 
               @if (form.controls.montoPagado.hasError('min')) {
+
                 <mat-error>
                   El monto no puede ser negativo.
                 </mat-error>
+
               }
 
             </mat-form-field>
@@ -481,9 +565,11 @@
               </mat-datepicker>
 
               @if (form.controls.fechaLimitePago.hasError('required')) {
+
                 <mat-error>
                   Indica hasta cuándo puede pagar.
                 </mat-error>
+
               }
 
             </mat-form-field>
@@ -515,14 +601,10 @@
                     errorSucursal ||
                     errorClientes ||
                     cargandoClientes ||
-                    (
-                      montoPagado > 0 &&
-                      (
-                        cargandoCaja ||
-                        errorCaja ||
-                        !cajasAbiertas.length
-                      )
-                    )">
+                    cargandoCaja ||
+                    errorCaja ||
+                    !cajaActual
+                  ">
 
             @if (guardando) {
 
@@ -556,14 +638,22 @@
             La sucursal debe estar disponible para registrar la venta.
           </p>
 
-        } @else if (
-          montoPagado > 0 &&
-          !cajasAbiertas.length &&
-          !cargandoCaja
-        ) {
+        } @else if (cargandoCaja) {
 
           <p class="submit-note" role="status">
-            Abre una caja en esta sucursal para registrar el pago.
+            Estamos verificando que tengas una caja abierta.
+          </p>
+
+        } @else if (errorCaja) {
+
+          <p class="submit-note" role="status">
+            No se pudo verificar tu caja. Reintenta la consulta.
+          </p>
+
+        } @else if (!cajaActual) {
+
+          <p class="submit-note" role="status">
+            No tienes una caja abierta. Debes abrir una caja para registrar ventas.
           </p>
 
         }

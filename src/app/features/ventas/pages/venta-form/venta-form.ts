@@ -6,12 +6,10 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
   EMPTY,
-  Observable,
   Subject,
   debounceTime,
   distinctUntilChanged,
   finalize,
-  of,
   switchMap
 } from 'rxjs';
 
@@ -91,9 +89,13 @@ export class VentaFormComponent implements OnInit {
   // =====================================
 
   clientes: Cliente[] = [];
+
   sucursalActual: Sucursal | null = null;
-  cajasAbiertas: Caja[] = [];
+
+  cajaActual: Caja | null = null;
+
   productos: Producto[] = [];
+
   detalles: ItemCarrito[] = [];
 
   sucursalId = 0;
@@ -131,6 +133,7 @@ export class VentaFormComponent implements OnInit {
   // =====================================
 
   form = this.fb.group({
+
     idCliente: [0, [
       Validators.required,
       Validators.min(1)
@@ -164,6 +167,8 @@ export class VentaFormComponent implements OnInit {
 
     this.cargarSucursalDeSesion();
 
+    this.cargarMiCajaAbierta();
+
     // Búsqueda de productos con espera de 300 ms.
     this.buscar$
       .pipe(
@@ -172,8 +177,11 @@ export class VentaFormComponent implements OnInit {
         takeUntilDestroyed(this.destroyRef)
       )
       .subscribe(valor => {
+
         this.buscar = valor;
+
         this.pageNumber = 1;
+
         this.cargarProductos();
       });
 
@@ -181,7 +189,9 @@ export class VentaFormComponent implements OnInit {
     this.form.controls.acredito.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(credito => {
+
         this.configurarCredito(!!credito);
+
       });
   }
 
@@ -198,12 +208,16 @@ export class VentaFormComponent implements OnInit {
         finalize(() => this.cargandoClientes = false)
       )
       .subscribe({
+
         next: res => {
+
           this.errorClientes = false;
+
           this.clientes = res;
         },
 
         error: error => {
+
           this.errorClientes = true;
 
           console.error(
@@ -227,6 +241,7 @@ export class VentaFormComponent implements OnInit {
     const usuarioId = this.leerNumero('Id');
 
     if (!usuarioId) {
+
       this.errorSucursal = true;
 
       this.notificationService.error(
@@ -237,16 +252,19 @@ export class VentaFormComponent implements OnInit {
     }
 
     this.cargandoSucursal = true;
+
     this.errorSucursal = false;
 
     this.usuarioService.getById(usuarioId)
       .pipe(
+
         switchMap(usuario => {
 
           if (
             !Number.isInteger(usuario.idSucursal) ||
             usuario.idSucursal <= 0
           ) {
+
             this.errorSucursal = true;
 
             this.notificationService.error(
@@ -264,19 +282,21 @@ export class VentaFormComponent implements OnInit {
         }),
 
         finalize(() => this.cargandoSucursal = false)
+
       )
       .subscribe({
+
         next: sucursal => {
 
           this.errorSucursal = false;
-          this.sucursalActual = sucursal;
 
-          this.cargarCajasAbiertas();
+          this.sucursalActual = sucursal;
         },
 
         error: error => {
 
           this.errorSucursal = true;
+
           this.sucursalActual = null;
 
           console.error(
@@ -308,104 +328,95 @@ export class VentaFormComponent implements OnInit {
   reintentarCargaSucursal(): void {
 
     this.sucursalActual = null;
+
     this.sucursalId = 0;
-    this.cajasAbiertas = [];
 
-    this.errorCaja = false;
-
-    this.form.controls.idCaja.setValue(0);
+    this.errorSucursal = false;
 
     this.cargarSucursalDeSesion();
   }
 
   // =====================================
-  // CAJAS ABIERTAS
+  // MI CAJA ABIERTA
   // =====================================
 
-  cargarCajasAbiertas(pagina = 1): void {
-
-    if (!this.sucursalId) {
-      this.errorCaja = true;
-      return;
-    }
+  cargarMiCajaAbierta(): void {
 
     this.cargandoCaja = true;
+
     this.errorCaja = false;
 
-    this.buscarCajasAbiertas(pagina)
+    this.cajaActual = null;
+
+    this.form.controls.idCaja.setValue(0);
+
+    this.cajaService.obtenerMiCajaAbierta()
       .pipe(
+
         finalize(() => this.cargandoCaja = false)
+
       )
       .subscribe({
-        next: abiertas => {
 
-          this.cajasAbiertas = abiertas;
+        next: caja => {
 
-          if (this.cajasAbiertas.length) {
+          const estado = (caja.estadoCaja ?? '')
+            .trim()
+            .toUpperCase();
 
-            const cajaSeleccionada =
-              this.cajasAbiertas.some(
-                caja =>
-                  caja.id === this.form.controls.idCaja.value
-              );
+          if (estado !== 'ABIERTA') {
 
-            if (!cajaSeleccionada) {
-              this.form.controls.idCaja.setValue(
-                this.cajasAbiertas[0].id
-              );
-            }
-
-          } else {
+            this.cajaActual = null;
 
             this.form.controls.idCaja.setValue(0);
+
+            this.notificationService.error(
+              'No tienes una caja abierta. Serás dirigido al módulo de cajas.'
+            );
+
+            this.router.navigate(['/cajas']);
+
+            return;
           }
+
+          this.errorCaja = false;
+
+          this.cajaActual = caja;
+
+          // Asignar automáticamente la caja del usuario.
+          this.form.controls.idCaja.setValue(caja.id);
+
         },
 
         error: error => {
 
-          this.errorCaja = true;
+          this.cajaActual = null;
+
+          this.form.controls.idCaja.setValue(0);
 
           console.error(
-            'Error al buscar cajas abiertas:',
+            'Error al consultar mi caja:',
             error
           );
 
+          if (error.status === 404) {
+
+            this.notificationService.error(
+              'No tienes una caja abierta. Serás dirigido al módulo de cajas.'
+            );
+
+            this.router.navigate(['/cajas']);
+
+            return;
+          }
+
+          this.errorCaja = true;
+
           this.notificationService.error(
-            'No se pudo consultar la caja abierta de la sucursal.'
+            'No se pudo consultar tu caja. Intenta nuevamente.'
           );
         }
       });
-  }
-
-  private buscarCajasAbiertas(
-    pagina: number
-  ): Observable<Caja[]> {
-
-    return this.cajaService.getAll({
-      pageNumber: pagina,
-      pageSize: 50,
-      buscar: ''
-    })
-    .pipe(
-      switchMap(response => {
-
-        const abiertas = response.data.filter(caja =>
-          caja.idSucursal === this.sucursalId &&
-          (caja.estadoCaja ?? '')
-            .trim()
-            .toUpperCase() === 'ABIERTA'
-        );
-
-        if (
-          abiertas.length ||
-          pagina >= response.meta.totalPages
-        ) {
-          return of(abiertas);
-        }
-
-        return this.buscarCajasAbiertas(pagina + 1);
-      })
-    );
   }
 
   // =====================================
@@ -427,6 +438,7 @@ export class VentaFormComponent implements OnInit {
         finalize(() => this.cargandoProductos = false)
       )
       .subscribe({
+
         next: res => {
 
           this.errorProductos = false;
@@ -454,6 +466,7 @@ export class VentaFormComponent implements OnInit {
   }
 
   onBuscar(valor: string): void {
+
     this.buscar$.next(valor.trim());
   }
 
@@ -469,6 +482,7 @@ export class VentaFormComponent implements OnInit {
   }
 
   get hayMasPaginas(): boolean {
+
     return this.productosHasNextPage;
   }
 
@@ -492,7 +506,9 @@ export class VentaFormComponent implements OnInit {
     );
 
     if (existente) {
+
       this.cambiarCantidad(existente, 1);
+
       return;
     }
 
@@ -509,6 +525,7 @@ export class VentaFormComponent implements OnInit {
       subtotal: redondear(producto.precioVenta),
 
       manejaLotes: producto.manejaLotes
+
     });
 
     this.sincronizarMonto();
@@ -610,6 +627,7 @@ export class VentaFormComponent implements OnInit {
   private configurarCredito(credito: boolean): void {
 
     const monto = this.form.controls.montoPagado;
+
     const fecha = this.form.controls.fechaLimitePago;
 
     if (credito) {
@@ -740,28 +758,23 @@ export class VentaFormComponent implements OnInit {
       return;
     }
 
-    // Validar caja cuando existe un pago.
-    const idCaja = Number(
-      this.form.controls.idCaja.value
-    );
-
+    // Validar que el usuario tenga su propia caja abierta.
     if (
-      this.montoPagado > 0 &&
-      (
-        this.errorCaja ||
-        this.cargandoCaja ||
-        !this.cajasAbiertas.some(
-          caja => caja.id === idCaja
-        )
-      )
+      this.cargandoCaja ||
+      this.errorCaja ||
+      !this.cajaActual ||
+      this.cajaActual.estadoCaja?.trim().toUpperCase() !== 'ABIERTA'
     ) {
 
       this.notificationService.error(
-        'Selecciona una caja abierta de la sucursal para registrar el pago.'
+        'Debes tener una caja abierta para registrar una venta.'
       );
 
       return;
     }
+
+    // La caja se obtiene de la sesión.
+    const idCaja = this.cajaActual.id;
 
     const raw = this.form.getRawValue();
 
@@ -797,6 +810,7 @@ export class VentaFormComponent implements OnInit {
         idProducto: item.productoId,
 
         cantidad: item.cantidad
+
       }));
 
     // =================================
@@ -825,9 +839,13 @@ export class VentaFormComponent implements OnInit {
     // =================================
 
     const dto: VentaDetalleDto = {
+
       venta,
+
       detalle,
+
       pagos
+
     };
 
     // =================================

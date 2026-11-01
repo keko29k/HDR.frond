@@ -1,12 +1,11 @@
+
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { debounceTime, distinctUntilChanged, finalize } from 'rxjs';
 
-
 import { NotificationService } from '../../../../core/services/notification.service';
-
 import { QueryFilter } from '../../../../core/models/query-filter.model';
 import { MetaData } from '../../../../core/models/metadata.model';
 
@@ -19,6 +18,7 @@ import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+
 import { CajaService } from '../../services/caja';
 import { Caja } from '../../models/caja.model';
 
@@ -49,10 +49,15 @@ export class CajaListComponent implements OnInit {
 
   cajas: Caja[] = [];
 
+  // Caja abierta del usuario autenticado
+  cajaActual: Caja | null = null;
+  loadingCajaActual = false;
+  errorCajaActual = false;
+
   displayedColumns: string[] = [
     'id',
     'idSucursal',
-    'idUsuarioApertura',  
+    'idUsuarioApertura',
     'fechaApertura',
     'fechaCierre',
     'montoInicial',
@@ -85,7 +90,7 @@ export class CajaListComponent implements OnInit {
   };
 
   ngOnInit(): void {
-
+    this.cargarMiCajaAbierta();
     this.cargarCajas();
 
     this.buscarControl.valueChanges
@@ -94,16 +99,47 @@ export class CajaListComponent implements OnInit {
         distinctUntilChanged()
       )
       .subscribe(valor => {
-
         this.filter.buscar = valor;
         this.filter.pageNumber = 1;
-
         this.cargarCajas();
       });
   }
 
-  cargarCajas(): void {
+  // Consulta la caja abierta del usuario autenticado
+  cargarMiCajaAbierta(): void {
+    this.loadingCajaActual = true;
+    this.errorCajaActual = false;
 
+    this.cajaService
+      .obtenerMiCajaAbierta()
+      .pipe(
+        finalize(() => this.loadingCajaActual = false)
+      )
+      .subscribe({
+        next: (caja) => {
+          this.cajaActual = caja;
+        },
+        error: (error) => {
+          // 404 significa que el usuario todavía no tiene una caja abierta
+          if (error.status === 404) {
+            this.cajaActual = null;
+            this.errorCajaActual = false;
+            return;
+          }
+
+          console.error('Error al consultar caja abierta:', error);
+
+          this.cajaActual = null;
+          this.errorCajaActual = true;
+
+          this.notificationService.error(
+            'No se pudo consultar tu caja abierta.'
+          );
+        }
+      });
+  }
+
+  cargarCajas(): void {
     this.loading = true;
     this.error = false;
 
@@ -113,15 +149,11 @@ export class CajaListComponent implements OnInit {
         finalize(() => this.loading = false)
       )
       .subscribe({
-
         next: (response) => {
-
           this.cajas = response.data;
           this.meta = response.meta;
         },
-
         error: (error) => {
-
           console.error('Error al cargar cajas:', error);
           this.error = true;
 
@@ -133,25 +165,27 @@ export class CajaListComponent implements OnInit {
   }
 
   cambiarPagina(event: PageEvent): void {
-
     this.filter.pageNumber = event.pageIndex + 1;
     this.filter.pageSize = event.pageSize;
-
     this.cargarCajas();
   }
 
   nuevo(): void {
+    if (this.cajaActual) {
+      this.notificationService.error(
+        'Ya tienes una caja abierta. Debes cerrarla antes de abrir otra.'
+      );
+      return;
+    }
 
     this.router.navigate(['/cajas/nuevo']);
   }
 
   editar(id: number): void {
-
     this.router.navigate(['/cajas/editar', id]);
   }
 
   eliminar(id: number): void {
-
     const confirmado = confirm(
       '¿Está seguro de eliminar esta caja?'
     );
@@ -168,9 +202,7 @@ export class CajaListComponent implements OnInit {
         finalize(() => this.loading = false)
       )
       .subscribe({
-
         next: () => {
-
           this.notificationService.success(
             'Caja eliminada correctamente.'
           );
@@ -183,10 +215,9 @@ export class CajaListComponent implements OnInit {
           }
 
           this.cargarCajas();
+          this.cargarMiCajaAbierta();
         },
-
         error: (error) => {
-
           console.error('Error al eliminar caja:', error);
 
           this.notificationService.error(
@@ -197,7 +228,6 @@ export class CajaListComponent implements OnInit {
   }
 
   cerrar(id: number): void {
-
     const confirmado = confirm(
       '¿Está seguro de cerrar esta caja?'
     );
@@ -214,27 +244,21 @@ export class CajaListComponent implements OnInit {
         finalize(() => this.loading = false)
       )
       .subscribe({
-
         next: (res) => {
-
           if (res) {
-
             this.notificationService.success(
               'Caja cerrada correctamente.'
             );
 
             this.cargarCajas();
-
+            this.cargarMiCajaAbierta();
           } else {
-
             this.notificationService.error(
               'No se pudo cerrar la caja.'
             );
           }
         },
-
         error: (error) => {
-
           console.error('Error al cerrar caja:', error);
 
           this.notificationService.error(

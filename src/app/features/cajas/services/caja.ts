@@ -1,3 +1,4 @@
+
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../../environments/environment';
@@ -14,7 +15,10 @@ import { Caja } from '../models/caja.model';
 export class CajaService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.apiUrl}/Caja`;
-  readonly cambios = new Subject<{ tipo: 'abierta'; caja: Caja } | { tipo: 'actualizada' }>();
+
+  readonly cambios = new Subject<
+    { tipo: 'abierta'; caja: Caja } | { tipo: 'actualizada' }
+  >();
 
   getAll(filter: QueryFilter): Observable<ApiResponse<Caja[]>> {
     const params = new HttpParams()
@@ -22,11 +26,18 @@ export class CajaService {
       .set('PageSize', filter.pageSize || 10)
       .set('Buscar', filter.buscar || '');
 
-    return this.http.get<ApiResponse<Caja[]>>( `${this.apiUrl}/paginacion`, { params });
+    return this.http.get<ApiResponse<Caja[]>>(
+      `${this.apiUrl}/paginacion`,
+      { params }
+    );
   }
 
   getById(id: number): Observable<Caja> {
     return this.http.get<Caja>(`${this.apiUrl}/${id}`);
+  }
+
+  obtenerMiCajaAbierta(): Observable<Caja> {
+    return this.http.get<Caja>(`${this.apiUrl}/MiCajaAbierta`);
   }
 
   create(data: CajaCreate): Observable<Caja> {
@@ -44,7 +55,10 @@ export class CajaService {
   }
 
   cerrarCaja(id: number): Observable<boolean> {
-    return this.http.put<boolean>(`${this.apiUrl}/Cerrar/${id}`, {}).pipe(
+    return this.http.put<boolean>(
+      `${this.apiUrl}/Cerrar/${id}`,
+      {}
+    ).pipe(
       tap(cerrada => {
         if (cerrada) {
           this.cambios.next({ tipo: 'actualizada' });
