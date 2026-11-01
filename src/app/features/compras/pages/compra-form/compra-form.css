@@ -1,3 +1,4 @@
+
 .container {
   padding: 20px;
   display: flex;
@@ -6,7 +7,7 @@
 
 .card {
   width: 100%;
-  max-width: 1250px;
+  max-width: 1400px;
   padding: 20px;
 }
 
@@ -17,7 +18,7 @@
 }
 
 .section-title {
-  margin: 22px 0 15px;
+  margin: 22px 0 10px;
   font-size: 17px;
   font-weight: 600;
 }
@@ -37,11 +38,43 @@
   grid-column: 1 / -1;
 }
 
+/* PRODUCTOS Y BUSCADOR */
+
+.productos-header,
+.detalle-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+}
+
+.productos-header p {
+  margin: 0 0 15px;
+  color: #777;
+  font-size: 13px;
+}
+
+.buscador {
+  width: 100%;
+  max-width: 550px;
+  margin-top: 12px;
+}
+
+.contador {
+  padding: 7px 12px;
+  border-radius: 20px;
+  background: #eaf2ff;
+  color: #1976d2;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
 .productos {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
-  margin: 15px 0 25px;
+  margin: 10px 0 25px;
 }
 
 .producto-card {
@@ -53,6 +86,12 @@
   border: 1px solid #ddd;
   border-radius: 8px;
   background: #fff;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.producto-card:hover {
+  border-color: #90caf9;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.07);
 }
 
 .producto-info {
@@ -64,12 +103,39 @@
 
 .producto-info strong {
   overflow-wrap: anywhere;
+  font-size: 14px;
 }
 
 .producto-info span {
   color: #666;
-  font-size: 13px;
+  font-size: 12px;
 }
+
+.producto-etiquetas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 5px;
+}
+
+.etiqueta {
+  padding: 4px 7px;
+  border-radius: 4px;
+  font-size: 10px !important;
+  font-weight: 600;
+}
+
+.etiqueta.lote {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+.etiqueta.vencimiento {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+/* TABLA */
 
 .table-container {
   width: 100%;
@@ -80,7 +146,7 @@
 .table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 700px;
+  min-width: 900px;
 }
 
 .table th,
@@ -93,6 +159,12 @@
 .table th {
   background: #f5f5f5;
   font-weight: 600;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.table td {
+  font-size: 13px;
 }
 
 .product-name {
@@ -117,10 +189,25 @@
   font: inherit;
 }
 
+.table-input:focus {
+  outline: none;
+  border-color: #1976d2;
+}
+
+.lote-input {
+  min-width: 120px;
+}
+
+.fecha-input {
+  min-width: 145px;
+}
+
 .subtotal {
   font-weight: 600;
   white-space: nowrap;
 }
+
+/* TOTAL */
 
 .total-container {
   display: flex;
@@ -142,6 +229,8 @@
   color: #1976d2;
 }
 
+/* BOTONES */
+
 .buttons {
   display: flex;
   justify-content: flex-end;
@@ -150,10 +239,15 @@
   margin-top: 25px;
 }
 
+/* ESTADOS */
+
 .empty {
   text-align: center;
   color: #777;
-  padding: 20px;
+  padding: 25px;
+  background: #fafafa;
+  border-radius: 8px;
+  margin: 15px 0;
 }
 
 .loading {
@@ -162,13 +256,15 @@
   padding: 15px;
 }
 
-@media (max-width: 900px) {
+/* RESPONSIVE */
+
+@media (max-width: 1000px) {
   .productos {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 650px) {
   .container {
     padding: 10px;
   }
@@ -182,6 +278,16 @@
     grid-template-columns: 1fr;
   }
 
+  .productos-header,
+  .detalle-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .buscador {
+    max-width: 100%;
+  }
+
   .buttons {
     flex-direction: column;
   }
@@ -193,5 +299,9 @@
   .total-container {
     justify-content: space-between;
     gap: 10px;
+  }
+
+  .total-container strong {
+    font-size: 19px;
   }
 }

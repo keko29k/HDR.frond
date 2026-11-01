@@ -1,3 +1,4 @@
+
 <div class="container">
 
   <mat-card class="card">
@@ -43,13 +44,16 @@
 
         <mat-form-field appearance="outline">
           <mat-label>Número de documento</mat-label>
-          <input matInput formControlName="numeroDocumento"
+          <input matInput
+                 formControlName="numeroDocumento"
                  placeholder="Ej. 001-000123">
         </mat-form-field>
 
         <mat-form-field appearance="outline">
           <mat-label>Fecha de compra</mat-label>
-          <input matInput type="date" formControlName="fechaCompra">
+          <input matInput
+                 type="date"
+                 formControlName="fechaCompra">
           <mat-error>Selecciona la fecha</mat-error>
         </mat-form-field>
 
@@ -66,17 +70,60 @@
 
       <mat-divider></mat-divider>
 
-      <!-- PRODUCTOS DISPONIBLES -->
-      <h3 class="section-title">Productos disponibles</h3>
+      <!-- BUSCADOR Y PRODUCTOS -->
+      <div class="productos-header">
 
-      <div class="productos" *ngIf="productos.length > 0">
+        <div>
+          <h3 class="section-title">Productos disponibles</h3>
+          <p>Busca por nombre, código o código de barras.</p>
+        </div>
 
-        <div class="producto-card" *ngFor="let producto of productos">
+        <span class="contador">
+          {{ productosFiltrados.length }} productos
+        </span>
+
+      </div>
+
+      <mat-form-field appearance="outline" class="buscador">
+        <mat-label>Buscar producto</mat-label>
+
+        <input matInput
+               type="text"
+               placeholder="Ej. Cable HDMI"
+               [value]="buscarProducto"
+               (input)="buscarProducto = $any($event.target).value">
+
+      </mat-form-field>
+
+      <div class="productos"
+           *ngIf="productosFiltrados.length > 0">
+
+        <div class="producto-card"
+             *ngFor="let producto of productosFiltrados">
 
           <div class="producto-info">
+
             <strong>{{ producto.nombre }}</strong>
+
             <span>Código: {{ producto.codigo }}</span>
-            <span>Precio de compra: Bs {{ producto.precioCompra | number:'1.2-2' }}</span>
+
+            <span>
+              Compra: Bs {{ producto.precioCompra | number:'1.2-2' }}
+            </span>
+
+            <div class="producto-etiquetas">
+
+              <span *ngIf="producto.manejaLotes" class="etiqueta lote">
+                Maneja lotes
+              </span>
+
+              <span *ngIf="producto.tieneVencimiento"
+                    class="etiqueta vencimiento">
+                Tiene vencimiento
+              </span>
+
+            </div>
+
           </div>
 
           <button type="button"
@@ -91,14 +138,28 @@
 
       </div>
 
-      <p class="empty" *ngIf="productos.length === 0">
-        No hay productos disponibles.
-      </p>
+      <div class="empty" *ngIf="productosFiltrados.length === 0">
+
+        <p *ngIf="productos.length === 0">
+          No hay productos disponibles.
+        </p>
+
+        <p *ngIf="productos.length > 0">
+          No se encontraron productos con esa búsqueda.
+        </p>
+
+      </div>
 
       <mat-divider></mat-divider>
 
       <!-- DETALLE DE COMPRA -->
-      <h3 class="section-title">Detalle de compra</h3>
+      <div class="detalle-header">
+        <h3 class="section-title">Detalle de compra</h3>
+
+        <span class="contador">
+          {{ detalles.length }} productos agregados
+        </span>
+      </div>
 
       <div class="table-container" *ngIf="detalles.length > 0">
 
@@ -110,6 +171,19 @@
               <th>Cantidad</th>
               <th>Precio compra</th>
               <th>Subtotal</th>
+
+              <th *ngIf="tieneProductosConLotes">
+                Número de lote
+              </th>
+
+              <th *ngIf="tieneProductosConFabricacion">
+                Fabricación
+              </th>
+
+              <th *ngIf="tieneProductosConVencimiento">
+                Vencimiento
+              </th>
+
               <th>Acciones</th>
             </tr>
           </thead>
@@ -135,7 +209,7 @@
               <td>
                 <input class="table-input"
                        type="number"
-                       min="0"
+                       min="0.01"
                        step="0.01"
                        [value]="detalle.precioCompra"
                        (change)="actualizarPrecio(i, $any($event.target).value)">
@@ -143,6 +217,37 @@
 
               <td class="subtotal">
                 Bs {{ detalle.subtotal | number:'1.2-2' }}
+              </td>
+
+              <!-- NUMERO DE LOTE -->
+              <td *ngIf="detalle.manejaLotes">
+
+                <input class="table-input lote-input"
+                       type="text"
+                       placeholder="N.º lote"
+                       [value]="detalle.numeroLote"
+                       (input)="actualizarNumeroLote(i, $any($event.target).value)">
+
+              </td>
+
+              <!-- FECHA FABRICACION -->
+              <td *ngIf="detalle.manejaLotes || detalle.tieneVencimiento">
+
+                <input class="table-input fecha-input"
+                       type="date"
+                       [value]="detalle.fechaFabricacion"
+                       (change)="actualizarFechaFabricacion(i, $any($event.target).value)">
+
+              </td>
+
+              <!-- FECHA VENCIMIENTO -->
+              <td *ngIf="detalle.tieneVencimiento">
+
+                <input class="table-input fecha-input"
+                       type="date"
+                       [value]="detalle.fechaVencimiento"
+                       (change)="actualizarFechaVencimiento(i, $any($event.target).value)">
+
               </td>
 
               <td>
@@ -162,14 +267,19 @@
 
       </div>
 
-      <p class="empty" *ngIf="detalles.length === 0">
-        Todavía no agregaste productos a esta compra.
-      </p>
+      <div class="empty" *ngIf="detalles.length === 0">
+        <p>Todavía no agregaste productos a esta compra.</p>
+      </div>
 
       <!-- TOTAL -->
       <div class="total-container">
+
         <span>Total de la compra</span>
-        <strong>Bs {{ calcularTotal() | number:'1.2-2' }}</strong>
+
+        <strong>
+          Bs {{ calcularTotal() | number:'1.2-2' }}
+        </strong>
+
       </div>
 
       <!-- BOTONES -->
@@ -178,15 +288,15 @@
         <button type="button"
                 mat-stroked-button
                 color="warn"
-                [disabled]="loading"
+                [disabled]="loading || detalles.length === 0"
                 (click)="limpiarDetalles()">
           Limpiar productos
         </button>
 
         <button type="button"
                 mat-button
-                (click)="cancelar()"
-                [disabled]="loading">
+                [disabled]="loading"
+                (click)="cancelar()">
           Cancelar
         </button>
 

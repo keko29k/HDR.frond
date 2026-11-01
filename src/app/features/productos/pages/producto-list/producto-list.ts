@@ -77,6 +77,7 @@ export class ProductoListComponent implements OnInit {
     'id',
     'codigo',
     'nombre',
+     'stock',
     'nombreGenerico',
     'precioCompra',
     'precioVenta',

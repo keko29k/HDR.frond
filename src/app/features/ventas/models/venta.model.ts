@@ -1,14 +1,21 @@
 export interface Venta {
   id: number;
-  idSucursal:number;
-  idCliente:number;
-  idUsuario:number;
+  idSucursal: number;
+  idCliente: number | null;
+  idUsuario: number;
+
   acredito: boolean;
   montoPagado: number;
   saldoPendiente: number;
-  fechaLimitePago: Date;
-  fechaVenta  : Date;
+
+  fechaLimitePago: string | null;
+  fechaVenta: string;
+
   total: number;
-  observacion: string;
-  estadoVenta: boolean;
+  observacion: string | null;
+  estadoVenta: string;
+
+  clienteNombre: string;
+  usuarioNombre: string;
+  metodoPago: string;
 }
