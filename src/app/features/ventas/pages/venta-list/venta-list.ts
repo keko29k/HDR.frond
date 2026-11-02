@@ -20,6 +20,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { VentaService } from '../../services/venta';
 import { Venta } from '../../models/venta.model';
+import { MatDialog } from '@angular/material/dialog';
+import { AbonarCredito } from '../abonar-credito/abonar-credito';
 
 @Component({
   selector: 'app-venta-list',
@@ -44,7 +46,7 @@ export class VentaListComponent implements OnInit {
   private ventaService = inject(VentaService);
   private notificationService = inject(NotificationService);
   private router = inject(Router);
-
+private dialog = inject(MatDialog);
   ventas: Venta[] = [];
   displayedColumns: string[] = [
     'id',
@@ -169,4 +171,30 @@ export class VentaListComponent implements OnInit {
     if (this.esCreditoCancelado(venta)) return 'row-credit-paid';
     return '';
   }
+
+  abonarCredito(venta: Venta): void {
+
+  if (!this.esCreditoPendiente(venta)) {
+    return;
+  }
+
+  const dialogRef = this.dialog.open(AbonarCredito, {
+    width: '520px',
+    maxWidth: '95vw',
+    disableClose: true,
+    data: venta
+  });
+
+  dialogRef.afterClosed().subscribe(resultado => {
+
+    if (resultado === true) {
+      this.notificationService.success(
+        'Abono registrado correctamente.'
+      );
+
+      this.cargarVentas();
+    }
+
+  });
+}
 }

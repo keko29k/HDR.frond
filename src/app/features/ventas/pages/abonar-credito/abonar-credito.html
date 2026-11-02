@@ -1,0 +1,153 @@
+
+<h2 mat-dialog-title>Registrar abono de crédito</h2>
+
+<mat-dialog-content>
+
+  <!-- INFORMACIÓN DE LA VENTA -->
+  <div class="venta-info">
+
+    <div class="info-header">
+      <strong>Venta #{{ venta.id }}</strong>
+      <span class="estado">CRÉDITO</span>
+    </div>
+
+    <div class="info-datos">
+      <div>
+        <small>Cliente</small>
+        <strong>{{ venta.clienteNombre }}</strong>
+      </div>
+
+      <div>
+        <small>Total de venta</small>
+        <strong>
+          Bs. {{ venta.total | number:'1.2-2' }}
+        </strong>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RESUMEN DEL CRÉDITO -->
+  <div class="resumen-credito">
+
+    <div class="resumen-item">
+      <small>Monto pagado</small>
+      <strong class="pagado">
+        Bs. {{ venta.montoPagado | number:'1.2-2' }}
+      </strong>
+    </div>
+
+    <div class="resumen-item">
+      <small>Saldo pendiente</small>
+      <strong class="pendiente">
+        Bs. {{ venta.saldoPendiente | number:'1.2-2' }}
+      </strong>
+    </div>
+
+  </div>
+
+  <form [formGroup]="formulario" (ngSubmit)="registrarAbono()">
+
+    <!-- MONTO DEL ABONO -->
+    <mat-form-field appearance="outline" class="campo-completo">
+      <mat-label>Monto del abono</mat-label>
+
+      <span matTextPrefix>Bs. &nbsp;</span>
+
+      <input
+        matInput
+        type="number"
+        formControlName="monto"
+        min="0.01"
+        [max]="venta.saldoPendiente"
+        step="0.01"
+        placeholder="Ingrese el monto"
+      />
+
+      <mat-error *ngIf="formulario.get('monto')?.hasError('required')">
+        El monto es obligatorio.
+      </mat-error>
+
+      <mat-error *ngIf="formulario.get('monto')?.hasError('min')">
+        El monto debe ser mayor a cero.
+      </mat-error>
+
+      <mat-error *ngIf="formulario.get('monto')?.hasError('max')">
+        El monto supera el saldo pendiente.
+      </mat-error>
+    </mat-form-field>
+
+    <!-- SALDO RESTANTE -->
+    <div class="saldo-restante">
+      <span>Saldo restante después del abono</span>
+
+      <strong>
+        Bs. {{ saldoRestante | number:'1.2-2' }}
+      </strong>
+    </div>
+
+    <!-- MÉTODO DE PAGO -->
+    <mat-form-field appearance="outline" class="campo-completo">
+      <mat-label>Método de pago</mat-label>
+
+      <mat-select formControlName="metodoPago">
+        <mat-option value="EFECTIVO">Efectivo</mat-option>
+        <mat-option value="QR">QR</mat-option>
+      </mat-select>
+
+      <mat-error>
+        Seleccione un método de pago.
+      </mat-error>
+    </mat-form-field>
+
+    <!-- REFERENCIA -->
+    <mat-form-field appearance="outline" class="campo-completo">
+      <mat-label>Referencia del pago</mat-label>
+
+      <input
+        matInput
+        formControlName="referencia"
+        placeholder="Número de transacción (opcional)"
+      />
+    </mat-form-field>
+
+    <!-- OBSERVACIÓN -->
+    <mat-form-field appearance="outline" class="campo-completo">
+      <mat-label>Observación</mat-label>
+
+      <textarea
+        matInput
+        formControlName="observacion"
+        rows="2"
+        placeholder="Detalle adicional (opcional)">
+      </textarea>
+    </mat-form-field>
+
+  </form>
+
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+
+  <button
+    mat-button
+    type="button"
+    (click)="cancelar()"
+    [disabled]="loading">
+    Cancelar
+  </button>
+
+  <button
+    mat-raised-button
+    color="primary"
+    type="button"
+    (click)="registrarAbono()"
+    [disabled]="loading || formulario.invalid">
+
+    <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
+
+    <span *ngIf="!loading">Registrar abono</span>
+
+  </button>
+
+</mat-dialog-actions>

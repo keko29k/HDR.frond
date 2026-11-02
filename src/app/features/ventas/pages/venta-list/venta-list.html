@@ -1,3 +1,4 @@
+
 <div class="page-container">
   <mat-card class="table-card">
 
@@ -5,8 +6,11 @@
     <div class="header">
       <div>
         <h2>Lista de ventas</h2>
-        <p class="header-description">Consulta las ventas, pagos y saldos pendientes.</p>
+        <p class="header-description">
+          Consulta las ventas, pagos y saldos pendientes.
+        </p>
       </div>
+
       <button mat-raised-button color="primary" (click)="nuevo()">
         Nueva venta
       </button>
@@ -16,7 +20,12 @@
     <div class="filters">
       <mat-form-field appearance="outline" class="search-field">
         <mat-label>Buscar venta</mat-label>
-        <input matInput [formControl]="buscarControl" placeholder="Cliente, método de pago...">
+
+        <input
+          matInput
+          [formControl]="buscarControl"
+          placeholder="Cliente, método de pago..."
+        />
       </mat-form-field>
     </div>
 
@@ -27,11 +36,13 @@
 
     <!-- TABLA -->
     <div class="table-container" *ngIf="!loading">
+
       <table mat-table [dataSource]="ventas" class="full-width-table">
 
         <!-- ID -->
         <ng-container matColumnDef="id">
           <th mat-header-cell *matHeaderCellDef>N.º</th>
+
           <td mat-cell *matCellDef="let venta">
             <strong>#{{ venta.id }}</strong>
           </td>
@@ -40,6 +51,7 @@
         <!-- FECHA -->
         <ng-container matColumnDef="fecha">
           <th mat-header-cell *matHeaderCellDef>Fecha</th>
+
           <td mat-cell *matCellDef="let venta">
             {{ venta.fechaVenta | date:'dd/MM/yyyy HH:mm' }}
           </td>
@@ -48,14 +60,18 @@
         <!-- CLIENTE -->
         <ng-container matColumnDef="cliente">
           <th mat-header-cell *matHeaderCellDef>Cliente</th>
+
           <td mat-cell *matCellDef="let venta">
-            <strong>{{ venta.clienteNombre || 'Consumidor final' }}</strong>
+            <strong>
+              {{ venta.clienteNombre || 'Consumidor final' }}
+            </strong>
           </td>
         </ng-container>
 
         <!-- VENDEDOR -->
         <ng-container matColumnDef="vendedor">
           <th mat-header-cell *matHeaderCellDef>Vendedor</th>
+
           <td mat-cell *matCellDef="let venta">
             {{ venta.usuarioNombre || '-' }}
           </td>
@@ -64,26 +80,36 @@
         <!-- TOTAL -->
         <ng-container matColumnDef="total">
           <th mat-header-cell *matHeaderCellDef>Total</th>
+
           <td mat-cell *matCellDef="let venta">
-            <strong class="money-total">{{ venta.total | currency:'BOB':'Bs. ':'1.2-2' }}</strong>
+            <strong class="money-total">
+              {{ venta.total | currency:'BOB':'Bs. ':'1.2-2' }}
+            </strong>
           </td>
         </ng-container>
 
         <!-- MONTO PAGADO -->
         <ng-container matColumnDef="montoPagado">
           <th mat-header-cell *matHeaderCellDef>Pagado</th>
+
           <td mat-cell *matCellDef="let venta">
-            <span class="money-paid">{{ venta.montoPagado | currency:'BOB':'Bs. ':'1.2-2' }}</span>
+            <span class="money-paid">
+              {{ venta.montoPagado | currency:'BOB':'Bs. ':'1.2-2' }}
+            </span>
           </td>
         </ng-container>
 
         <!-- SALDO PENDIENTE -->
         <ng-container matColumnDef="saldoPendiente">
           <th mat-header-cell *matHeaderCellDef>Saldo pendiente</th>
+
           <td mat-cell *matCellDef="let venta">
-            <strong [class.money-debt]="venta.saldoPendiente > 0"
+            <strong
+              [class.money-debt]="venta.saldoPendiente > 0"
               [class.money-clear]="venta.saldoPendiente <= 0">
+
               {{ venta.saldoPendiente | currency:'BOB':'Bs. ':'1.2-2' }}
+
             </strong>
           </td>
         </ng-container>
@@ -91,6 +117,7 @@
         <!-- MÉTODO DE PAGO -->
         <ng-container matColumnDef="metodoPago">
           <th mat-header-cell *matHeaderCellDef>Método de pago</th>
+
           <td mat-cell *matCellDef="let venta">
             {{ venta.metodoPago || '-' }}
           </td>
@@ -99,9 +126,14 @@
         <!-- ESTADO DE PAGO -->
         <ng-container matColumnDef="estadoPago">
           <th mat-header-cell *matHeaderCellDef>Estado de pago</th>
+
           <td mat-cell *matCellDef="let venta">
-            <span class="status-badge" [ngClass]="claseEstado(venta)">
+            <span
+              class="status-badge"
+              [ngClass]="claseEstado(venta)">
+
               {{ textoEstado(venta) }}
+
             </span>
           </td>
         </ng-container>
@@ -109,26 +141,60 @@
         <!-- OBSERVACIONES -->
         <ng-container matColumnDef="observaciones">
           <th mat-header-cell *matHeaderCellDef>Observaciones</th>
+
           <td mat-cell *matCellDef="let venta">
-            <span class="observation">{{ venta.observacion || '-' }}</span>
+            <span class="observation">
+              {{ venta.observacion || '-' }}
+            </span>
           </td>
         </ng-container>
 
         <!-- ACCIONES -->
         <ng-container matColumnDef="acciones">
+
           <th mat-header-cell *matHeaderCellDef>Acciones</th>
+
           <td mat-cell *matCellDef="let venta" class="actions-cell">
-            <button mat-icon-button color="warn" (click)="eliminar(venta.id)"
-              matTooltip="Eliminar venta" aria-label="Eliminar venta">
-              <mat-icon>delete</mat-icon>
+
+            <!-- REGISTRAR ABONO -->
+            <button
+              *ngIf="esCreditoPendiente(venta)"
+              mat-icon-button
+              color="primary"
+              (click)="abonarCredito(venta)"
+              matTooltip="Registrar abono"
+              aria-label="Registrar abono">
+
+              <mat-icon>payments</mat-icon>
+
             </button>
+
+            <!-- ELIMINAR -->
+            <button
+              mat-icon-button
+              color="warn"
+              (click)="eliminar(venta.id)"
+              matTooltip="Eliminar venta"
+              aria-label="Eliminar venta">
+
+              <mat-icon>delete</mat-icon>
+
+            </button>
+
           </td>
         </ng-container>
 
         <!-- FILAS -->
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns"
-          class="table-row" [ngClass]="claseFila(row)">
+        <tr
+          mat-header-row
+          *matHeaderRowDef="displayedColumns">
+        </tr>
+
+        <tr
+          mat-row
+          *matRowDef="let row; columns: displayedColumns"
+          class="table-row"
+          [ngClass]="claseFila(row)">
         </tr>
 
       </table>
@@ -137,6 +203,7 @@
       <div class="empty-state" *ngIf="ventas.length === 0">
         No se encontraron ventas.
       </div>
+
     </div>
 
     <!-- PAGINADOR -->
@@ -147,6 +214,7 @@
       [pageSizeOptions]="[5, 10, 20, 50]"
       showFirstLastButtons
       (page)="cambiarPagina($event)">
+
     </mat-paginator>
 
   </mat-card>
