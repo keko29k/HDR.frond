@@ -14,15 +14,27 @@
       </div>
     </div>
 
-    <button
-      type="button"
-      class="btn-refresh"
-      (click)="cargarProductos()"
-      [disabled]="loading || cargandoSucursal || !sucursalId">
+    <div class="header-actions">
+      <button
+        type="button"
+        class="btn-lotes-all"
+        (click)="verTodosLosLotes()"
+        title="Ver todos los lotes de la sucursal">
 
-      <span class="material-icons">refresh</span>
-      Actualizar
-    </button>
+        <span class="material-icons">layers</span>
+        Ver todos los lotes
+      </button>
+
+      <button
+        type="button"
+        class="btn-refresh"
+        (click)="cargarProductos()"
+        [disabled]="loading || cargandoSucursal || !sucursalId">
+
+        <span class="material-icons">refresh</span>
+        Actualizar
+      </button>
+    </div>
   </div>
 
   <!-- INFORMACIÓN DE SUCURSAL -->
@@ -216,6 +228,7 @@
             <th>PRECIO COMPRA</th>
             <th>PRECIO VENTA</th>
             <th>STOCK ACTUAL</th>
+            <th>LOTES</th>
             <th>INVENTARIO</th>
             <th>VENTA</th>
           </tr>
@@ -278,6 +291,25 @@
                 {{ producto.stockActual }}
 
               </span>
+            </td>
+
+            <!-- LOTES -->
+            <td>
+              <button
+                *ngIf="producto.manejaLotes; else sinLotes"
+                type="button"
+                class="btn-lotes"
+                [matTooltip]="'Ver lotes de ' + producto.nombre"
+                (click)="verLotes(producto)">
+
+                <span class="material-icons">layers</span>
+                Ver lotes
+
+              </button>
+
+              <ng-template #sinLotes>
+                <span class="no-lotes">No maneja lotes</span>
+              </ng-template>
             </td>
 
             <!-- CONTROL DE INVENTARIO -->

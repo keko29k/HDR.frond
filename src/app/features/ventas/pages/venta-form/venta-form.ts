@@ -20,6 +20,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { provideNativeDateAdapter } from '@angular/material/core';
 
 import { NotificationService } from '../../../../core/services/notification.service';
@@ -65,11 +67,16 @@ const redondear = (n: number): number =>
     MatButtonModule,
     MatSelectModule,
     MatDatepickerModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatIconModule,
+    MatTooltipModule
   ],
   providers: [provideNativeDateAdapter()],
   templateUrl: './venta-form.html',
-  styleUrl: './venta-form.css'
+  styleUrls: [
+    '../../../../shared/styles/operaciones.css',
+    './venta-form.css'
+  ]
 })
 export class VentaFormComponent implements OnInit {
 

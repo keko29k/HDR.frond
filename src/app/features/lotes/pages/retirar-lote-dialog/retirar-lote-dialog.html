@@ -1,0 +1,68 @@
+<div class="dialog">
+  <header class="dialog-header">
+    <span class="icon"><span class="material-icons">delete_sweep</span></span>
+    <div>
+      <h2>Retirar del inventario</h2>
+      <p>Las unidades se descontarán del lote y del stock de la sucursal.</p>
+    </div>
+  </header>
+
+  <div class="dialog-body">
+    <dl class="info">
+      <div><dt>Producto</dt><dd>{{ lote.producto }}</dd></div>
+      <div><dt>Lote</dt><dd class="mono">{{ lote.numeroLote }}</dd></div>
+      <div><dt>Sucursal</dt><dd>{{ lote.sucursal }}</dd></div>
+      <div>
+        <dt>Vencimiento</dt>
+        <dd [class.expired]="lote.diasRestantes < 0">
+          {{ lote.fechaVencimiento | date:'dd/MM/yyyy' }}
+          @if (lote.diasRestantes < 0) { · vencido }
+        </dd>
+      </div>
+      <div><dt>Disponible</dt><dd>{{ lote.cantidadDisponible | number:'1.0-2' }} unidades</dd></div>
+    </dl>
+
+    <label class="field" for="cantidad">
+      <span>Cantidad a retirar</span>
+      <div class="qty-row">
+        <input id="cantidad" type="number" min="0.01" step="1" [max]="lote.cantidadDisponible"
+          [(ngModel)]="cantidad" [class.invalid]="!cantidadValida" (keydown.enter)="confirmar()">
+        <button type="button" class="link" [disabled]="retiraTodo" (click)="usarTodo()">Todo ({{ lote.cantidadDisponible | number:'1.0-2' }})</button>
+      </div>
+      @if (!cantidadValida) {
+        <small class="err">Ingresa una cantidad entre 1 y {{ lote.cantidadDisponible | number:'1.0-2' }}.</small>
+      }
+    </label>
+
+    <div class="loss">
+      <span>Pérdida a precio de costo</span>
+      <strong>Bs {{ valorRetirado | number:'1.2-2' }}</strong>
+    </div>
+
+    <p class="warn">
+      <span class="material-icons">info</span>
+      Esta acción no se puede deshacer y no queda registrada en un historial.
+      @if (retiraTodo) { El lote dejará de aparecer en las alertas de vencimiento. }
+    </p>
+
+    @if (error) {
+      <div class="error" role="alert">
+        <span class="material-icons">error_outline</span>
+        {{ error }}
+      </div>
+    }
+  </div>
+
+  <footer class="dialog-footer">
+    <button type="button" class="btn secondary" [disabled]="guardando" (click)="cancelar()">Cancelar</button>
+    <button type="button" class="btn danger" [disabled]="!cantidadValida || guardando" (click)="confirmar()">
+      @if (guardando) {
+        <mat-spinner diameter="18"></mat-spinner>
+        Retirando...
+      } @else {
+        <span class="material-icons">delete_sweep</span>
+        Retirar {{ cantidadValida ? (cantidad | number:'1.0-2') : '' }} unid.
+      }
+    </button>
+  </footer>
+</div>

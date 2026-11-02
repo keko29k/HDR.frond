@@ -6,6 +6,27 @@ html, body {
   color: #12201c;
 }
 
+/* El tema de Material usa Roboto (no cargada): todos los componentes
+   (tablas, selects, menús, paginadores, diálogos) pasan a usar Onest. */
+html body {
+  --app-font: 'Onest', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mat-sys-body-large-font: var(--app-font);
+  --mat-sys-body-medium-font: var(--app-font);
+  --mat-sys-body-small-font: var(--app-font);
+  --mat-sys-display-large-font: var(--app-font);
+  --mat-sys-display-medium-font: var(--app-font);
+  --mat-sys-display-small-font: var(--app-font);
+  --mat-sys-headline-large-font: var(--app-font);
+  --mat-sys-headline-medium-font: var(--app-font);
+  --mat-sys-headline-small-font: var(--app-font);
+  --mat-sys-label-large-font: var(--app-font);
+  --mat-sys-label-medium-font: var(--app-font);
+  --mat-sys-label-small-font: var(--app-font);
+  --mat-sys-title-large-font: var(--app-font);
+  --mat-sys-title-medium-font: var(--app-font);
+  --mat-sys-title-small-font: var(--app-font);
+}
+
 * {
   box-sizing: border-box;
 }

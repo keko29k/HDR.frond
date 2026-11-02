@@ -161,6 +161,22 @@ import('./features/reportes/pages/reporte-list/reporte-list')
 .then(m => m.ReporteListComponent);
 
 /* =========================================================
+DASHBOARD
+========================================================= */
+
+const loadDashboardComponent = () =>
+import('./features/dashboard/pages/dashboard/dashboard')
+.then(m => m.DashboardComponent);
+
+/* =========================================================
+VENCIMIENTOS
+========================================================= */
+
+const loadVencimientosComponent = () =>
+import('./features/lotes/pages/vencimientos/vencimientos')
+.then(m => m.VencimientosComponent);
+
+/* =========================================================
 RUTAS
 ========================================================= */
 
@@ -169,6 +185,16 @@ export const routes: Routes = [
 {
 path: 'login',
 loadComponent: loadLoginComponent
+},
+
+{
+path: 'vencimientos',
+loadComponent: loadVencimientosComponent
+},
+
+{
+path: 'dashboard',
+loadComponent: loadDashboardComponent
 },
 
 /* =======================================================
@@ -456,13 +482,13 @@ RUTA PRINCIPAL
  Al entrar a:
  http://localhost:4200/
 
- irá automáticamente a productos.
+ irá automáticamente al dashboard.
 
 ======================================================= */
 
 {
 path: '',
-redirectTo: 'productos',
+redirectTo: 'dashboard',
 pathMatch: 'full'
 },
 
@@ -472,7 +498,7 @@ RUTA NO ENCONTRADA
 
 {
 path: '**',
-redirectTo: 'productos'
+redirectTo: 'dashboard'
 }
 
 ];

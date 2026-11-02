@@ -7,10 +7,7 @@ import { finalize } from 'rxjs';
 import { AuthService } from '../../services/auth';
 import { NotificationService } from '../../../../core/services/notification.service';
 
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
@@ -19,10 +16,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
+    MatIconModule,
     MatProgressSpinnerModule
   ],
   templateUrl: './login.html',
@@ -35,13 +29,31 @@ export class LoginComponent {
   private router = inject(Router);
 
   loading = false;
+  mostrarClave = false;
+  mayusculasActivas = false;
+  errorLogin = '';
+
+  readonly anio = new Date().getFullYear();
 
   form = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
     clave: ['', [Validators.required]]
   });
 
+  campoInvalido(campo: 'email' | 'clave'): boolean {
+    const control = this.form.controls[campo];
+    return control.invalid && (control.touched || control.dirty);
+  }
+
+  detectarMayusculas(event: KeyboardEvent): void {
+    this.mayusculasActivas = event.getModifierState?.('CapsLock') ?? false;
+  }
+
   iniciarSesion(): void {
+    if (this.loading) {
+      return;
+    }
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       this.notificationService.error('Complete correctamente el formulario.');
@@ -49,21 +61,26 @@ export class LoginComponent {
     }
 
     const data = {
-      email: this.form.value.email!,
+      email: this.form.value.email!.trim(),
       clave: this.form.value.clave!
     };
 
     this.loading = true;
+    this.errorLogin = '';
 
     this.authService.login(data)
       .pipe(finalize(() => this.loading = false))
       .subscribe({
         next: () => {
           this.notificationService.success('Inicio de sesión correcto.');
-          this.router.navigate(['/cajas']);
+          this.router.navigate(['/dashboard']);
         },
         error: (error) => {
-          const mensaje = error?.error?.mensaje || 'No se pudo iniciar sesión.';
+          const mensaje = error?.status === 0
+            ? 'No se pudo conectar con el servidor.'
+            : error?.error?.mensaje || 'No se pudo iniciar sesión.';
+
+          this.errorLogin = mensaje;
           this.notificationService.error(mensaje);
         }
       });

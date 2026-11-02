@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { debounceTime, distinctUntilChanged, finalize } from 'rxjs';
+import { catchError, debounceTime, distinctUntilChanged, finalize, of } from 'rxjs';
 
 import { NotificationService } from '../../../../core/services/notification.service';
 import { QueryFilter } from '../../../../core/models/query-filter.model';
@@ -20,6 +20,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { GastoService } from '../../services/gasto';
 import { Gasto } from '../../models/gasto.model';
+import { ReporteService } from '../../../reportes/services/reporte';
+import { ReporteGeneral } from '../../../reportes/models/reporte-general.model';
 
 @Component({
   selector: 'app-gasto-list',
@@ -38,10 +40,14 @@ import { Gasto } from '../../models/gasto.model';
     MatTooltipModule
   ],
   templateUrl: './gasto-list.html',
-  styleUrl: './gasto-list.css'
+  styleUrls: [
+    '../../../../shared/styles/operaciones.css',
+    './gasto-list.css'
+  ]
 })
 export class GastoListComponent implements OnInit {
   private gastoService = inject(GastoService);
+  private reporteService = inject(ReporteService);
   private notificationService = inject(NotificationService);
   private router = inject(Router);
 
@@ -49,16 +55,19 @@ export class GastoListComponent implements OnInit {
 
   displayedColumns: string[] = [
     'id',
-    'idCaja',
-    'idUsuario',
+    'fecha',
     'concepto',
     'numeroComprobante',
+    'idCaja',
     'monto',
-    'observacion',
     'acciones'
   ];
 
   loading = false;
+  error = false;
+
+  /** Resumen del mes actual (desde el endpoint de reportes). */
+  resumenMes: ReporteGeneral | null = null;
 
   buscarControl = new FormControl('', {
     nonNullable: true
@@ -81,6 +90,7 @@ export class GastoListComponent implements OnInit {
 
   ngOnInit(): void {
     this.cargarGastos();
+    this.cargarResumenMes();
 
     this.buscarControl.valueChanges
       .pipe(
@@ -96,6 +106,7 @@ export class GastoListComponent implements OnInit {
 
   cargarGastos(): void {
     this.loading = true;
+    this.error = false;
 
     this.gastoService
       .getAll(this.filter)
@@ -108,6 +119,8 @@ export class GastoListComponent implements OnInit {
           this.meta = response.meta;
         },
         error: () => {
+          this.error = true;
+          this.gastos = [];
           this.notificationService.error(
             'No se pudo cargar la lista de gastos.'
           );
@@ -115,10 +128,64 @@ export class GastoListComponent implements OnInit {
       });
   }
 
+  private cargarResumenMes(): void {
+    const hoy = new Date();
+    const inicio = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+
+    this.reporteService
+      .getReporteGeneral(this.formatoFecha(inicio), this.formatoFecha(hoy), null)
+      .pipe(catchError(() => of(null)))
+      .subscribe(reporte => this.resumenMes = reporte);
+  }
+
+  actualizar(): void {
+    this.cargarGastos();
+    this.cargarResumenMes();
+  }
+
   cambiarPagina(event: PageEvent): void {
     this.filter.pageNumber = event.pageIndex + 1;
     this.filter.pageSize = event.pageSize;
     this.cargarGastos();
+  }
+
+  limpiarBusqueda(): void {
+    this.buscarControl.setValue('');
+  }
+
+  // =========================
+  // RESUMEN
+  // =========================
+
+  get totalPagina(): number {
+    return this.gastos.reduce((total, g) => total + (g.monto ?? 0), 0);
+  }
+
+  get sinComprobante(): number {
+    return this.gastos.filter(g => !g.numeroComprobante?.trim()).length;
+  }
+
+  get conceptoPrincipal(): { concepto: string; monto: number } | null {
+    return this.resumenMes?.gastosPorConcepto[0] ?? null;
+  }
+
+  // =========================
+  // PRESENTACIÓN
+  // =========================
+
+  iconoConcepto(concepto: string | null | undefined): string {
+    const valor = (concepto ?? '').toLowerCase();
+
+    if (/(luz|agua|internet|tel[eé]fono|servicio|gas\b)/.test(valor)) return 'bolt';
+    if (/(transporte|pasaje|taxi|flete|combustible|gasolina)/.test(valor)) return 'local_shipping';
+    if (/(alquiler|renta)/.test(valor)) return 'home_work';
+    if (/(sueldo|salario|pago personal|planilla|adelanto)/.test(valor)) return 'badge';
+    if (/(limpieza|mantenimiento|reparaci)/.test(valor)) return 'build';
+    if (/(insumo|material|papel|bolsa|útil|util)/.test(valor)) return 'inventory';
+    if (/(comida|almuerzo|refrigerio|alimento)/.test(valor)) return 'restaurant';
+    if (/(impuesto|tributo|patente)/.test(valor)) return 'account_balance';
+
+    return 'receipt_long';
   }
 
   nuevo(): void {
@@ -164,6 +231,7 @@ export class GastoListComponent implements OnInit {
           }
 
           this.cargarGastos();
+          this.cargarResumenMes();
         },
         error: () => {
           this.notificationService.error(
@@ -171,5 +239,12 @@ export class GastoListComponent implements OnInit {
           );
         }
       });
+  }
+
+  private formatoFecha(fecha: Date): string {
+    const anio = fecha.getFullYear();
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+    const dia = String(fecha.getDate()).padStart(2, '0');
+    return `${anio}-${mes}-${dia}`;
   }
 }

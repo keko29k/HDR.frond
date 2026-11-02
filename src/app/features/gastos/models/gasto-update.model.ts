@@ -1,5 +1,5 @@
 export interface GastoUpdate {
-  concepto : number;
+  concepto : string;
   numeroComprobante : string;
   monto: number;
   observacion : string;

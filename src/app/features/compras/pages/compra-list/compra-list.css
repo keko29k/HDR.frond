@@ -1,28 +1,44 @@
-.page-container {
-  min-height: 100vh;
-  background: #f4f6f8;
-  padding: 24px;
+/* Estilos base en shared/styles/operaciones.css */
+
+.table {
+  min-width: 1080px;
 }
 
-.table-card {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 24px;
+.observation {
+  display: block;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.header {
+.document {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.document strong {
+  color: var(--op-text);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.document small {
+  color: var(--op-muted);
+  font-size: 11.5px;
+}
+
+.with-icon {
+  display: inline-flex;
   align-items: center;
-  margin-bottom: 24px;
-  gap: 12px;
-  flex-wrap: wrap;
+  gap: 6px;
+  white-space: nowrap;
 }
 
-.table-container {
-  overflow-x: auto;
-}
-
-.full-width-table {
-  width: 100%;
+.with-icon mat-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--op-muted);
+  font-size: 16px;
 }

@@ -21,8 +21,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 interface DetalleCompraFormulario {
   idProducto: number;
@@ -54,11 +54,14 @@ interface DetalleCompraFormulario {
     MatButtonModule,
     MatSelectModule,
     MatProgressSpinnerModule,
-    MatDividerModule,
-    MatToolbarModule
+    MatIconModule,
+    MatTooltipModule
   ],
   templateUrl: './compra-form.html',
-  styleUrl: './compra-form.css'
+  styleUrls: [
+    '../../../../shared/styles/operaciones.css',
+    './compra-form.css'
+  ]
 })
 export class CompraFormComponent implements OnInit {
 
@@ -171,6 +174,24 @@ export class CompraFormComponent implements OnInit {
 
   get tieneProductosConVencimiento(): boolean {
     return this.detalles.some(d => d.tieneVencimiento);
+  }
+
+  // =========================
+  // RESUMEN
+  // =========================
+
+  get totalUnidades(): number {
+    return this.detalles.reduce((total, d) => total + d.cantidad, 0);
+  }
+
+  get nombreProveedorSeleccionado(): string {
+    const id = this.form.controls.idProveedor.value;
+
+    return this.proveedores.find(p => p.id === id)?.nombre ?? 'Sin seleccionar';
+  }
+
+  enDetalle(producto: Producto): number {
+    return this.detalles.find(d => d.idProducto === producto.id)?.cantidad ?? 0;
   }
 
   // =========================

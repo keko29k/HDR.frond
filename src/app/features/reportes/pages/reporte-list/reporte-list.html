@@ -1,127 +1,610 @@
-<div class="container">
+<main class="page">
 
-  <!-- TÍTULO -->
-  <mat-card class="header">
-    <h1>📊 Reporte de Ventas</h1>
-    <p>Consulta el rendimiento de ventas por rango de fechas</p>
-  </mat-card>
+  <!-- ENCABEZADO -->
+  <header class="page-header">
+    <div class="heading">
+      <span class="heading-icon"><mat-icon>bar_chart</mat-icon></span>
+      <div>
+        <span class="eyebrow">Finanzas</span>
+        <h1>Reportes</h1>
+        <p>Ventas, rentabilidad, gastos, cuentas por cobrar e inventario del negocio.</p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn secondary" type="button" [disabled]="!reporte || loading" (click)="exportarCsv()"
+        matTooltip="Exporta la sección actual a Excel (CSV)">
+        <mat-icon>download</mat-icon>
+        Exportar Excel
+      </button>
+      <button class="btn secondary" type="button" [disabled]="!reporte || loading" (click)="imprimir()">
+        <mat-icon>print</mat-icon>
+        Imprimir
+      </button>
+    </div>
+  </header>
 
   <!-- FILTROS -->
-  <mat-card class="filtros-card">
-    <div class="filtros">
+  <mat-card class="panel filters">
+    <div class="presets" role="group" aria-label="Periodo">
+      @for (r of rangos; track r.id) {
+        <button type="button" class="preset" [class.on]="rango === r.id" [disabled]="loading" (click)="aplicarRango(r.id)">
+          {{ r.label }}
+        </button>
+      }
+    </div>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Fecha Inicial</mat-label>
-        <input matInput [matDatepicker]="picker1" [(ngModel)]="fechaInicial">
-        <mat-datepicker-toggle matSuffix [for]="picker1"></mat-datepicker-toggle>
-        <mat-datepicker #picker1></mat-datepicker>
+    <div class="filter-fields">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Desde</mat-label>
+        <input matInput type="date" [(ngModel)]="desde" [max]="hasta" (ngModelChange)="cambioFechaManual()">
       </mat-form-field>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Fecha Final</mat-label>
-        <input matInput [matDatepicker]="picker2" [(ngModel)]="fechaFinal">
-        <mat-datepicker-toggle matSuffix [for]="picker2"></mat-datepicker-toggle>
-        <mat-datepicker #picker2></mat-datepicker>
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Hasta</mat-label>
+        <input matInput type="date" [(ngModel)]="hasta" [min]="desde" (ngModelChange)="cambioFechaManual()">
       </mat-form-field>
 
-      <button mat-raised-button color="primary" (click)="obtenerReporte()">
-        🔎 Generar
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>Sucursal</mat-label>
+        <mat-icon matPrefix>storefront</mat-icon>
+        <mat-select [(ngModel)]="idSucursal" (selectionChange)="generar()">
+          <mat-option [value]="0">Todas las sucursales</mat-option>
+          @for (s of sucursales; track s.id) {
+            <mat-option [value]="s.id">{{ s.nombre }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <button class="btn primary" type="button" [disabled]="loading" (click)="generar()">
+        @if (loading) {
+          <mat-spinner diameter="18"></mat-spinner>
+        } @else {
+          <mat-icon>search</mat-icon>
+        }
+        Generar
       </button>
-
     </div>
   </mat-card>
 
-  <!-- LOADING -->
-  <div class="loading" *ngIf="loading">
-    <mat-spinner diameter="50"></mat-spinner>
-  </div>
+  @if (error && !loading) {
+    <div class="alert" role="alert">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ error }}</span>
+    </div>
+  }
 
-  <!-- ERROR -->
-  <div class="error" *ngIf="error">
-    ⚠️ {{ error }}
-  </div>
-
-  <!-- RESUMEN -->
-  <div class="resumen" *ngIf="reporte">
-
-    <mat-card class="card total">
-      <h3>Total Ventas</h3>
-      <p>{{ reporte.totalGen | currency }}</p>
+  @if (loading && !reporte) {
+    <mat-card class="panel">
+      <div class="state-panel" role="status">
+        <mat-spinner diameter="34"></mat-spinner>
+        <span>Generando reporte...</span>
+      </div>
     </mat-card>
+  }
 
-    <mat-card class="card inversion">
-      <h3>Inversión</h3>
-      <p>{{ reporte.inversionTotal | currency }}</p>
-    </mat-card>
+  @if (reporte; as r) {
+    <div class="report" [class.refreshing]="loading">
 
-    <mat-card class="card gasto">
-      <h3>Gastos</h3>
-      <p>{{ reporte.gastoTotal | currency }}</p>
-    </mat-card>
+      <p class="period">
+        <mat-icon>date_range</mat-icon>
+        Del <strong>{{ fechaTexto(r.desde) }}</strong> al <strong>{{ fechaTexto(r.hasta) }}</strong> · {{ r.sucursal }}
+      </p>
 
-    <mat-card class="card ganancia">
-      <h3>Ganancia</h3>
-      <p>{{ reporte.gananciaTotal | currency }}</p>
-    </mat-card>
+      <!-- KPIs PRINCIPALES -->
+      <section class="summary-row" aria-label="Indicadores principales">
+        <article class="summary-card">
+          <span class="summary-icon"><mat-icon>point_of_sale</mat-icon></span>
+          <div>
+            <span class="summary-label">Ventas</span>
+            <strong>Bs {{ r.resumen.totalVentas | number:'1.2-2' }}</strong>
+            <small>{{ r.resumen.cantidadVentas }} ventas · ticket Bs {{ r.resumen.ticketPromedio | number:'1.2-2' }}</small>
+          </div>
+        </article>
 
-  </div>
+        <article class="summary-card">
+          <span class="summary-icon info"><mat-icon>trending_up</mat-icon></span>
+          <div>
+            <span class="summary-label">Utilidad bruta</span>
+            <strong [class.neg]="r.resumen.utilidadBruta < 0">Bs {{ r.resumen.utilidadBruta | number:'1.2-2' }}</strong>
+            <small>Margen {{ r.resumen.margenBruto | number:'1.0-1' }}% · costo Bs {{ r.resumen.costoVentas | number:'1.2-2' }}</small>
+          </div>
+        </article>
 
-  <!-- TABLA -->
-  <mat-card class="tabla-card" *ngIf="reporte?.productos?.length">
+        <article class="summary-card">
+          <span class="summary-icon warning"><mat-icon>receipt_long</mat-icon></span>
+          <div>
+            <span class="summary-label">Gastos</span>
+            <strong>Bs {{ r.resumen.totalGastos | number:'1.2-2' }}</strong>
+            <small>{{ r.gastosPorConcepto.length }} {{ r.gastosPorConcepto.length === 1 ? 'concepto' : 'conceptos' }}</small>
+          </div>
+        </article>
 
-    <h2>📦 Productos vendidos</h2>
+        <article class="summary-card highlight" [class.loss]="r.resumen.utilidadNeta < 0">
+          <span class="summary-icon"><mat-icon>account_balance</mat-icon></span>
+          <div>
+            <span class="summary-label">Utilidad neta</span>
+            <strong>Bs {{ r.resumen.utilidadNeta | number:'1.2-2' }}</strong>
+            <small>Margen neto {{ r.resumen.margenNeto | number:'1.0-1' }}%</small>
+          </div>
+        </article>
+      </section>
 
-    <table mat-table [dataSource]="reporte.productos" class="mat-elevation-z8">
+      <!-- PESTAÑAS -->
+      <nav class="tabs" role="tablist" aria-label="Secciones del reporte">
+        @for (s of secciones; track s.id) {
+          <button type="button" role="tab" class="tab" [class.on]="seccion === s.id"
+            [attr.aria-selected]="seccion === s.id" (click)="seccion = s.id">
+            <mat-icon>{{ s.icon }}</mat-icon>
+            {{ s.label }}
+            @if (s.id === 'creditos' && r.cuentasPorCobrar.creditosVencidos) {
+              <span class="tab-badge">{{ r.cuentasPorCobrar.creditosVencidos }}</span>
+            }
+            @if (s.id === 'inventario' && (r.inventario.productosStockBajo + r.inventario.lotesPorVencer)) {
+              <span class="tab-badge warn">{{ r.inventario.productosStockBajo + r.inventario.lotesPorVencer }}</span>
+            }
+          </button>
+        }
+      </nav>
 
-      <!-- Nombre -->
-      <ng-container matColumnDef="nombre">
-        <th mat-header-cell *matHeaderCellDef>Producto</th>
-        <td mat-cell *matCellDef="let e">{{ e.nombre }}</td>
-      </ng-container>
+      <!-- ================= RESUMEN ================= -->
+      @if (seccion === 'resumen') {
+        <div class="grid-2-1">
+          <mat-card class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>Ventas por día</h2>
+                <p>
+                  @if (mejorDia; as m) {
+                    Mejor día: {{ fechaTexto(m.fecha) }} con Bs {{ m.total | number:'1.2-2' }}
+                  } @else {
+                    Sin ventas en el periodo
+                  }
+                </p>
+              </div>
+              <div class="mini-legend">
+                <span><i class="sw sales"></i>Ventas</span>
+                <span><i class="sw profit"></i>Utilidad</span>
+              </div>
+            </div>
+            <div class="panel-body">
+              @if (maxVentaDia > 0) {
+                <div class="chart" [style.--n]="r.ventasPorDia.length">
+                  <div class="chart-bars">
+                    @for (d of r.ventasPorDia; track d.fecha) {
+                      <div class="bar-col"
+                        [matTooltip]="fechaTexto(d.fecha) + ' · Bs ' + (d.total | number:'1.2-2') + ' · ' + d.cantidadVentas + ' ventas · utilidad Bs ' + (d.utilidad | number:'1.2-2')">
+                        <div class="bar" [style.height.%]="altoBarra(d)">
+                          <div class="bar-profit" [style.height.%]="d.total > 0 ? porcentaje(d.utilidad > 0 ? d.utilidad : 0, d.total) : 0"></div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                  <div class="chart-axis">
+                    <span>{{ fechaTexto(r.desde) }}</span>
+                    <span>{{ fechaTexto(r.hasta) }}</span>
+                  </div>
+                </div>
+              } @else {
+                <div class="state-panel compact">
+                  <span class="state-icon"><mat-icon>show_chart</mat-icon></span>
+                  <h3>Sin ventas en este periodo</h3>
+                  <p>Prueba con otro rango de fechas.</p>
+                </div>
+              }
+            </div>
+          </mat-card>
 
-      <!-- Cantidad -->
-      <ng-container matColumnDef="cantidad">
-        <th mat-header-cell *matHeaderCellDef>Cant.</th>
-        <td mat-cell *matCellDef="let e">{{ e.cantidad }}</td>
-      </ng-container>
+          <mat-card class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>Flujo del periodo</h2>
+                <p>Cobros y tipo de venta</p>
+              </div>
+            </div>
+            <div class="panel-body">
+              <dl class="kv">
+                <div><dt>Total cobrado</dt><dd class="pos">Bs {{ r.resumen.totalCobrado | number:'1.2-2' }}</dd></div>
+                <div><dt>Ventas al contado</dt><dd>Bs {{ r.resumen.ventasContado | number:'1.2-2' }}</dd></div>
+                <div><dt>Ventas a crédito</dt><dd>Bs {{ r.resumen.ventasCredito | number:'1.2-2' }}</dd></div>
+                <div><dt>Unidades vendidas</dt><dd>{{ r.resumen.unidadesVendidas | number:'1.0-2' }}</dd></div>
+                <div><dt>Compras ({{ r.resumen.cantidadCompras }})</dt><dd>Bs {{ r.resumen.totalCompras | number:'1.2-2' }}</dd></div>
+                <div><dt>Por cobrar hoy</dt><dd class="neg">Bs {{ r.cuentasPorCobrar.totalPendiente | number:'1.2-2' }}</dd></div>
+              </dl>
 
-      <!-- Venta -->
-      <ng-container matColumnDef="precioVenta">
-        <th mat-header-cell *matHeaderCellDef>Venta</th>
-        <td mat-cell *matCellDef="let e">{{ e.precioVenta | currency }}</td>
-      </ng-container>
+              <h3 class="sub">Cobros por método</h3>
+              @for (m of r.ventasPorMetodo; track m.metodo) {
+                <div class="bar-row">
+                  <div class="bar-row-head">
+                    <span class="with-icon"><mat-icon>{{ iconoMetodo(m.metodo) }}</mat-icon>{{ m.metodo | titlecase }}</span>
+                    <strong>Bs {{ m.monto | number:'1.2-2' }}</strong>
+                  </div>
+                  <div class="track"><div class="fill" [style.width.%]="porcentaje(m.monto, totalMetodos)"></div></div>
+                </div>
+              } @empty {
+                <p class="muted small">Sin cobros en el periodo.</p>
+              }
+            </div>
+          </mat-card>
+        </div>
 
-      <!-- Compra -->
-      <ng-container matColumnDef="precioCompra">
-        <th mat-header-cell *matHeaderCellDef>Compra</th>
-        <td mat-cell *matCellDef="let e">{{ e.precioCompra | currency }}</td>
-      </ng-container>
+        <div class="grid-2">
+          <mat-card class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>Productos más vendidos</h2>
+                <p>Top 5 por monto vendido</p>
+              </div>
+              <button type="button" class="btn ghost small" (click)="seccion = 'productos'">Ver todos</button>
+            </div>
+            <div class="panel-body">
+              @for (p of topProductos; track p.idProducto; let i = $index) {
+                <div class="rank-row">
+                  <span class="rank">{{ i + 1 }}</span>
+                  <div class="rank-body">
+                    <div class="bar-row-head">
+                      <span class="ellipsis">{{ p.nombre }}</span>
+                      <strong>Bs {{ p.ventas | number:'1.2-2' }}</strong>
+                    </div>
+                    <div class="track"><div class="fill" [style.width.%]="porcentaje(p.ventas, topProductos[0].ventas)"></div></div>
+                    <small class="muted">{{ p.cantidad | number:'1.0-2' }} unid. · utilidad Bs {{ p.utilidad | number:'1.2-2' }}</small>
+                  </div>
+                </div>
+              } @empty {
+                <p class="muted small">Sin productos vendidos en el periodo.</p>
+              }
+            </div>
+          </mat-card>
 
-      <!-- Total Venta -->
-      <ng-container matColumnDef="precioVentaT">
-        <th mat-header-cell *matHeaderCellDef>Total V</th>
-        <td mat-cell *matCellDef="let e">{{ e.precioVentaT | currency }}</td>
-      </ng-container>
+          <mat-card class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>Ventas por vendedor</h2>
+                <p>Desempeño del equipo</p>
+              </div>
+            </div>
+            <div class="panel-body">
+              @for (v of r.ventasPorVendedor; track v.idUsuario) {
+                <div class="rank-row">
+                  <span class="avatar">{{ v.vendedor.substring(0, 1) | uppercase }}</span>
+                  <div class="rank-body">
+                    <div class="bar-row-head">
+                      <span class="ellipsis">{{ v.vendedor }}</span>
+                      <strong>Bs {{ v.total | number:'1.2-2' }}</strong>
+                    </div>
+                    <div class="track"><div class="fill alt" [style.width.%]="porcentaje(v.total, totalVendedores)"></div></div>
+                    <small class="muted">{{ v.cantidadVentas }} ventas · {{ porcentaje(v.total, totalVendedores) | number:'1.0-1' }}% del total</small>
+                  </div>
+                </div>
+              } @empty {
+                <p class="muted small">Sin ventas en el periodo.</p>
+              }
+            </div>
+          </mat-card>
+        </div>
+      }
 
-      <!-- Total Compra -->
-      <ng-container matColumnDef="precioCompraT">
-        <th mat-header-cell *matHeaderCellDef>Total C</th>
-        <td mat-cell *matCellDef="let e">{{ e.precioCompraT | currency }}</td>
-      </ng-container>
+      <!-- ================= PRODUCTOS ================= -->
+      @if (seccion === 'productos') {
+        <mat-card class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Rentabilidad por producto</h2>
+              <p>{{ productosFiltrados.length }} productos vendidos en el periodo</p>
+            </div>
+            <div class="head-tools">
+              <mat-form-field appearance="outline" subscriptSizing="dynamic" class="order">
+                <mat-label>Ordenar por</mat-label>
+                <mat-select [(ngModel)]="ordenProducto">
+                  <mat-option value="ventas">Monto vendido</mat-option>
+                  <mat-option value="cantidad">Cantidad</mat-option>
+                  <mat-option value="utilidad">Utilidad</mat-option>
+                  <mat-option value="margen">Margen</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search">
+                <mat-label>Buscar producto</mat-label>
+                <mat-icon matPrefix>search</mat-icon>
+                <input matInput [(ngModel)]="buscarProducto" placeholder="Nombre o código">
+              </mat-form-field>
+            </div>
+          </div>
 
-      <!-- Ganancia -->
-      <ng-container matColumnDef="ganancia">
-        <th mat-header-cell *matHeaderCellDef>Ganancia</th>
-        <td mat-cell *matCellDef="let e" class="ganancia">
-          {{ e.totalGanancia | currency }}
-        </td>
-      </ng-container>
+          @if (productosFiltrados.length) {
+            <div class="table-wrap">
+              <table class="report-table">
+                <thead>
+                  <tr>
+                    <th>Producto</th>
+                    <th class="right">Cantidad</th>
+                    <th class="right">Ventas</th>
+                    <th class="right">Costo</th>
+                    <th class="right">Utilidad</th>
+                    <th class="right">Margen</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (p of productosFiltrados; track p.idProducto) {
+                    <tr>
+                      <td>
+                        <span class="line-product">
+                          <strong>{{ p.nombre }}</strong>
+                          <small class="mono">{{ p.codigo }}</small>
+                        </span>
+                      </td>
+                      <td class="right">{{ p.cantidad | number:'1.0-2' }}</td>
+                      <td class="right"><span class="money">Bs {{ p.ventas | number:'1.2-2' }}</span></td>
+                      <td class="right muted">Bs {{ p.costo | number:'1.2-2' }}</td>
+                      <td class="right"><span class="money" [class.negative]="p.utilidad < 0" [class.positive]="p.utilidad > 0">Bs {{ p.utilidad | number:'1.2-2' }}</span></td>
+                      <td class="right"><span class="status" [ngClass]="claseMargen(p.margen)">{{ p.margen | number:'1.0-1' }}%</span></td>
+                    </tr>
+                  }
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td>Total</td>
+                    <td class="right">{{ totalesProductos.cantidad | number:'1.0-2' }}</td>
+                    <td class="right">Bs {{ totalesProductos.ventas | number:'1.2-2' }}</td>
+                    <td class="right">Bs {{ totalesProductos.costo | number:'1.2-2' }}</td>
+                    <td class="right">Bs {{ totalesProductos.utilidad | number:'1.2-2' }}</td>
+                    <td class="right">{{ porcentaje(totalesProductos.utilidad, totalesProductos.ventas) | number:'1.0-1' }}%</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          } @else {
+            <div class="state-panel">
+              <span class="state-icon"><mat-icon>inventory_2</mat-icon></span>
+              <h3>{{ buscarProducto ? 'Sin coincidencias' : 'Sin productos vendidos' }}</h3>
+              <p>{{ buscarProducto ? 'Prueba con otro nombre o código.' : 'No hubo ventas en el periodo seleccionado.' }}</p>
+            </div>
+          }
+        </mat-card>
+      }
 
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      <!-- ================= COMPRAS Y GASTOS ================= -->
+      @if (seccion === 'compras') {
+        <div class="grid-2">
+          <mat-card class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>Compras por proveedor</h2>
+                <p>{{ r.resumen.cantidadCompras }} compras · Bs {{ r.resumen.totalCompras | number:'1.2-2' }}</p>
+              </div>
+            </div>
+            @if (r.comprasPorProveedor.length) {
+              <div class="table-wrap">
+                <table class="report-table">
+                  <thead>
+                    <tr><th>Proveedor</th><th class="right">Compras</th><th class="right">Total</th><th class="right">%</th></tr>
+                  </thead>
+                  <tbody>
+                    @for (p of r.comprasPorProveedor; track p.idProveedor) {
+                      <tr>
+                        <td><strong class="strong">{{ p.proveedor }}</strong></td>
+                        <td class="right">{{ p.cantidadCompras }}</td>
+                        <td class="right"><span class="money">Bs {{ p.total | number:'1.2-2' }}</span></td>
+                        <td class="right muted">{{ porcentaje(p.total, totalProveedores) | number:'1.0-1' }}%</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            } @else {
+              <div class="state-panel compact">
+                <span class="state-icon"><mat-icon>local_shipping</mat-icon></span>
+                <h3>Sin compras en el periodo</h3>
+              </div>
+            }
+          </mat-card>
 
-    </table>
+          <mat-card class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>Gastos por concepto</h2>
+                <p>Total Bs {{ r.resumen.totalGastos | number:'1.2-2' }}</p>
+              </div>
+            </div>
+            @if (r.gastosPorConcepto.length) {
+              <div class="panel-body">
+                @for (g of r.gastosPorConcepto; track g.concepto) {
+                  <div class="bar-row">
+                    <div class="bar-row-head">
+                      <span class="ellipsis">{{ g.concepto }} <small class="muted">({{ g.cantidad }})</small></span>
+                      <strong>Bs {{ g.monto | number:'1.2-2' }}</strong>
+                    </div>
+                    <div class="track"><div class="fill warn" [style.width.%]="porcentaje(g.monto, totalGastosConcepto)"></div></div>
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="state-panel compact">
+                <span class="state-icon"><mat-icon>receipt_long</mat-icon></span>
+                <h3>Sin gastos en el periodo</h3>
+              </div>
+            }
+          </mat-card>
+        </div>
+      }
 
-  </mat-card>
+      <!-- ================= CUENTAS POR COBRAR ================= -->
+      @if (seccion === 'creditos') {
+        <section class="summary-row compact-row">
+          <article class="summary-card">
+            <span class="summary-icon danger"><mat-icon>request_quote</mat-icon></span>
+            <div>
+              <span class="summary-label">Saldo por cobrar</span>
+              <strong>Bs {{ r.cuentasPorCobrar.totalPendiente | number:'1.2-2' }}</strong>
+              <small>{{ r.cuentasPorCobrar.creditosPendientes }} créditos pendientes</small>
+            </div>
+          </article>
+          <article class="summary-card">
+            <span class="summary-icon warning"><mat-icon>event_busy</mat-icon></span>
+            <div>
+              <span class="summary-label">Vencido</span>
+              <strong>Bs {{ r.cuentasPorCobrar.montoVencido | number:'1.2-2' }}</strong>
+              <small>{{ r.cuentasPorCobrar.creditosVencidos }} créditos vencidos</small>
+            </div>
+          </article>
+        </section>
 
-</div>
+        <mat-card class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Créditos pendientes</h2>
+              <p>Estado actual (no depende del rango de fechas). Primero los más atrasados.</p>
+            </div>
+          </div>
+          @if (r.cuentasPorCobrar.creditos.length) {
+            <div class="table-wrap">
+              <table class="report-table">
+                <thead>
+                  <tr>
+                    <th>Venta</th><th>Cliente</th><th>Fecha venta</th>
+                    <th class="right">Total</th><th class="right">Saldo</th><th>Fecha límite</th><th>Estado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (c of r.cuentasPorCobrar.creditos; track c.idVenta) {
+                    <tr>
+                      <td><span class="id-tag">#{{ c.idVenta }}</span></td>
+                      <td><strong class="strong">{{ c.cliente }}</strong></td>
+                      <td class="nowrap">{{ c.fechaVenta | date:'dd/MM/yyyy' }}</td>
+                      <td class="right">Bs {{ c.total | number:'1.2-2' }}</td>
+                      <td class="right"><span class="money negative">Bs {{ c.saldoPendiente | number:'1.2-2' }}</span></td>
+                      <td class="nowrap">{{ c.fechaLimitePago ? fechaTexto(c.fechaLimitePago) : '—' }}</td>
+                      <td>
+                        @if (c.diasVencido > 0) {
+                          <span class="status danger">Vencido hace {{ c.diasVencido }} {{ c.diasVencido === 1 ? 'día' : 'días' }}</span>
+                        } @else {
+                          <span class="status warning">Al día</span>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          } @else {
+            <div class="state-panel">
+              <span class="state-icon"><mat-icon>task_alt</mat-icon></span>
+              <h3>No hay créditos pendientes</h3>
+              <p>Todos los créditos están pagados.</p>
+            </div>
+          }
+        </mat-card>
+      }
+
+      <!-- ================= INVENTARIO ================= -->
+      @if (seccion === 'inventario') {
+        <section class="summary-row compact-row">
+          <article class="summary-card">
+            <span class="summary-icon info"><mat-icon>warehouse</mat-icon></span>
+            <div>
+              <span class="summary-label">Valor del inventario</span>
+              <strong>Bs {{ r.inventario.valorInventario | number:'1.2-2' }}</strong>
+              <small>A precio de compra</small>
+            </div>
+          </article>
+          <article class="summary-card">
+            <span class="summary-icon warning"><mat-icon>production_quantity_limits</mat-icon></span>
+            <div>
+              <span class="summary-label">Stock bajo</span>
+              <strong>{{ r.inventario.productosStockBajo }}</strong>
+              <small>En o por debajo del mínimo</small>
+            </div>
+          </article>
+          <article class="summary-card">
+            <span class="summary-icon danger"><mat-icon>event</mat-icon></span>
+            <div>
+              <span class="summary-label">Lotes por vencer</span>
+              <strong>{{ r.inventario.lotesPorVencer }}</strong>
+              <small>Vencidos o en los próximos 30 días</small>
+            </div>
+          </article>
+        </section>
+
+        <div class="grid-2">
+          <mat-card class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>Productos con stock bajo</h2>
+                <p>Conviene reponer estos productos</p>
+              </div>
+            </div>
+            @if (r.inventario.stockBajo.length) {
+              <div class="table-wrap">
+                <table class="report-table">
+                  <thead>
+                    <tr><th>Producto</th><th>Sucursal</th><th class="right">Stock</th><th class="right">Mínimo</th></tr>
+                  </thead>
+                  <tbody>
+                    @for (s of r.inventario.stockBajo; track s.idProducto + s.sucursal) {
+                      <tr>
+                        <td><strong class="strong">{{ s.producto }}</strong></td>
+                        <td class="muted">{{ s.sucursal }}</td>
+                        <td class="right"><span class="money" [class.negative]="s.stockActual <= 0">{{ s.stockActual | number:'1.0-2' }}</span></td>
+                        <td class="right muted">{{ s.stockMinimo | number:'1.0-2' }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            } @else {
+              <div class="state-panel compact">
+                <span class="state-icon"><mat-icon>task_alt</mat-icon></span>
+                <h3>Todo el stock está sobre el mínimo</h3>
+              </div>
+            }
+          </mat-card>
+
+          <mat-card class="panel">
+            <div class="panel-head">
+              <div>
+                <h2>Próximos vencimientos</h2>
+                <p>Lotes con stock disponible</p>
+              </div>
+            </div>
+            @if (r.inventario.proximosVencimientos.length) {
+              <div class="table-wrap">
+                <table class="report-table">
+                  <thead>
+                    <tr><th>Producto / lote</th><th>Vence</th><th class="right">Cant.</th><th>Estado</th></tr>
+                  </thead>
+                  <tbody>
+                    @for (l of r.inventario.proximosVencimientos; track l.idLote) {
+                      <tr>
+                        <td>
+                          <span class="line-product">
+                            <strong>{{ l.producto }}</strong>
+                            <small class="mono">Lote {{ l.numeroLote }} · {{ l.sucursal }}</small>
+                          </span>
+                        </td>
+                        <td class="nowrap">{{ fechaTexto(l.fechaVencimiento) }}</td>
+                        <td class="right">{{ l.cantidadDisponible | number:'1.0-2' }}</td>
+                        <td>
+                          @if (l.diasRestantes < 0) {
+                            <span class="status danger">Vencido</span>
+                          } @else if (l.diasRestantes === 0) {
+                            <span class="status danger">Vence hoy</span>
+                          } @else {
+                            <span class="status warning">{{ l.diasRestantes }} {{ l.diasRestantes === 1 ? 'día' : 'días' }}</span>
+                          }
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            } @else {
+              <div class="state-panel compact">
+                <span class="state-icon"><mat-icon>task_alt</mat-icon></span>
+                <h3>Sin lotes por vencer</h3>
+              </div>
+            }
+          </mat-card>
+        </div>
+      }
+    </div>
+  }
+</main>

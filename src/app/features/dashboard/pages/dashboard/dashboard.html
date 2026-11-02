@@ -1,0 +1,320 @@
+<main class="page">
+
+  <!-- ENCABEZADO -->
+  <header class="page-header">
+    <div class="heading">
+      <span class="heading-icon"><mat-icon>dashboard</mat-icon></span>
+      <div>
+        <span class="eyebrow">{{ fechaLarga }}</span>
+        <h1>{{ saludo }}{{ nombreUsuario ? ', ' + nombreUsuario : '' }}</h1>
+        <p>Así va el negocio hoy y en los últimos 30 días.</p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="branch">
+        <mat-icon matPrefix>storefront</mat-icon>
+        <mat-select [(ngModel)]="idSucursal" (selectionChange)="cargar()" aria-label="Sucursal">
+          <mat-option [value]="0">Todas las sucursales</mat-option>
+          @for (s of sucursales; track s.id) {
+            <mat-option [value]="s.id">{{ s.nombre }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <button class="btn secondary" type="button" [disabled]="loading" (click)="cargar()" matTooltip="Actualizar">
+        <mat-icon [class.spin]="loading">refresh</mat-icon>
+      </button>
+    </div>
+  </header>
+
+  <!-- ACCESOS RÁPIDOS -->
+  <nav class="quick" aria-label="Accesos rápidos">
+    <button type="button" class="quick-item primary" (click)="ir('/ventas/nuevo')">
+      <span class="quick-icon"><mat-icon>point_of_sale</mat-icon></span>
+      <span><strong>Nueva venta</strong><small>Punto de venta</small></span>
+    </button>
+    <button type="button" class="quick-item" (click)="ir('/compras/nuevo')">
+      <span class="quick-icon"><mat-icon>add_shopping_cart</mat-icon></span>
+      <span><strong>Nueva compra</strong><small>Ingreso de mercadería</small></span>
+    </button>
+    <button type="button" class="quick-item" (click)="ir('/inventario')">
+      <span class="quick-icon"><mat-icon>warehouse</mat-icon></span>
+      <span><strong>Inventario</strong><small>Stock y lotes</small></span>
+    </button>
+    <button type="button" class="quick-item" (click)="ir('/reportes')">
+      <span class="quick-icon"><mat-icon>bar_chart</mat-icon></span>
+      <span><strong>Reportes</strong><small>Análisis completo</small></span>
+    </button>
+  </nav>
+
+  @if (error && !loading) {
+    <mat-card class="panel">
+      <div class="state-panel" role="alert">
+        <span class="state-icon error"><mat-icon>cloud_off</mat-icon></span>
+        <h3>No se pudo cargar el dashboard</h3>
+        <p>Verifica que el servidor esté en ejecución y que tu sesión siga activa.</p>
+        <button class="btn secondary small" type="button" (click)="cargar()">
+          <mat-icon>refresh</mat-icon>
+          Reintentar
+        </button>
+      </div>
+    </mat-card>
+  } @else if (loading && !periodo) {
+    <!-- ESQUELETO DE CARGA -->
+    <section class="summary-row">
+      @for (i of [1, 2, 3, 4]; track i) {
+        <div class="skeleton kpi-skel"></div>
+      }
+    </section>
+    <div class="grid-main">
+      <div class="skeleton chart-skel"></div>
+      <div class="skeleton chart-skel"></div>
+    </div>
+  } @else if (periodo && hoy && mes) {
+    <div class="content" [class.refreshing]="loading">
+
+      <!-- KPIs -->
+      <section class="summary-row" aria-label="Indicadores">
+        <article class="summary-card kpi">
+          <span class="summary-icon"><mat-icon>today</mat-icon></span>
+          <div>
+            <span class="summary-label">Ventas de hoy</span>
+            <strong>Bs {{ hoy.resumen.totalVentas | number:'1.2-2' }}</strong>
+            <small>{{ hoy.resumen.cantidadVentas }} {{ hoy.resumen.cantidadVentas === 1 ? 'venta' : 'ventas' }} · cobrado Bs {{ hoy.resumen.totalCobrado | number:'1.2-2' }}</small>
+          </div>
+        </article>
+
+        <article class="summary-card kpi">
+          <span class="summary-icon info"><mat-icon>calendar_month</mat-icon></span>
+          <div>
+            <span class="summary-label">Ventas del mes</span>
+            <strong>Bs {{ mes.resumen.totalVentas | number:'1.2-2' }}</strong>
+            <small>
+              @if (variacionMes !== null) {
+                <span class="trend" [class.up]="variacionMes >= 0" [class.down]="variacionMes < 0">
+                  <mat-icon>{{ variacionMes >= 0 ? 'trending_up' : 'trending_down' }}</mat-icon>
+                  {{ variacionMes >= 0 ? '+' : '' }}{{ variacionMes | number:'1.0-1' }}%
+                </span>
+                vs. mes anterior
+              } @else {
+                {{ mes.resumen.cantidadVentas }} ventas en el mes
+              }
+            </small>
+          </div>
+        </article>
+
+        <article class="summary-card kpi">
+          <span class="summary-icon" [class.danger]="mes.resumen.utilidadNeta < 0"><mat-icon>account_balance</mat-icon></span>
+          <div>
+            <span class="summary-label">Utilidad neta del mes</span>
+            <strong [class.neg]="mes.resumen.utilidadNeta < 0">Bs {{ mes.resumen.utilidadNeta | number:'1.2-2' }}</strong>
+            <small>Margen {{ mes.resumen.margenNeto | number:'1.0-1' }}% · gastos Bs {{ mes.resumen.totalGastos | number:'1.2-2' }}</small>
+          </div>
+        </article>
+
+        <article class="summary-card kpi">
+          <span class="summary-icon danger"><mat-icon>request_quote</mat-icon></span>
+          <div>
+            <span class="summary-label">Por cobrar</span>
+            <strong>Bs {{ periodo.cuentasPorCobrar.totalPendiente | number:'1.2-2' }}</strong>
+            <small>{{ periodo.cuentasPorCobrar.creditosPendientes }} créditos · {{ periodo.cuentasPorCobrar.creditosVencidos }} vencidos</small>
+          </div>
+        </article>
+      </section>
+
+      <!-- GRÁFICO + ALERTAS -->
+      <div class="grid-main">
+        <mat-card class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Ventas de los últimos 30 días</h2>
+              <p>
+                Total Bs {{ periodo.resumen.totalVentas | number:'1.2-2' }} ·
+                promedio diario Bs {{ promedioDiario | number:'1.2-2' }}
+              </p>
+            </div>
+            <div class="mini-legend">
+              <span><i class="sw sales"></i>Ventas</span>
+              <span><i class="sw profit"></i>Utilidad</span>
+              <span><i class="sw avg"></i>Promedio</span>
+            </div>
+          </div>
+          <div class="panel-body">
+            @if (maxDia > 0) {
+              <div class="chart">
+                <div class="chart-area">
+                  <div class="avg-line" [style.bottom.%]="altoPromedio"></div>
+                  @for (d of dias; track d.fecha; let ultimo = $last) {
+                    <div class="bar-col" [class.today]="ultimo"
+                      [matTooltip]="fechaTexto(d.fecha) + ' · Bs ' + (d.total | number:'1.2-2') + ' · ' + d.cantidadVentas + ' ventas · utilidad Bs ' + (d.utilidad | number:'1.2-2')">
+                      <div class="bar" [style.height.%]="altoBarra(d)">
+                        <div class="bar-profit" [style.height.%]="d.total > 0 && d.utilidad > 0 ? porcentaje(d.utilidad, d.total) : 0"></div>
+                      </div>
+                    </div>
+                  }
+                </div>
+                <div class="chart-axis">
+                  @for (d of dias; track d.fecha; let i = $index; let ultimo = $last) {
+                    <span>{{ i % 5 === 0 || ultimo ? diaCorto(d.fecha) : '' }}</span>
+                  }
+                </div>
+              </div>
+            } @else {
+              <div class="state-panel compact">
+                <span class="state-icon"><mat-icon>show_chart</mat-icon></span>
+                <h3>Aún no hay ventas en los últimos 30 días</h3>
+                <button class="btn primary small" type="button" (click)="ir('/ventas/nuevo')">
+                  <mat-icon>add</mat-icon>
+                  Registrar venta
+                </button>
+              </div>
+            }
+          </div>
+        </mat-card>
+
+        <mat-card class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Requiere atención</h2>
+              <p>{{ totalAlertas ? totalAlertas + ' alertas activas' : 'Todo en orden' }}</p>
+            </div>
+          </div>
+          <div class="alerts">
+            <button type="button" class="alert-item" [class.ok]="!periodo.cuentasPorCobrar.creditosVencidos" (click)="ir('/ventas')">
+              <span class="alert-icon danger"><mat-icon>event_busy</mat-icon></span>
+              <span class="alert-text">
+                <strong>{{ periodo.cuentasPorCobrar.creditosVencidos }} créditos vencidos</strong>
+                <small>Bs {{ periodo.cuentasPorCobrar.montoVencido | number:'1.2-2' }} por cobrar</small>
+              </span>
+              <mat-icon class="chev">chevron_right</mat-icon>
+            </button>
+
+            <button type="button" class="alert-item" [class.ok]="!periodo.inventario.productosStockBajo" (click)="ir('/inventario')">
+              <span class="alert-icon warning"><mat-icon>production_quantity_limits</mat-icon></span>
+              <span class="alert-text">
+                <strong>{{ periodo.inventario.productosStockBajo }} productos con stock bajo</strong>
+                <small>En o por debajo del mínimo</small>
+              </span>
+              <mat-icon class="chev">chevron_right</mat-icon>
+            </button>
+
+            <button type="button" class="alert-item" [class.ok]="!periodo.inventario.lotesPorVencer" (click)="ir('/vencimientos')">
+              <span class="alert-icon info"><mat-icon>layers</mat-icon></span>
+              <span class="alert-text">
+                <strong>{{ periodo.inventario.lotesPorVencer }} lotes por vencer</strong>
+                <small>Vencidos o en los próximos 30 días</small>
+              </span>
+              <mat-icon class="chev">chevron_right</mat-icon>
+            </button>
+          </div>
+
+          @if (periodo.inventario.stockBajo.length) {
+            <div class="mini-list">
+              <span class="mini-title">Reponer pronto</span>
+              @for (s of periodo.inventario.stockBajo.slice(0, 4); track s.idProducto + s.sucursal) {
+                <div class="mini-row">
+                  <span class="ellipsis">{{ s.producto }}</span>
+                  <span class="stock-pill" [class.zero]="s.stockActual <= 0">{{ s.stockActual | number:'1.0-2' }} / {{ s.stockMinimo | number:'1.0-2' }}</span>
+                </div>
+              }
+            </div>
+          }
+        </mat-card>
+      </div>
+
+      <!-- PRODUCTOS / MÉTODOS / VENTAS RECIENTES -->
+      <div class="grid-3">
+        <mat-card class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Más vendidos</h2>
+              <p>Últimos 30 días</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            @for (p of periodo.productos.slice(0, 5); track p.idProducto; let i = $index) {
+              <div class="rank-row">
+                <span class="rank" [class.gold]="i === 0">{{ i + 1 }}</span>
+                <div class="rank-body">
+                  <div class="row-head">
+                    <span class="ellipsis">{{ p.nombre }}</span>
+                    <strong>Bs {{ p.ventas | number:'1.2-2' }}</strong>
+                  </div>
+                  <div class="track"><div class="fill" [style.width.%]="porcentaje(p.ventas, periodo.productos[0].ventas)"></div></div>
+                  <small class="muted">{{ p.cantidad | number:'1.0-2' }} unid. · margen {{ p.margen | number:'1.0-1' }}%</small>
+                </div>
+              </div>
+            } @empty {
+              <p class="empty">Sin ventas en el periodo.</p>
+            }
+          </div>
+        </mat-card>
+
+        <mat-card class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Cobros por método</h2>
+              <p>Últimos 30 días</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            @if (totalMetodos > 0) {
+              <div class="donut-wrap">
+                <svg viewBox="0 0 42 42" class="donut" role="img" aria-label="Distribución de cobros por método de pago">
+                  <circle cx="21" cy="21" r="15.915" fill="none" stroke="#eef3f1" stroke-width="5"></circle>
+                  @for (s of segmentosMetodo; track s.metodo) {
+                    <circle cx="21" cy="21" r="15.915" fill="none" [attr.stroke]="s.color" stroke-width="5"
+                      [attr.stroke-dasharray]="s.pct + ' ' + (100 - s.pct)" [attr.stroke-dashoffset]="s.offset + 25"></circle>
+                  }
+                </svg>
+                <div class="donut-center">
+                  <small>Total</small>
+                  <strong>Bs {{ totalMetodos | number:'1.0-0' }}</strong>
+                </div>
+              </div>
+              <ul class="legend">
+                @for (s of segmentosMetodo; track s.metodo) {
+                  <li>
+                    <i [style.background]="s.color"></i>
+                    <span class="ellipsis">{{ s.metodo | titlecase }}</span>
+                    <strong>Bs {{ s.monto | number:'1.2-2' }}</strong>
+                    <small>{{ s.pct | number:'1.0-0' }}%</small>
+                  </li>
+                }
+              </ul>
+            } @else {
+              <p class="empty">Sin cobros en el periodo.</p>
+            }
+          </div>
+        </mat-card>
+
+        <mat-card class="panel">
+          <div class="panel-head">
+            <div>
+              <h2>Ventas recientes</h2>
+              <p>Últimas registradas</p>
+            </div>
+            <button type="button" class="btn ghost small" (click)="ir('/ventas')">Ver todas</button>
+          </div>
+          <div class="recent">
+            @for (v of ultimasVentas; track v.id) {
+              <div class="recent-row">
+                <span class="avatar">{{ iniciales(v.clienteNombre) }}</span>
+                <span class="recent-text">
+                  <strong class="ellipsis">{{ v.clienteNombre || 'Consumidor final' }}</strong>
+                  <small>#{{ v.id }} · {{ v.fechaVenta | date:'dd/MM HH:mm' }}</small>
+                </span>
+                <span class="recent-amount">
+                  <strong>Bs {{ v.total | number:'1.2-2' }}</strong>
+                  <span class="status" [ngClass]="estadoVenta(v).clase">{{ estadoVenta(v).texto }}</span>
+                </span>
+              </div>
+            } @empty {
+              <p class="empty">Aún no hay ventas registradas.</p>
+            }
+          </div>
+        </mat-card>
+      </div>
+    </div>
+  }
+</main>

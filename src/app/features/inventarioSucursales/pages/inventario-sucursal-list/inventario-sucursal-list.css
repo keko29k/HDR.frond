@@ -480,6 +480,82 @@
 }
 
 /* =========================================
+   LOTES
+========================================= */
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-lotes-all {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px;
+  border: 1px solid #bae6fd;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #0284c7;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.btn-lotes-all:hover {
+  border-color: #0284c7;
+  background: #f0f9ff;
+}
+
+.btn-lotes-all .material-icons {
+  font-size: 19px;
+}
+
+.btn-lotes {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 30px;
+  padding: 0 10px;
+  border: 1px solid #bae6fd;
+  border-radius: 7px;
+  background: #f0f9ff;
+  color: #0369a1;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.btn-lotes .material-icons {
+  font-size: 16px;
+}
+
+.btn-lotes:hover {
+  border-color: #0284c7;
+  background: #0284c7;
+  color: #ffffff;
+}
+
+.btn-lotes:focus-visible,
+.btn-lotes-all:focus-visible {
+  outline: 2px solid #0284c7;
+  outline-offset: 2px;
+}
+
+.no-lotes {
+  color: #94a3b8;
+  font-size: 11.5px;
+  white-space: nowrap;
+}
+
+/* =========================================
    CONTROL DE INVENTARIO
 ========================================= */
 
@@ -691,6 +767,15 @@
   }
 
   .btn-refresh .material-icons {
+    font-size: 20px;
+  }
+
+  .btn-lotes-all {
+    padding: 0 11px;
+    font-size: 0;
+  }
+
+  .btn-lotes-all .material-icons {
     font-size: 20px;
   }
 

@@ -1,316 +1,348 @@
+<form class="page" [formGroup]="form" (ngSubmit)="guardar()">
 
-<div class="container">
-
-  <mat-card class="card">
-
-    <mat-toolbar color="primary" class="toolbar">
-      Nueva Compra
-    </mat-toolbar>
-
-    <div class="loading" *ngIf="loading">
-      <mat-spinner diameter="40"></mat-spinner>
+  <!-- ENCABEZADO -->
+  <header class="page-header">
+    <div class="heading">
+      <button type="button" class="back-btn" aria-label="Volver a compras" matTooltip="Volver a compras" (click)="cancelar()">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div>
+        <span class="eyebrow">Compras</span>
+        <h1>Nueva compra</h1>
+        <p>Registra el documento del proveedor y la mercadería que ingresa al inventario.</p>
+      </div>
     </div>
 
-    <form [formGroup]="form" (ngSubmit)="guardar()">
+    @if (loading) {
+      <span class="count-chip">
+        <mat-spinner diameter="14"></mat-spinner>
+        {{ detalles.length ? 'Procesando...' : 'Cargando datos...' }}
+      </span>
+    }
+  </header>
 
-      <!-- DATOS GENERALES -->
-      <h3 class="section-title">Datos generales</h3>
+  <div class="layout">
 
-      <div class="form-grid">
+    <!-- COLUMNA PRINCIPAL -->
+    <div class="main">
 
-        <mat-form-field appearance="outline">
-          <mat-label>Proveedor</mat-label>
-
-          <mat-select formControlName="idProveedor">
-            <mat-option *ngFor="let proveedor of proveedores"
-                        [value]="proveedor.id">
-              {{ proveedor.nombre }}
-            </mat-option>
-          </mat-select>
-
-          <mat-error>Selecciona un proveedor</mat-error>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Tipo de documento</mat-label>
-
-          <mat-select formControlName="tipoDocumento">
-            <mat-option value="Factura">Factura</mat-option>
-            <mat-option value="Nota de venta">Nota de venta</mat-option>
-            <mat-option value="Recibo">Recibo</mat-option>
-            <mat-option value="Otro">Otro</mat-option>
-          </mat-select>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Número de documento</mat-label>
-          <input matInput
-                 formControlName="numeroDocumento"
-                 placeholder="Ej. 001-000123">
-        </mat-form-field>
-
-        <mat-form-field appearance="outline">
-          <mat-label>Fecha de compra</mat-label>
-          <input matInput
-                 type="date"
-                 formControlName="fechaCompra">
-          <mat-error>Selecciona la fecha</mat-error>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="full">
-          <mat-label>Observación</mat-label>
-          <textarea matInput
-                    formControlName="observacion"
-                    rows="2"
-                    placeholder="Observaciones de la compra">
-          </textarea>
-        </mat-form-field>
-
-      </div>
-
-      <mat-divider></mat-divider>
-
-      <!-- BUSCADOR Y PRODUCTOS -->
-      <div class="productos-header">
-
-        <div>
-          <h3 class="section-title">Productos disponibles</h3>
-          <p>Busca por nombre, código o código de barras.</p>
+      <!-- 1. DATOS DEL DOCUMENTO -->
+      <mat-card class="panel">
+        <div class="panel-head">
+          <div>
+            <h2><span class="step">1</span>Datos del documento</h2>
+            <p>Proveedor, comprobante y fecha de la compra.</p>
+          </div>
         </div>
 
-        <span class="contador">
-          {{ productosFiltrados.length }} productos
-        </span>
+        <div class="panel-body form-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Proveedor</mat-label>
+            <mat-icon matPrefix>local_shipping</mat-icon>
+            <mat-select formControlName="idProveedor">
+              @for (proveedor of proveedores; track proveedor.id) {
+                <mat-option [value]="proveedor.id">{{ proveedor.nombre }}</mat-option>
+              }
+            </mat-select>
+            <mat-error>Selecciona un proveedor</mat-error>
+          </mat-form-field>
 
-      </div>
+          <mat-form-field appearance="outline">
+            <mat-label>Fecha de compra</mat-label>
+            <mat-icon matPrefix>event</mat-icon>
+            <input matInput type="date" formControlName="fechaCompra">
+            <mat-error>Selecciona la fecha</mat-error>
+          </mat-form-field>
 
-      <mat-form-field appearance="outline" class="buscador">
-        <mat-label>Buscar producto</mat-label>
+          <mat-form-field appearance="outline">
+            <mat-label>Tipo de documento</mat-label>
+            <mat-icon matPrefix>description</mat-icon>
+            <mat-select formControlName="tipoDocumento">
+              <mat-option value="Factura">Factura</mat-option>
+              <mat-option value="Nota de venta">Nota de venta</mat-option>
+              <mat-option value="Recibo">Recibo</mat-option>
+              <mat-option value="Otro">Otro</mat-option>
+            </mat-select>
+          </mat-form-field>
 
-        <input matInput
-               type="text"
-               placeholder="Ej. Cable HDMI"
-               [value]="buscarProducto"
-               (input)="buscarProducto = $any($event.target).value">
+          <mat-form-field appearance="outline">
+            <mat-label>Número de documento</mat-label>
+            <mat-icon matPrefix>tag</mat-icon>
+            <input matInput formControlName="numeroDocumento" placeholder="Ej. 001-000123">
+          </mat-form-field>
 
-      </mat-form-field>
+          <mat-form-field appearance="outline" class="full">
+            <mat-label>Observación</mat-label>
+            <textarea matInput formControlName="observacion" rows="2" placeholder="Notas internas sobre la compra (opcional)"></textarea>
+          </mat-form-field>
+        </div>
+      </mat-card>
 
-      <div class="productos"
-           *ngIf="productosFiltrados.length > 0">
-
-        <div class="producto-card"
-             *ngFor="let producto of productosFiltrados">
-
-          <div class="producto-info">
-
-            <strong>{{ producto.nombre }}</strong>
-
-            <span>Código: {{ producto.codigo }}</span>
-
-            <span>
-              Compra: Bs {{ producto.precioCompra | number:'1.2-2' }}
-            </span>
-
-            <div class="producto-etiquetas">
-
-              <span *ngIf="producto.manejaLotes" class="etiqueta lote">
-                Maneja lotes
-              </span>
-
-              <span *ngIf="producto.tieneVencimiento"
-                    class="etiqueta vencimiento">
-                Tiene vencimiento
-              </span>
-
-            </div>
-
+      <!-- 2. CATÁLOGO -->
+      <mat-card class="panel">
+        <div class="panel-head">
+          <div>
+            <h2><span class="step">2</span>Agregar productos</h2>
+            <p>Busca por nombre o código y pulsa sobre el producto para agregarlo.</p>
           </div>
 
-          <button type="button"
-                  mat-stroked-button
-                  color="primary"
-                  [disabled]="loading"
-                  (click)="agregarProducto(producto)">
-            Agregar
-          </button>
-
+          <mat-form-field appearance="outline" class="search" subscriptSizing="dynamic">
+            <mat-label>Buscar producto</mat-label>
+            <mat-icon matPrefix>search</mat-icon>
+            <input matInput type="text" placeholder="Ej. Cable HDMI" [value]="buscarProducto"
+              (input)="buscarProducto = $any($event.target).value" (keydown.enter)="$event.preventDefault()">
+            @if (buscarProducto) {
+              <button mat-icon-button matSuffix type="button" aria-label="Limpiar búsqueda" (click)="buscarProducto = ''">
+                <mat-icon>close</mat-icon>
+              </button>
+            }
+          </mat-form-field>
         </div>
 
-      </div>
+        <div class="panel-body">
+          @if (productosFiltrados.length) {
+            <div class="catalog-meta">
+              <span>{{ productosFiltrados.length }} {{ productosFiltrados.length === 1 ? 'producto' : 'productos' }}</span>
+            </div>
 
-      <div class="empty" *ngIf="productosFiltrados.length === 0">
-
-        <p *ngIf="productos.length === 0">
-          No hay productos disponibles.
-        </p>
-
-        <p *ngIf="productos.length > 0">
-          No se encontraron productos con esa búsqueda.
-        </p>
-
-      </div>
-
-      <mat-divider></mat-divider>
-
-      <!-- DETALLE DE COMPRA -->
-      <div class="detalle-header">
-        <h3 class="section-title">Detalle de compra</h3>
-
-        <span class="contador">
-          {{ detalles.length }} productos agregados
-        </span>
-      </div>
-
-      <div class="table-container" *ngIf="detalles.length > 0">
-
-        <table class="table">
-
-          <thead>
-            <tr>
-              <th>Producto</th>
-              <th>Cantidad</th>
-              <th>Precio compra</th>
-              <th>Subtotal</th>
-
-              <th *ngIf="tieneProductosConLotes">
-                Número de lote
-              </th>
-
-              <th *ngIf="tieneProductosConFabricacion">
-                Fabricación
-              </th>
-
-              <th *ngIf="tieneProductosConVencimiento">
-                Vencimiento
-              </th>
-
-              <th>Acciones</th>
-            </tr>
-          </thead>
-
-          <tbody>
-
-            <tr *ngFor="let detalle of detalles; let i = index">
-
-              <td class="product-name">
-                {{ detalle.nombreProducto }}
-                <small>{{ detalle.codigo }}</small>
-              </td>
-
-              <td>
-                <input class="table-input"
-                       type="number"
-                       min="1"
-                       step="1"
-                       [value]="detalle.cantidad"
-                       (change)="actualizarCantidad(i, $any($event.target).value)">
-              </td>
-
-              <td>
-                <input class="table-input"
-                       type="number"
-                       min="0.01"
-                       step="0.01"
-                       [value]="detalle.precioCompra"
-                       (change)="actualizarPrecio(i, $any($event.target).value)">
-              </td>
-
-              <td class="subtotal">
-                Bs {{ detalle.subtotal | number:'1.2-2' }}
-              </td>
-
-              <!-- NUMERO DE LOTE -->
-              <td *ngIf="detalle.manejaLotes">
-
-                <input class="table-input lote-input"
-                       type="text"
-                       placeholder="N.º lote"
-                       [value]="detalle.numeroLote"
-                       (input)="actualizarNumeroLote(i, $any($event.target).value)">
-
-              </td>
-
-              <!-- FECHA FABRICACION -->
-              <td *ngIf="detalle.manejaLotes || detalle.tieneVencimiento">
-
-                <input class="table-input fecha-input"
-                       type="date"
-                       [value]="detalle.fechaFabricacion"
-                       (change)="actualizarFechaFabricacion(i, $any($event.target).value)">
-
-              </td>
-
-              <!-- FECHA VENCIMIENTO -->
-              <td *ngIf="detalle.tieneVencimiento">
-
-                <input class="table-input fecha-input"
-                       type="date"
-                       [value]="detalle.fechaVencimiento"
-                       (change)="actualizarFechaVencimiento(i, $any($event.target).value)">
-
-              </td>
-
-              <td>
-                <button type="button"
-                        mat-button
-                        color="warn"
-                        (click)="eliminarDetalle(i)">
-                  Eliminar
+            <div class="catalog">
+              @for (producto of productosFiltrados; track producto.id) {
+                <button type="button" class="product" [class.in-cart]="enDetalle(producto) > 0"
+                  [disabled]="loading" (click)="agregarProducto(producto)">
+                  <span class="product-top">
+                    <span class="product-name">{{ producto.nombre }}</span>
+                    @if (enDetalle(producto) > 0) {
+                      <span class="product-badge">{{ enDetalle(producto) }}</span>
+                    } @else {
+                      <mat-icon class="product-add">add_circle_outline</mat-icon>
+                    }
+                  </span>
+                  <span class="product-code mono">{{ producto.codigo }}</span>
+                  <span class="product-bottom">
+                    <span class="product-price">Bs {{ producto.precioCompra | number:'1.2-2' }}</span>
+                    <span class="product-tags">
+                      @if (producto.manejaLotes) {
+                        <span class="tag info" matTooltip="Requiere número de lote">Lote</span>
+                      }
+                      @if (producto.tieneVencimiento) {
+                        <span class="tag warning" matTooltip="Requiere fecha de vencimiento">Vence</span>
+                      }
+                    </span>
+                  </span>
                 </button>
-              </td>
+              }
+            </div>
+          } @else {
+            <div class="state-panel compact">
+              <span class="state-icon"><mat-icon>{{ productos.length ? 'search_off' : 'inventory_2' }}</mat-icon></span>
+              <h3>{{ productos.length ? 'Sin coincidencias' : 'No hay productos disponibles' }}</h3>
+              <p>{{ productos.length ? 'No encontramos productos con esa búsqueda.' : 'Registra productos en el catálogo para poder comprarlos.' }}</p>
+            </div>
+          }
+        </div>
+      </mat-card>
 
-            </tr>
+      <!-- 3. DETALLE -->
+      <mat-card class="panel">
+        <div class="panel-head">
+          <div>
+            <h2><span class="step">3</span>Detalle de la compra</h2>
+            <p>Ajusta cantidades, costos y datos de lote cuando corresponda.</p>
+          </div>
 
-          </tbody>
+          <div class="head-actions">
+            <span class="count-chip">
+              <mat-icon class="chip-icon">inventory_2</mat-icon>
+              {{ detalles.length }} {{ detalles.length === 1 ? 'producto' : 'productos' }}
+            </span>
+            @if (detalles.length) {
+              <button type="button" class="btn danger-ghost small" [disabled]="loading" (click)="limpiarDetalles()">
+                <mat-icon>delete_sweep</mat-icon>
+                Vaciar
+              </button>
+            }
+          </div>
+        </div>
 
-        </table>
+        @if (detalles.length) {
+          <div class="detail-container">
+            <table class="detail-table">
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th class="center">Cantidad</th>
+                  <th class="center">Costo unit. (Bs)</th>
+                  @if (tieneProductosConLotes) {
+                    <th>N.º de lote</th>
+                  }
+                  @if (tieneProductosConFabricacion) {
+                    <th>Fabricación</th>
+                  }
+                  @if (tieneProductosConVencimiento) {
+                    <th>Vencimiento</th>
+                  }
+                  <th class="right">Subtotal</th>
+                  <th></th>
+                </tr>
+              </thead>
 
-      </div>
+              <tbody>
+                @for (detalle of detalles; track detalle.idProducto; let i = $index) {
+                  <tr>
+                    <td>
+                      <span class="line-product">
+                        <strong>{{ detalle.nombreProducto }}</strong>
+                        <small class="mono">{{ detalle.codigo }}</small>
+                      </span>
+                    </td>
 
-      <div class="empty" *ngIf="detalles.length === 0">
-        <p>Todavía no agregaste productos a esta compra.</p>
-      </div>
+                    <td class="center">
+                      <input class="cell-input qty" type="number" min="1" step="1"
+                        [attr.aria-label]="'Cantidad de ' + detalle.nombreProducto"
+                        [value]="detalle.cantidad"
+                        (change)="actualizarCantidad(i, $any($event.target).value)">
+                    </td>
 
-      <!-- TOTAL -->
-      <div class="total-container">
+                    <td class="center">
+                      <input class="cell-input price" type="number" min="0.01" step="0.01"
+                        [attr.aria-label]="'Costo de ' + detalle.nombreProducto"
+                        [value]="detalle.precioCompra"
+                        (change)="actualizarPrecio(i, $any($event.target).value)">
+                    </td>
 
-        <span>Total de la compra</span>
+                    @if (tieneProductosConLotes) {
+                      <td>
+                        @if (detalle.manejaLotes) {
+                          <input class="cell-input lot" type="text" placeholder="N.º lote"
+                            [class.invalid]="!detalle.numeroLote.trim()"
+                            [attr.aria-label]="'Lote de ' + detalle.nombreProducto"
+                            [value]="detalle.numeroLote"
+                            (input)="actualizarNumeroLote(i, $any($event.target).value)">
+                        } @else {
+                          <span class="na">No aplica</span>
+                        }
+                      </td>
+                    }
 
-        <strong>
-          Bs {{ calcularTotal() | number:'1.2-2' }}
-        </strong>
+                    @if (tieneProductosConFabricacion) {
+                      <td>
+                        @if (detalle.manejaLotes || detalle.tieneVencimiento) {
+                          <input class="cell-input date" type="date"
+                            [attr.aria-label]="'Fecha de fabricación de ' + detalle.nombreProducto"
+                            [value]="detalle.fechaFabricacion"
+                            (change)="actualizarFechaFabricacion(i, $any($event.target).value)">
+                        } @else {
+                          <span class="na">No aplica</span>
+                        }
+                      </td>
+                    }
 
-      </div>
+                    @if (tieneProductosConVencimiento) {
+                      <td>
+                        @if (detalle.tieneVencimiento) {
+                          <input class="cell-input date" type="date"
+                            [class.invalid]="!detalle.fechaVencimiento"
+                            [attr.aria-label]="'Fecha de vencimiento de ' + detalle.nombreProducto"
+                            [value]="detalle.fechaVencimiento"
+                            (change)="actualizarFechaVencimiento(i, $any($event.target).value)">
+                        } @else {
+                          <span class="na">No aplica</span>
+                        }
+                      </td>
+                    }
 
-      <!-- BOTONES -->
-      <div class="buttons">
+                    <td class="right">
+                      <span class="money">Bs {{ detalle.subtotal | number:'1.2-2' }}</span>
+                    </td>
 
-        <button type="button"
-                mat-stroked-button
-                color="warn"
-                [disabled]="loading || detalles.length === 0"
-                (click)="limpiarDetalles()">
-          Limpiar productos
-        </button>
+                    <td class="right">
+                      <button type="button" class="icon-action danger" matTooltip="Quitar producto"
+                        [attr.aria-label]="'Quitar ' + detalle.nombreProducto" (click)="eliminarDetalle(i)">
+                        <mat-icon>close</mat-icon>
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <div class="state-panel compact">
+            <span class="state-icon"><mat-icon>add_shopping_cart</mat-icon></span>
+            <h3>Aún no agregaste productos</h3>
+            <p>Selecciona productos del catálogo para armar el detalle de la compra.</p>
+          </div>
+        }
+      </mat-card>
+    </div>
 
-        <button type="button"
-                mat-button
-                [disabled]="loading"
-                (click)="cancelar()">
-          Cancelar
-        </button>
+    <!-- RESUMEN -->
+    <aside class="aside">
+      <mat-card class="panel summary">
+        <div class="panel-head">
+          <div>
+            <h2>Resumen</h2>
+            <p>Verifica los datos antes de registrar.</p>
+          </div>
+        </div>
 
-        <button type="submit"
-                mat-raised-button
-                color="primary"
-                [disabled]="loading">
-          {{ loading ? 'Registrando...' : 'Registrar compra' }}
-        </button>
+        <div class="panel-body">
+          <dl class="summary-list">
+            <div>
+              <dt>Proveedor</dt>
+              <dd [class.muted]="!form.controls.idProveedor.value">{{ nombreProveedorSeleccionado }}</dd>
+            </div>
+            <div>
+              <dt>Documento</dt>
+              <dd>
+                {{ form.controls.tipoDocumento.value }}
+                @if (form.controls.numeroDocumento.value) {
+                  <span class="mono">· {{ form.controls.numeroDocumento.value }}</span>
+                }
+              </dd>
+            </div>
+            <div>
+              <dt>Fecha</dt>
+              <dd>{{ form.controls.fechaCompra.value | date:'dd/MM/yyyy' }}</dd>
+            </div>
+            <div>
+              <dt>Productos</dt>
+              <dd>{{ detalles.length }}</dd>
+            </div>
+            <div>
+              <dt>Unidades</dt>
+              <dd>{{ totalUnidades }}</dd>
+            </div>
+          </dl>
 
-      </div>
+          <div class="grand-total">
+            <span>Total de la compra</span>
+            <strong>Bs {{ calcularTotal() | number:'1.2-2' }}</strong>
+          </div>
 
-    </form>
+          @if (tieneProductosConLotes || tieneProductosConVencimiento) {
+            <p class="hint">
+              <mat-icon>info</mat-icon>
+              Los productos con lote o vencimiento requieren esos datos para registrar la compra.
+            </p>
+          }
 
-  </mat-card>
-
-</div>
+          <div class="summary-actions">
+            <button type="submit" class="btn primary block" [disabled]="loading || detalles.length === 0">
+              @if (loading && detalles.length) {
+                <mat-spinner diameter="18"></mat-spinner>
+                Registrando...
+              } @else {
+                <mat-icon>check_circle</mat-icon>
+                Registrar compra
+              }
+            </button>
+            <button type="button" class="btn secondary block" [disabled]="loading" (click)="cancelar()">
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </mat-card>
+    </aside>
+  </div>
+</form>

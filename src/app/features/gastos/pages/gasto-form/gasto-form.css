@@ -1,122 +1,246 @@
+/* Estilos base en shared/styles/operaciones.css */
 
-.gasto-form-container {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 24px;
+.page {
+  max-width: 1120px;
 }
 
-.header {
-  margin-bottom: 24px;
-}
-
-.header h1 {
-  margin: 0;
-  font-size: 28px;
-  font-weight: 600;
-}
-
-.header p {
-  margin: 6px 0 0;
-  color: #757575;
-  font-size: 14px;
-}
-
-.form-card {
-  padding: 28px;
-}
-
-.section-title {
-  margin-bottom: 24px;
-}
-
-.section-title h2 {
-  margin: 0;
-  font-size: 20px;
-  font-weight: 600;
-}
-
-.section-title p {
-  margin: 5px 0 0;
-  color: #757575;
-  font-size: 14px;
-}
-
-.form-grid {
+.back-btn {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 4px 20px;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  place-items: center;
+  border: 1px solid var(--op-border-strong);
+  border-radius: 12px;
+  background: var(--op-surface);
+  color: var(--op-text-2);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
 }
 
-.full-width {
-  grid-column: 1 / -1;
+.back-btn:hover {
+  border-color: var(--op-primary);
+  color: var(--op-primary);
 }
 
-textarea {
-  resize: vertical;
-  min-height: 100px;
-}
+/* ---------- AVISO DE CAJA ---------- */
 
-.form-actions {
+.notice {
   display: flex;
-  justify-content: flex-end;
   align-items: center;
-  gap: 12px;
-  margin-top: 28px;
-  padding-top: 20px;
-  border-top: 1px solid #eeeeee;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  border: 1px solid var(--op-border);
+  border-radius: 12px;
+  background: var(--op-surface);
+  color: var(--op-text-2);
+  font-size: 13.5px;
 }
 
-.form-actions button {
-  min-width: 150px;
-  min-height: 44px;
-  display: inline-flex;
-  justify-content: center;
+.notice > span {
+  flex: 1;
+}
+
+.notice.warn {
+  border-color: #f3d39b;
+  background: var(--op-warning-soft);
+  color: #7a4605;
+}
+
+.notice.danger {
+  border-color: #f0c2bd;
+  background: var(--op-danger-soft);
+  color: var(--op-danger);
+}
+
+.notice mat-spinner {
+  --mat-progress-spinner-active-indicator-color: var(--op-primary);
+}
+
+/* ---------- LAYOUT ---------- */
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  align-items: start;
+  gap: 20px;
+}
+
+.aside {
+  position: sticky;
+  top: 84px;
+}
+
+.full {
+  width: 100%;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  column-gap: 16px;
+  margin-top: 8px;
+}
+
+.grid-2 mat-form-field {
+  width: 100%;
+}
+
+/* ---------- CONCEPTOS SUGERIDOS ---------- */
+
+.suggestions {
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 6px;
+  margin: -4px 0 8px;
 }
 
-.form-actions mat-spinner {
-  margin: 0 auto;
+.suggestions > span {
+  margin-right: 2px;
+  color: var(--op-muted);
+  font-size: 12px;
 }
 
-@media (max-width: 768px) {
-  .gasto-form-container {
-    padding: 16px;
-  }
+.suggestion {
+  display: inline-flex;
+  height: 30px;
+  align-items: center;
+  gap: 5px;
+  padding: 0 11px;
+  border: 1px solid var(--op-border);
+  border-radius: 999px;
+  background: var(--op-surface);
+  color: var(--op-text-2);
+  font: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
 
-  .form-card {
-    padding: 20px;
-  }
+.suggestion mat-icon {
+  width: 15px;
+  height: 15px;
+  color: var(--op-muted);
+  font-size: 15px;
+}
 
-  .form-grid {
+.suggestion:hover {
+  border-color: var(--op-primary);
+  color: var(--op-primary);
+}
+
+.suggestion.on {
+  border-color: var(--op-primary);
+  background: var(--op-primary-soft);
+  color: var(--op-primary-strong);
+}
+
+.suggestion.on mat-icon {
+  color: var(--op-primary);
+}
+
+.suggestion:focus-visible {
+  outline: 2px solid var(--op-primary);
+  outline-offset: 2px;
+}
+
+/* ---------- RESUMEN ---------- */
+
+.amount {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 18px;
+  padding: 16px;
+  border-radius: 12px;
+  background: var(--op-danger-soft);
+}
+
+.amount span {
+  color: var(--op-danger);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.amount strong {
+  color: var(--op-danger);
+  font-size: 28px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+}
+
+.summary-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0 0 20px;
+}
+
+.summary-list > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.summary-list dt {
+  flex: 0 0 auto;
+  color: var(--op-muted);
+}
+
+.summary-list dd {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  color: var(--op-text);
+  font-weight: 600;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.caja-ok {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--op-primary-strong);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #16a34a;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.actions mat-spinner {
+  --mat-progress-spinner-active-indicator-color: #ffffff;
+  --mdc-circular-progress-active-indicator-color: #ffffff;
+}
+
+/* ---------- RESPONSIVE ---------- */
+
+@media (max-width: 900px) {
+  .layout {
     grid-template-columns: 1fr;
   }
 
-  .full-width {
-    grid-column: auto;
+  .aside {
+    position: static;
   }
 }
 
-@media (max-width: 480px) {
-  .gasto-form-container {
-    padding: 10px;
-  }
-
-  .form-card {
-    padding: 16px;
-  }
-
-  .header h1 {
-    font-size: 24px;
-  }
-
-  .form-actions {
-    flex-direction: column-reverse;
-    align-items: stretch;
-  }
-
-  .form-actions button {
-    width: 100%;
+@media (max-width: 600px) {
+  .notice {
+    flex-wrap: wrap;
   }
 }
-

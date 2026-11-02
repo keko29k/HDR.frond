@@ -40,29 +40,33 @@ import { AbonarCredito } from '../abonar-credito/abonar-credito';
     MatTooltipModule
   ],
   templateUrl: './venta-list.html',
-  styleUrl: './venta-list.css'
+  styleUrls: [
+    '../../../../shared/styles/operaciones.css',
+    './venta-list.css'
+  ]
 })
 export class VentaListComponent implements OnInit {
   private ventaService = inject(VentaService);
   private notificationService = inject(NotificationService);
   private router = inject(Router);
-private dialog = inject(MatDialog);
+  private dialog = inject(MatDialog);
+
   ventas: Venta[] = [];
   displayedColumns: string[] = [
     'id',
     'fecha',
     'cliente',
     'vendedor',
+    'metodoPago',
     'total',
     'montoPagado',
     'saldoPendiente',
-    'metodoPago',
     'estadoPago',
-    'observaciones',
     'acciones'
   ];
 
   loading = false;
+  error = false;
   buscarControl = new FormControl('', { nonNullable: true });
 
   filter: QueryFilter = {
@@ -97,6 +101,7 @@ private dialog = inject(MatDialog);
 
   cargarVentas(): void {
     this.loading = true;
+    this.error = false;
 
     this.ventaService.getAll(this.filter)
       .pipe(finalize(() => this.loading = false))
@@ -106,6 +111,8 @@ private dialog = inject(MatDialog);
           this.meta = response.meta;
         },
         error: () => {
+          this.error = true;
+          this.ventas = [];
           this.notificationService.error('No se pudo cargar la lista de ventas.');
         }
       });
@@ -115,6 +122,10 @@ private dialog = inject(MatDialog);
     this.filter.pageNumber = event.pageIndex + 1;
     this.filter.pageSize = event.pageSize;
     this.cargarVentas();
+  }
+
+  limpiarBusqueda(): void {
+    this.buscarControl.setValue('');
   }
 
   nuevo(): void {
@@ -146,6 +157,52 @@ private dialog = inject(MatDialog);
       });
   }
 
+  // =====================================
+  // RESUMEN (PÁGINA ACTUAL)
+  // =====================================
+
+  get totalVendidoPagina(): number {
+    return this.ventas.reduce((sum, v) => sum + (v.total ?? 0), 0);
+  }
+
+  get totalCobradoPagina(): number {
+    return this.ventas.reduce((sum, v) => sum + (v.montoPagado ?? 0), 0);
+  }
+
+  get saldoPendientePagina(): number {
+    return this.ventas.reduce((sum, v) => sum + Math.max(v.saldoPendiente ?? 0, 0), 0);
+  }
+
+  get creditosPendientesPagina(): number {
+    return this.ventas.filter(v => this.esCreditoPendiente(v)).length;
+  }
+
+  // =====================================
+  // PRESENTACIÓN
+  // =====================================
+
+  iniciales(nombre: string | null | undefined): string {
+    const partes = (nombre ?? '').trim().split(/\s+/).filter(Boolean);
+
+    if (!partes.length) return 'CF';
+
+    return partes
+      .slice(0, 2)
+      .map(p => p[0].toUpperCase())
+      .join('');
+  }
+
+  iconoMetodo(metodo: string | null | undefined): string {
+    const valor = (metodo ?? '').trim().toUpperCase();
+
+    if (valor === 'QR') return 'qr_code_2';
+    if (valor === 'EFECTIVO') return 'payments';
+    if (valor.includes('TARJETA')) return 'credit_card';
+    if (valor.includes('TRANSFER')) return 'account_balance';
+
+    return 'receipt';
+  }
+
   esCreditoPendiente(venta: Venta): boolean {
     return venta.acredito && venta.saldoPendiente > 0;
   }
@@ -155,15 +212,15 @@ private dialog = inject(MatDialog);
   }
 
   textoEstado(venta: Venta): string {
-    if (!venta.acredito) return 'CONTADO';
-    if (venta.saldoPendiente > 0) return 'CRÉDITO PENDIENTE';
-    return 'CRÉDITO CANCELADO';
+    if (!venta.acredito) return 'Contado';
+    if (venta.saldoPendiente > 0) return 'Crédito pendiente';
+    return 'Crédito pagado';
   }
 
   claseEstado(venta: Venta): string {
-    if (this.esCreditoPendiente(venta)) return 'status-pending';
-    if (this.esCreditoCancelado(venta)) return 'status-paid';
-    return 'status-normal';
+    if (this.esCreditoPendiente(venta)) return 'danger';
+    if (this.esCreditoCancelado(venta)) return 'success';
+    return 'neutral';
   }
 
   claseFila(venta: Venta): string {
@@ -174,27 +231,27 @@ private dialog = inject(MatDialog);
 
   abonarCredito(venta: Venta): void {
 
-  if (!this.esCreditoPendiente(venta)) {
-    return;
-  }
-
-  const dialogRef = this.dialog.open(AbonarCredito, {
-    width: '520px',
-    maxWidth: '95vw',
-    disableClose: true,
-    data: venta
-  });
-
-  dialogRef.afterClosed().subscribe(resultado => {
-
-    if (resultado === true) {
-      this.notificationService.success(
-        'Abono registrado correctamente.'
-      );
-
-      this.cargarVentas();
+    if (!this.esCreditoPendiente(venta)) {
+      return;
     }
 
-  });
-}
+    const dialogRef = this.dialog.open(AbonarCredito, {
+      width: '520px',
+      maxWidth: '95vw',
+      disableClose: true,
+      data: venta
+    });
+
+    dialogRef.afterClosed().subscribe(resultado => {
+
+      if (resultado === true) {
+        this.notificationService.success(
+          'Abono registrado correctamente.'
+        );
+
+        this.cargarVentas();
+      }
+
+    });
+  }
 }

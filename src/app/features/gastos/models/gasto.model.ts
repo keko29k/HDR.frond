@@ -3,8 +3,9 @@ export interface Gasto {
   id: number;
   idCaja : number;
   idUsuario : number;
-  concepto : number;
-  numeroComprobante : string;
+  concepto : string;
+  numeroComprobante : string | null;
   monto: number;
-  observacion : string;
+  observacion : string | null;
+  fechaRegistro?: string;
 }

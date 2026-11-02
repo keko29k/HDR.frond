@@ -1,331 +1,184 @@
-<div class="gasto-form-container">
+<form class="page" [formGroup]="form" (ngSubmit)="guardar()">
 
   <!-- ENCABEZADO -->
+  <header class="page-header">
+    <div class="heading">
+      <button type="button" class="back-btn" aria-label="Volver a gastos" matTooltip="Volver a gastos" (click)="cancelar()">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div>
+        <span class="eyebrow">Gastos</span>
+        <h1>{{ titulo }}</h1>
+        <p>{{ editando ? 'Modifica la información del gasto registrado.' : 'Registra una salida de dinero de tu caja abierta.' }}</p>
+      </div>
+    </div>
+  </header>
 
-  <div class="header">
-    <div>
-      <h1>{{ titulo }}</h1>
+  <!-- AVISO DE CAJA (solo al registrar) -->
+  @if (!editando) {
+    @if (cargandoCaja) {
+      <div class="notice" role="status">
+        <mat-spinner diameter="18"></mat-spinner>
+        <span>Verificando tu caja abierta...</span>
+      </div>
+    } @else if (sinCajaAbierta) {
+      <div class="notice warn" role="alert">
+        <mat-icon>lock</mat-icon>
+        <span><strong>No tienes una caja abierta.</strong> Los gastos se descuentan de la caja, ábrela para poder registrar.</span>
+        <button type="button" class="btn primary small" (click)="abrirCaja()">
+          <mat-icon>add</mat-icon>
+          Abrir caja
+        </button>
+      </div>
+    } @else if (errorCaja) {
+      <div class="notice danger" role="alert">
+        <mat-icon>error_outline</mat-icon>
+        <span>No se pudo verificar tu caja.</span>
+        <button type="button" class="btn secondary small" (click)="cargarCajaAbierta()">
+          <mat-icon>refresh</mat-icon>
+          Reintentar
+        </button>
+      </div>
+    }
+  }
 
-```
-  <p>
-    {{ editando
-      ? 'Modifique la información del gasto'
-      : 'Registre un nuevo gasto' }}
-  </p>
-</div>
-```
+  <div class="layout">
 
+    <!-- FORMULARIO -->
+    <mat-card class="panel">
+      <div class="panel-head">
+        <div>
+          <h2>Información del gasto</h2>
+          <p>Concepto, monto y comprobante del gasto.</p>
+        </div>
+      </div>
+
+      <div class="panel-body">
+
+        <!-- CONCEPTO -->
+        <mat-form-field appearance="outline" class="full">
+          <mat-label>Concepto</mat-label>
+          <mat-icon matPrefix>label</mat-icon>
+          <input matInput formControlName="concepto" placeholder="Ej. Pago de luz del mes" maxlength="150">
+          @if (form.controls.concepto.hasError('required')) {
+            <mat-error>El concepto es obligatorio.</mat-error>
+          }
+          @if (form.controls.concepto.hasError('maxlength')) {
+            <mat-error>Máximo 150 caracteres.</mat-error>
+          }
+        </mat-form-field>
+
+        <div class="suggestions" aria-label="Conceptos frecuentes">
+          <span>Frecuentes:</span>
+          @for (c of conceptosSugeridos; track c.texto) {
+            <button type="button" class="suggestion"
+              [class.on]="form.controls.concepto.value === c.texto"
+              (click)="usarConcepto(c.texto)">
+              <mat-icon>{{ c.icono }}</mat-icon>
+              {{ c.texto }}
+            </button>
+          }
+        </div>
+
+        <div class="grid-2">
+          <!-- MONTO -->
+          <mat-form-field appearance="outline">
+            <mat-label>Monto</mat-label>
+            <span matTextPrefix>Bs&nbsp;</span>
+            <input matInput type="number" step="0.01" min="0.01" formControlName="monto" placeholder="0.00">
+            @if (form.controls.monto.hasError('required')) {
+              <mat-error>El monto es obligatorio.</mat-error>
+            }
+            @if (form.controls.monto.hasError('min')) {
+              <mat-error>El monto debe ser mayor a 0.</mat-error>
+            }
+          </mat-form-field>
+
+          <!-- COMPROBANTE -->
+          <mat-form-field appearance="outline">
+            <mat-label>N.º de comprobante</mat-label>
+            <mat-icon matPrefix>description</mat-icon>
+            <input matInput formControlName="numeroComprobante" placeholder="Ej. FAC-000123">
+            <mat-hint>Opcional, pero recomendado.</mat-hint>
+            @if (form.controls.numeroComprobante.hasError('maxlength')) {
+              <mat-error>Máximo 100 caracteres.</mat-error>
+            }
+          </mat-form-field>
+        </div>
+
+        <!-- OBSERVACIÓN -->
+        <mat-form-field appearance="outline" class="full">
+          <mat-label>Observación</mat-label>
+          <textarea matInput formControlName="observacion" rows="4" maxlength="500"
+            placeholder="Detalle adicional del gasto (opcional)"></textarea>
+          <mat-hint align="end">{{ form.controls.observacion.value?.length || 0 }}/500</mat-hint>
+          @if (form.controls.observacion.hasError('maxlength')) {
+            <mat-error>Máximo 500 caracteres.</mat-error>
+          }
+        </mat-form-field>
+      </div>
+    </mat-card>
+
+    <!-- RESUMEN -->
+    <aside class="aside">
+      <mat-card class="panel">
+        <div class="panel-head">
+          <div>
+            <h2>Resumen</h2>
+            <p>Verifica antes de guardar.</p>
+          </div>
+        </div>
+
+        <div class="panel-body">
+          <div class="amount">
+            <span>Monto del gasto</span>
+            <strong>− Bs {{ montoActual | number:'1.2-2' }}</strong>
+          </div>
+
+          <dl class="summary-list">
+            <div>
+              <dt>Concepto</dt>
+              <dd [class.muted]="!form.controls.concepto.value">{{ form.controls.concepto.value || 'Sin definir' }}</dd>
+            </div>
+            <div>
+              <dt>Comprobante</dt>
+              <dd [class.muted]="!form.controls.numeroComprobante.value">{{ form.controls.numeroComprobante.value || 'Sin comprobante' }}</dd>
+            </div>
+            <div>
+              <dt>Caja</dt>
+              <dd>
+                @if (editando) {
+                  Caja #{{ form.controls.idCaja.value }}
+                } @else if (cajaActual) {
+                  <span class="caja-ok">
+                    <span class="dot"></span>
+                    Caja #{{ cajaActual.id }} abierta
+                  </span>
+                } @else {
+                  <span class="muted">{{ cargandoCaja ? 'Verificando…' : 'Sin caja abierta' }}</span>
+                }
+              </dd>
+            </div>
+            <div>
+              <dt>Fecha</dt>
+              <dd>{{ editando ? 'Registrada' : (hoy | date:'dd/MM/yyyy') }}</dd>
+            </div>
+          </dl>
+
+          <div class="actions">
+            <button type="submit" class="btn primary block" [disabled]="!puedeGuardar">
+              @if (loading) {
+                <mat-spinner diameter="18"></mat-spinner>
+                Guardando...
+              } @else {
+                <mat-icon>{{ editando ? 'save' : 'check_circle' }}</mat-icon>
+                {{ editando ? 'Guardar cambios' : 'Registrar gasto' }}
+              }
+            </button>
+            <button type="button" class="btn secondary block" [disabled]="loading" (click)="cancelar()">Cancelar</button>
+          </div>
+        </div>
+      </mat-card>
+    </aside>
   </div>
-
-  <!-- FORMULARIO -->
-
-  <mat-card class="form-card">
-
-```
-<form
-  [formGroup]="form"
-  (ngSubmit)="guardar()">
-
-  <!-- INFORMACIÓN DEL GASTO -->
-  <div class="section-title">
-
-    <h2>Información del gasto</h2>
-
-    <p>
-      Ingrese los datos correspondientes al movimiento de caja.
-    </p>
-
-  </div>
-
-
-  <!-- CAMPOS -->
-  <div class="form-grid">
-
-
-    <!-- CAJA -->
-    <mat-form-field appearance="outline">
-
-      <mat-label>ID Caja</mat-label>
-
-      <input
-        matInput
-        type="number"
-        formControlName="idCaja"
-        placeholder="Ej. 1">
-
-
-      @if (
-        form.get('idCaja')?.hasError('required') &&
-        form.get('idCaja')?.touched
-      ) {
-
-        <mat-error>
-          La caja es obligatoria.
-        </mat-error>
-
-      }
-
-
-      @if (
-        form.get('idCaja')?.hasError('min')
-      ) {
-
-        <mat-error>
-          El ID de caja debe ser mayor a 0.
-        </mat-error>
-
-      }
-
-    </mat-form-field>
-
-
-
-    <!-- USUARIO -->
-    <mat-form-field appearance="outline">
-
-      <mat-label>ID Usuario</mat-label>
-
-      <input
-        matInput
-        type="number"
-        formControlName="idUsuario"
-        placeholder="Ej. 1">
-
-
-      @if (
-        form.get('idUsuario')?.hasError('required') &&
-        form.get('idUsuario')?.touched
-      ) {
-
-        <mat-error>
-          El usuario es obligatorio.
-        </mat-error>
-
-      }
-
-
-      @if (
-        form.get('idUsuario')?.hasError('min')
-      ) {
-
-        <mat-error>
-          El ID de usuario debe ser mayor a 0.
-        </mat-error>
-
-      }
-
-    </mat-form-field>
-
-
-
-    <!-- CONCEPTO -->
-    <mat-form-field appearance="outline">
-
-      <mat-label>Concepto</mat-label>
-
-      <input
-        matInput
-        type="number"
-        formControlName="concepto"
-        placeholder="Ej. 1">
-
-
-      @if (
-        form.get('concepto')?.hasError('required') &&
-        form.get('concepto')?.touched
-      ) {
-
-        <mat-error>
-          El concepto es obligatorio.
-        </mat-error>
-
-      }
-
-
-      @if (
-        form.get('concepto')?.hasError('min')
-      ) {
-
-        <mat-error>
-          El concepto debe ser mayor a 0.
-        </mat-error>
-
-      }
-
-    </mat-form-field>
-
-
-
-    <!-- NÚMERO DE COMPROBANTE -->
-    <mat-form-field appearance="outline">
-
-      <mat-label>
-        Número de comprobante
-      </mat-label>
-
-      <input
-        matInput
-        formControlName="numeroComprobante"
-        placeholder="Ej. COMP-000123">
-
-
-      <mat-hint>
-        Opcional.
-      </mat-hint>
-
-
-      @if (
-        form.get('numeroComprobante')?.hasError('maxlength')
-      ) {
-
-        <mat-error>
-          Máximo 100 caracteres.
-        </mat-error>
-
-      }
-
-    </mat-form-field>
-
-
-
-    <!-- MONTO -->
-    <mat-form-field appearance="outline">
-
-      <mat-label>
-        Monto
-      </mat-label>
-
-      <input
-        matInput
-        type="number"
-        step="0.01"
-        min="0.01"
-        formControlName="monto"
-        placeholder="Ej. 150.50">
-
-      <span matTextPrefix>Bs.&nbsp;</span>
-
-
-      @if (
-        form.get('monto')?.hasError('required') &&
-        form.get('monto')?.touched
-      ) {
-
-        <mat-error>
-          El monto es obligatorio.
-        </mat-error>
-
-      }
-
-
-      @if (
-        form.get('monto')?.hasError('min')
-      ) {
-
-        <mat-error>
-          El monto debe ser mayor a 0.
-        </mat-error>
-
-      }
-
-    </mat-form-field>
-
-
-
-    <!-- OBSERVACIÓN -->
-    <mat-form-field
-      appearance="outline"
-      class="full-width">
-
-      <mat-label>
-        Observación
-      </mat-label>
-
-      <textarea
-        matInput
-        formControlName="observacion"
-        rows="5"
-        maxlength="500"
-        placeholder="Ingrese una observación sobre el gasto...">
-      </textarea>
-
-
-      <!-- CONTADOR -->
-      <mat-hint align="end">
-        {{ form.get('observacion')?.value?.length || 0 }}/500
-      </mat-hint>
-
-
-      @if (
-        form.get('observacion')?.hasError('maxlength')
-      ) {
-
-        <mat-error>
-          Máximo 500 caracteres.
-        </mat-error>
-
-      }
-
-    </mat-form-field>
-
-  </div>
-
-
-  <!-- BOTONES -->
-  <div class="form-actions">
-
-
-    <!-- CANCELAR -->
-    <button
-      mat-stroked-button
-      type="button"
-      (click)="cancelar()"
-      [disabled]="loading">
-
-      Cancelar
-
-    </button>
-
-
-
-    <!-- GUARDAR / ACTUALIZAR -->
-    <button
-      mat-raised-button
-      color="primary"
-      type="submit"
-      [disabled]="loading">
-
-
-      <!-- SPINNER -->
-      <mat-spinner
-        [hidden]="!loading"
-        diameter="20">
-      </mat-spinner>
-
-
-      <!-- ICONO -->
-      <mat-icon
-        [hidden]="loading"
-        [textContent]="editando ? 'save' : 'add'">
-      </mat-icon>
-
-
-      <!-- TEXTO -->
-      <span [hidden]="loading">
-
-        {{ editando
-          ? 'Actualizar gasto'
-          : 'Guardar gasto' }}
-
-      </span>
-
-    </button>
-
-  </div>
-
 </form>
-```
-
-  </mat-card>
-
-</div>

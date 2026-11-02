@@ -1,0 +1,268 @@
+<main class="page">
+
+  <!-- ENCABEZADO -->
+  <header class="page-header">
+    <div class="heading">
+      <span class="heading-icon alert"><mat-icon>event_busy</mat-icon></span>
+      <div>
+        <span class="eyebrow">Catálogo · Lotes</span>
+        <h1>Vencimientos</h1>
+        <p>Lotes con stock vencidos o próximos a vencer, del más urgente al menos urgente.</p>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn secondary" type="button" [disabled]="loading || !lotesFiltrados.length" (click)="exportarCsv()">
+        <mat-icon>download</mat-icon>
+        Exportar Excel
+      </button>
+      <button class="btn secondary" type="button" [disabled]="loading" (click)="cargar()" matTooltip="Actualizar">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+  </header>
+
+  <!-- FILTROS SUPERIORES -->
+  <div class="top-filters">
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Sucursal</mat-label>
+      <mat-icon matPrefix>storefront</mat-icon>
+      <mat-select [(ngModel)]="idSucursal" (selectionChange)="cargar()">
+        <mat-option [value]="0">Todas las sucursales</mat-option>
+        @for (s of sucursales; track s.id) {
+          <mat-option [value]="s.id">{{ s.nombre }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Mostrar hasta</mat-label>
+      <mat-icon matPrefix>date_range</mat-icon>
+      <mat-select [(ngModel)]="horizonte" (selectionChange)="cargar()">
+        @for (h of horizontes; track h) {
+          <mat-option [value]="h">{{ h === 365 ? '1 año' : h + ' días' }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    @if (!loading && !error && lotes.length) {
+      <div class="risk">
+        <mat-icon>savings</mat-icon>
+        <span>
+          <small>Valor en riesgo (vencidos + 30 días)</small>
+          <strong>Bs {{ valorEnRiesgo | number:'1.2-2' }}</strong>
+        </span>
+      </div>
+    }
+  </div>
+
+  <!-- SEMÁFORO -->
+  <section class="levels" aria-label="Niveles de urgencia">
+    @for (n of niveles; track n.id) {
+      <button type="button" class="level" [ngClass]="n.clase"
+        [class.on]="nivelFiltro === n.id" [class.dim]="nivelFiltro && nivelFiltro !== n.id"
+        [attr.aria-pressed]="nivelFiltro === n.id" (click)="toggleNivel(n.id)">
+        <span class="level-head">
+          <span class="level-icon"><mat-icon>{{ n.icono }}</mat-icon></span>
+          <span class="level-title">
+            <strong>{{ n.titulo }}</strong>
+            <small>{{ n.descripcion }}</small>
+          </span>
+          @if (nivelFiltro === n.id) {
+            <mat-icon class="level-check">filter_alt</mat-icon>
+          }
+        </span>
+        <span class="level-value">{{ loading ? '—' : resumen(n.id).lotes }}<small> lotes</small></span>
+        <span class="level-foot">
+          {{ resumen(n.id).unidades | number:'1.0-2' }} unid. · Bs {{ resumen(n.id).valor | number:'1.2-2' }}
+        </span>
+      </button>
+    }
+  </section>
+
+  <!-- LISTADO -->
+  <mat-card class="panel">
+    <div class="panel-head">
+      <div class="head-left">
+        <div class="view-toggle" role="group" aria-label="Agrupar por">
+          <button type="button" [class.on]="vista === 'lote'" [attr.aria-pressed]="vista === 'lote'" (click)="vista = 'lote'">
+            <mat-icon>layers</mat-icon>
+            Por lote
+          </button>
+          <button type="button" [class.on]="vista === 'producto'" [attr.aria-pressed]="vista === 'producto'" (click)="vista = 'producto'">
+            <mat-icon>inventory_2</mat-icon>
+            Por producto
+          </button>
+        </div>
+        @if (nivelFiltro || buscar) {
+          <button type="button" class="btn ghost small" (click)="limpiarFiltros()">
+            <mat-icon>filter_alt_off</mat-icon>
+            Quitar filtros
+          </button>
+        }
+      </div>
+
+      <mat-form-field appearance="outline" class="search" subscriptSizing="dynamic">
+        <mat-label>Buscar</mat-label>
+        <mat-icon matPrefix>search</mat-icon>
+        <input matInput [(ngModel)]="buscar" placeholder="Producto, código o lote">
+      </mat-form-field>
+    </div>
+
+    @if (loading) {
+      <div class="state-panel" role="status">
+        <mat-spinner diameter="34"></mat-spinner>
+        <span>Revisando vencimientos...</span>
+      </div>
+    } @else if (error) {
+      <div class="state-panel" role="alert">
+        <span class="state-icon error"><mat-icon>cloud_off</mat-icon></span>
+        <h3>No se pudieron cargar los vencimientos</h3>
+        <p>Verifica que el servidor esté en ejecución con la última versión.</p>
+        <button class="btn secondary small" type="button" (click)="cargar()">
+          <mat-icon>refresh</mat-icon>
+          Reintentar
+        </button>
+      </div>
+    } @else if (!lotes.length) {
+      <div class="state-panel">
+        <span class="state-icon ok"><mat-icon>verified</mat-icon></span>
+        <h3>Sin vencimientos en los próximos {{ horizonte }} días</h3>
+        <p>Ningún lote con stock vence en este periodo. Todo en orden.</p>
+      </div>
+    } @else if (!lotesFiltrados.length) {
+      <div class="state-panel">
+        <span class="state-icon"><mat-icon>search_off</mat-icon></span>
+        <h3>Sin coincidencias</h3>
+        <p>Ningún lote coincide con los filtros aplicados.</p>
+        <button class="btn secondary small" type="button" (click)="limpiarFiltros()">Quitar filtros</button>
+      </div>
+    } @else if (vista === 'lote') {
+
+      <!-- VISTA POR LOTE -->
+      <div class="table-wrap">
+        <table class="report-table">
+          <thead>
+            <tr>
+              <th>Estado</th>
+              <th>Producto</th>
+              <th>Lote</th>
+              <th>Vencimiento</th>
+              <th class="right">Disponible</th>
+              <th class="right">Valor en riesgo</th>
+              <th>Acción sugerida</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (l of lotesFiltrados; track l.idLote) {
+              <tr [ngClass]="'row-' + info(nivel(l)).clase">
+                <td>
+                  <span class="pill" [ngClass]="info(nivel(l)).clase">
+                    <mat-icon>{{ info(nivel(l)).icono }}</mat-icon>
+                    {{ info(nivel(l)).singular }}
+                  </span>
+                </td>
+                <td>
+                  <span class="line-product">
+                    <strong>{{ l.producto }}</strong>
+                    <small><span class="mono">{{ l.codigo }}</span> · {{ l.sucursal }}</small>
+                  </span>
+                </td>
+                <td><span class="lot mono">{{ l.numeroLote }}</span></td>
+                <td>
+                  <div class="due">
+                    <div class="due-top">
+                      <strong>{{ fechaTexto(l.fechaVencimiento) }}</strong>
+                      <small [ngClass]="info(nivel(l)).clase">{{ textoDias(l.diasRestantes) }}</small>
+                    </div>
+                    <div class="countdown"><div [ngClass]="info(nivel(l)).clase" [style.width.%]="urgencia(l.diasRestantes)"></div></div>
+                  </div>
+                </td>
+                <td class="right">
+                  <div class="qty">
+                    <strong>{{ l.cantidadDisponible | number:'1.0-2' }}</strong>
+                    <small>de {{ l.cantidadInicial | number:'1.0-2' }}</small>
+                  </div>
+                </td>
+                <td class="right">
+                  <div class="value">
+                    <strong>Bs {{ l.valorCosto | number:'1.2-2' }}</strong>
+                    <small>venta Bs {{ l.valorVenta | number:'1.2-2' }}</small>
+                  </div>
+                </td>
+                <td>
+                  @if (nivel(l) === 'VENCIDO') {
+                    <button type="button" class="action action-btn vencido" (click)="retirar(l)">
+                      <mat-icon>delete_sweep</mat-icon>
+                      Retirar del inventario
+                    </button>
+                  } @else {
+                    <span class="action" [ngClass]="info(nivel(l)).clase">{{ info(nivel(l)).accion }}</span>
+                  }
+                </td>
+                <td class="right nowrap">
+                  @if (nivel(l) !== 'VENCIDO') {
+                    <button type="button" class="icon-action danger" matTooltip="Retirar unidades (dañadas, etc.)"
+                      [attr.aria-label]="'Retirar unidades del lote ' + l.numeroLote" (click)="retirar(l)">
+                      <mat-icon>remove_circle_outline</mat-icon>
+                    </button>
+                  }
+                  <button type="button" class="icon-action" matTooltip="Ver todos los lotes del producto"
+                    [attr.aria-label]="'Ver lotes de ' + l.producto"
+                    (click)="verLotes(l.idProducto, l.producto, l.codigo, l.idSucursal, l.sucursal)">
+                    <mat-icon>visibility</mat-icon>
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+    } @else {
+
+      <!-- VISTA POR PRODUCTO -->
+      <div class="products">
+        @for (g of productos; track g.idProducto) {
+          <article class="product-card" [ngClass]="info(g.nivel).clase">
+            <div class="product-head">
+              <span class="pill" [ngClass]="info(g.nivel).clase">
+                <mat-icon>{{ info(g.nivel).icono }}</mat-icon>
+                {{ textoDias(g.diasMinimo) }}
+              </span>
+              <span class="action" [ngClass]="info(g.nivel).clase">{{ info(g.nivel).accion }}</span>
+            </div>
+
+            <h3>{{ g.producto }}</h3>
+            <small class="muted"><span class="mono">{{ g.codigo }}</span> · {{ g.sucursales.join(', ') }}</small>
+
+            <div class="product-stats">
+              <div><span>Lotes</span><strong>{{ g.lotes.length }}</strong></div>
+              <div><span>Unidades</span><strong>{{ g.unidades | number:'1.0-2' }}</strong></div>
+              <div><span>A costo</span><strong>Bs {{ g.valorCosto | number:'1.2-2' }}</strong></div>
+            </div>
+
+            <div class="lot-chips">
+              @for (l of g.lotes; track l.idLote) {
+                <button type="button" class="lot-chip" [ngClass]="info(nivel(l)).clase"
+                  [matTooltip]="l.sucursal + ' · ' + (l.cantidadDisponible | number:'1.0-2') + ' unid. · ' + textoDias(l.diasRestantes) + (nivel(l) === 'VENCIDO' ? ' · clic para retirar' : '')"
+                  (click)="nivel(l) === 'VENCIDO' ? retirar(l) : verLotes(l.idProducto, l.producto, l.codigo, l.idSucursal, l.sucursal)">
+                  <span class="mono">{{ l.numeroLote }}</span>
+                  <small>{{ fechaTexto(l.fechaVencimiento) }}</small>
+                </button>
+              }
+            </div>
+          </article>
+        }
+      </div>
+    }
+
+    @if (!loading && !error && lotesFiltrados.length) {
+      <div class="panel-foot">
+        Mostrando {{ vista === 'lote' ? lotesFiltrados.length + ' lotes' : productos.length + ' productos' }}
+        de {{ lotes.length }} lotes con vencimiento en los próximos {{ horizonte }} días (incluye vencidos).
+      </div>
+    }
+  </mat-card>
+</main>

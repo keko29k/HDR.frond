@@ -1,215 +1,235 @@
-<div class="page-container">
+<main class="page">
 
-  <mat-card class="table-card">
+  <!-- ENCABEZADO -->
+  <header class="page-header">
+    <div class="heading">
+      <span class="heading-icon"><mat-icon>shopping_cart</mat-icon></span>
+      <div>
+        <span class="eyebrow">Operaciones</span>
+        <h1>Compras</h1>
+        <p>Registra y consulta las compras a proveedores y el ingreso de mercadería.</p>
+      </div>
+    </div>
 
-    <!-- HEADER -->
-    <div class="header">
-
-      <h2>Lista de compras</h2>
-
-      <button
-        mat-raised-button
-        color="primary"
-        (click)="nuevo()">
-
+    <div class="header-actions">
+      <button class="btn secondary" type="button" [disabled]="loading" (click)="cargarCompras()">
+        <mat-icon>refresh</mat-icon>
+        Actualizar
+      </button>
+      <button class="btn primary" type="button" (click)="nuevo()">
         <mat-icon>add</mat-icon>
         Nueva compra
-
       </button>
-
     </div>
+  </header>
 
-    <!-- FILTRO -->
-    <div class="filters">
+  <!-- RESUMEN -->
+  <section class="summary-row" aria-label="Resumen de compras">
+    <article class="summary-card">
+      <span class="summary-icon"><mat-icon>receipt_long</mat-icon></span>
+      <div>
+        <span class="summary-label">Compras registradas</span>
+        <strong>{{ loading || error ? '—' : meta.totalCount }}</strong>
+        <small>{{ filter.buscar ? 'Según la búsqueda' : 'Total histórico' }}</small>
+      </div>
+    </article>
 
-      <mat-form-field appearance="outline" class="search-field">
+    <article class="summary-card">
+      <span class="summary-icon info"><mat-icon>payments</mat-icon></span>
+      <div>
+        <span class="summary-label">Monto comprado</span>
+        <strong>{{ loading || error ? '—' : 'Bs ' + (totalPagina | number:'1.2-2') }}</strong>
+        <small>En esta página</small>
+      </div>
+    </article>
 
-        <mat-label>Buscar compra</mat-label>
+    <article class="summary-card">
+      <span class="summary-icon warning"><mat-icon>trending_up</mat-icon></span>
+      <div>
+        <span class="summary-label">Compra promedio</span>
+        <strong>{{ loading || error ? '—' : 'Bs ' + (promedioPagina | number:'1.2-2') }}</strong>
+        <small>En esta página</small>
+      </div>
+    </article>
 
-        <input
-          matInput
-          [formControl]="buscarControl"
-          placeholder="Proveedor, sucursal, documento..." />
+    <article class="summary-card">
+      <span class="summary-icon"><mat-icon>local_shipping</mat-icon></span>
+      <div>
+        <span class="summary-label">Proveedores</span>
+        <strong>{{ loading || error ? '—' : proveedoresPagina }}</strong>
+        <small>Distintos en esta página</small>
+      </div>
+    </article>
+  </section>
 
-        <mat-icon matSuffix>search</mat-icon>
-
-      </mat-form-field>
-
-    </div>
-
-    <!-- LOADING -->
-    <div class="loading-container" *ngIf="loading">
-
-      <mat-spinner diameter="42"></mat-spinner>
-
-    </div>
-
-    <!-- TABLA -->
-    <div class="table-container" *ngIf="!loading">
-
-      <table
-        mat-table
-        [dataSource]="compras"
-        class="full-width-table mat-elevation-z1">
-
-        <!-- ID -->
-        <ng-container matColumnDef="id">
-
-          <th mat-header-cell *matHeaderCellDef>
-            ID
-          </th>
-
-          <td mat-cell *matCellDef="let compra">
-            {{ compra.id }}
-          </td>
-
-        </ng-container>
-
-        <!-- FECHA -->
-        <ng-container matColumnDef="fechaCompra">
-
-          <th mat-header-cell *matHeaderCellDef>
-            Fecha
-          </th>
-
-          <td mat-cell *matCellDef="let compra">
-            {{ compra.fechaCompra | date:'dd/MM/yyyy' }}
-          </td>
-
-        </ng-container>
-
-        <!-- SUCURSAL -->
-        <ng-container matColumnDef="sucursal">
-
-          <th mat-header-cell *matHeaderCellDef>
-            Sucursal
-          </th>
-
-          <td mat-cell *matCellDef="let compra">
-            {{ compra.sucursal || '-' }}
-          </td>
-
-        </ng-container>
-
-        <!-- PROVEEDOR -->
-        <ng-container matColumnDef="proveedor">
-
-          <th mat-header-cell *matHeaderCellDef>
-            Proveedor
-          </th>
-
-          <td mat-cell *matCellDef="let compra">
-            {{ compra.proveedor || '-' }}
-          </td>
-
-        </ng-container>
-
-        <!-- USUARIO -->
-        <ng-container matColumnDef="usuario">
-
-          <th mat-header-cell *matHeaderCellDef>
-            Usuario
-          </th>
-
-          <td mat-cell *matCellDef="let compra">
-            {{ compra.usuario || '-' }}
-          </td>
-
-        </ng-container>
-
-        <!-- TOTAL -->
-        <ng-container matColumnDef="total">
-
-          <th mat-header-cell *matHeaderCellDef>
-            Total
-          </th>
-
-          <td mat-cell *matCellDef="let compra">
-            {{ compra.total | number:'1.2-2' }} Bs
-          </td>
-
-        </ng-container>
-
-        <!-- ESTADO -->
-        <ng-container matColumnDef="estadoCompra">
-
-          <th mat-header-cell *matHeaderCellDef>
-            Estado
-          </th>
-
-          <td mat-cell *matCellDef="let compra">
-            {{ compra.estadoCompra }}
-          </td>
-
-        </ng-container>
-
-        <!-- ACCIONES -->
-        <ng-container matColumnDef="acciones">
-
-          <th mat-header-cell *matHeaderCellDef>
-            Acciones
-          </th>
-
-          <td mat-cell *matCellDef="let compra" class="actions-cell">
-
-            <button
-              mat-icon-button
-              color="primary"
-              (click)="editar(compra.id)"
-              matTooltip="Editar">
-
-              <mat-icon>edit</mat-icon>
-
-            </button>
-
-            <button
-              mat-icon-button
-              color="warn"
-              (click)="eliminar(compra.id)"
-              matTooltip="Eliminar">
-
-              <mat-icon>delete</mat-icon>
-
-            </button>
-
-          </td>
-
-        </ng-container>
-
-        <!-- FILAS -->
-        <tr
-          mat-header-row
-          *matHeaderRowDef="displayedColumns">
-        </tr>
-
-        <tr
-          mat-row
-          *matRowDef="let row; columns: displayedColumns;"
-          class="table-row">
-        </tr>
-
-      </table>
-
-      <!-- EMPTY -->
-      <div class="empty-state" *ngIf="compras.length === 0">
-
-        No se encontraron compras.
-
+  <!-- LISTADO -->
+  <mat-card class="panel">
+    <div class="panel-head">
+      <div>
+        <h2>Historial de compras</h2>
+        <p>Busca por proveedor, sucursal o número de documento.</p>
       </div>
 
+      <mat-form-field appearance="outline" class="search" subscriptSizing="dynamic">
+        <mat-label>Buscar compra</mat-label>
+        <mat-icon matPrefix>search</mat-icon>
+        <input matInput [formControl]="buscarControl" placeholder="Proveedor, sucursal, documento..." />
+        @if (buscarControl.value) {
+          <button mat-icon-button matSuffix type="button" aria-label="Limpiar búsqueda" (click)="limpiarBusqueda()">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+      </mat-form-field>
     </div>
 
-    <!-- PAGINADOR -->
-    <mat-paginator
-      [length]="meta.totalCount"
-      [pageSize]="meta.pageSize"
-      [pageIndex]="meta.currentPage - 1"
-      [pageSizeOptions]="[5, 10, 20, 50]"
-      showFirstLastButtons
-      (page)="cambiarPagina($event)">
+    <div class="table-container">
+      @if (loading) {
+        <div class="state-panel" role="status">
+          <mat-spinner diameter="34"></mat-spinner>
+          <span>Cargando compras...</span>
+        </div>
+      } @else if (error) {
+        <div class="state-panel" role="alert">
+          <span class="state-icon error"><mat-icon>cloud_off</mat-icon></span>
+          <h3>No se pudo cargar el historial</h3>
+          <p>Comprueba la conexión con el servidor e inténtalo nuevamente.</p>
+          <button class="btn secondary small" type="button" (click)="cargarCompras()">
+            <mat-icon>refresh</mat-icon>
+            Reintentar
+          </button>
+        </div>
+      } @else if (compras.length) {
+        <table mat-table [dataSource]="compras" class="table">
 
-    </mat-paginator>
+          <!-- ID -->
+          <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef>N.º</th>
+            <td mat-cell *matCellDef="let compra">
+              <span class="id-tag">#{{ compra.id }}</span>
+            </td>
+          </ng-container>
 
+          <!-- FECHA -->
+          <ng-container matColumnDef="fechaCompra">
+            <th mat-header-cell *matHeaderCellDef>Fecha</th>
+            <td mat-cell *matCellDef="let compra" class="nowrap">
+              {{ compra.fechaCompra | date:'dd/MM/yyyy' }}
+            </td>
+          </ng-container>
+
+          <!-- PROVEEDOR -->
+          <ng-container matColumnDef="proveedor">
+            <th mat-header-cell *matHeaderCellDef>Proveedor</th>
+            <td mat-cell *matCellDef="let compra">
+              <div class="entity">
+                <span class="avatar">{{ iniciales(compra.proveedor) }}</span>
+                <span class="entity-text">
+                  <strong>{{ compra.proveedor || 'Sin proveedor' }}</strong>
+                  @if (compra.observacion) {
+                    <small class="observation" [matTooltip]="compra.observacion">{{ compra.observacion }}</small>
+                  }
+                </span>
+              </div>
+            </td>
+          </ng-container>
+
+          <!-- DOCUMENTO -->
+          <ng-container matColumnDef="documento">
+            <th mat-header-cell *matHeaderCellDef>Documento</th>
+            <td mat-cell *matCellDef="let compra">
+              <span class="document">
+                <strong>{{ compra.tipoDocumento || '—' }}</strong>
+                <small class="mono">{{ compra.numeroDocumento || 'Sin número' }}</small>
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- SUCURSAL -->
+          <ng-container matColumnDef="sucursal">
+            <th mat-header-cell *matHeaderCellDef>Sucursal</th>
+            <td mat-cell *matCellDef="let compra">
+              <span class="with-icon">
+                <mat-icon>storefront</mat-icon>
+                {{ compra.sucursal || '—' }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- USUARIO -->
+          <ng-container matColumnDef="usuario">
+            <th mat-header-cell *matHeaderCellDef>Registrado por</th>
+            <td mat-cell *matCellDef="let compra" class="muted">
+              {{ compra.usuario || '—' }}
+            </td>
+          </ng-container>
+
+          <!-- TOTAL -->
+          <ng-container matColumnDef="total">
+            <th mat-header-cell *matHeaderCellDef class="right">Total</th>
+            <td mat-cell *matCellDef="let compra" class="right">
+              <span class="money">Bs {{ compra.total | number:'1.2-2' }}</span>
+            </td>
+          </ng-container>
+
+          <!-- ESTADO -->
+          <ng-container matColumnDef="estadoCompra">
+            <th mat-header-cell *matHeaderCellDef>Estado</th>
+            <td mat-cell *matCellDef="let compra">
+              <span class="status" [ngClass]="claseEstado(compra.estadoCompra)">
+                {{ compra.estadoCompra || 'Sin estado' | titlecase }}
+              </span>
+            </td>
+          </ng-container>
+
+          <!-- ACCIONES -->
+          <ng-container matColumnDef="acciones">
+            <th mat-header-cell *matHeaderCellDef class="right">Acciones</th>
+            <td mat-cell *matCellDef="let compra" class="actions-cell">
+              <button type="button" class="icon-action" matTooltip="Editar compra"
+                [attr.aria-label]="'Editar compra ' + compra.id" (click)="editar(compra.id)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button type="button" class="icon-action danger" matTooltip="Eliminar compra"
+                [attr.aria-label]="'Eliminar compra ' + compra.id" (click)="eliminar(compra.id)">
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      } @else {
+        <div class="state-panel">
+          <span class="state-icon"><mat-icon>{{ filter.buscar ? 'search_off' : 'shopping_cart' }}</mat-icon></span>
+          <h3>{{ filter.buscar ? 'No hay resultados' : 'Aún no hay compras' }}</h3>
+          <p>
+            {{ filter.buscar
+              ? 'No encontramos compras para «' + filter.buscar + '». Prueba con otros términos.'
+              : 'Registra la primera compra para ingresar mercadería al inventario.' }}
+          </p>
+          @if (filter.buscar) {
+            <button class="btn secondary small" type="button" (click)="limpiarBusqueda()">Limpiar búsqueda</button>
+          } @else {
+            <button class="btn primary small" type="button" (click)="nuevo()">
+              <mat-icon>add</mat-icon>
+              Registrar compra
+            </button>
+          }
+        </div>
+      }
+    </div>
+
+    @if (!error && compras.length) {
+      <mat-paginator
+        [length]="meta.totalCount"
+        [pageSize]="meta.pageSize"
+        [pageIndex]="meta.currentPage - 1"
+        [pageSizeOptions]="[5, 10, 20, 50]"
+        showFirstLastButtons
+        (page)="cambiarPagina($event)">
+      </mat-paginator>
+    }
   </mat-card>
 
-</div>
+</main>

@@ -38,7 +38,10 @@ import { Compra } from '../../models/compra.model';
     MatTooltipModule
   ],
   templateUrl: './compra-list.html',
-  styleUrl: './compra-list.css'
+  styleUrls: [
+    '../../../../shared/styles/operaciones.css',
+    './compra-list.css'
+  ]
 })
 export class CompraListComponent implements OnInit {
 
@@ -51,8 +54,9 @@ export class CompraListComponent implements OnInit {
   displayedColumns: string[] = [
     'id',
     'fechaCompra',
-    'sucursal',
     'proveedor',
+    'documento',
+    'sucursal',
     'usuario',
     'total',
     'estadoCompra',
@@ -60,6 +64,7 @@ export class CompraListComponent implements OnInit {
   ];
 
   loading = false;
+  error = false;
 
   buscarControl = new FormControl('', { nonNullable: true });
 
@@ -95,6 +100,7 @@ export class CompraListComponent implements OnInit {
 
   cargarCompras(): void {
     this.loading = true;
+    this.error = false;
 
     this.compraService.getAll(this.filter)
       .pipe(finalize(() => this.loading = false))
@@ -102,12 +108,11 @@ export class CompraListComponent implements OnInit {
         next: (response) => {
           this.compras = response.data;
           this.meta = response.meta;
-
-          
-
-          console.log('Compras cargadas:', this.compras);
         },
         error: () => {
+          this.error = true;
+          this.compras = [];
+
           this.notificationService.error(
             'No se pudo cargar la lista de compras.'
           );
@@ -120,6 +125,61 @@ export class CompraListComponent implements OnInit {
     this.filter.pageSize = event.pageSize;
 
     this.cargarCompras();
+  }
+
+  // =========================
+  // RESUMEN (PÁGINA ACTUAL)
+  // =========================
+
+  get totalPagina(): number {
+    return this.compras.reduce((total, c) => total + (c.total ?? 0), 0);
+  }
+
+  get promedioPagina(): number {
+    return this.compras.length ? this.totalPagina / this.compras.length : 0;
+  }
+
+  get proveedoresPagina(): number {
+    return new Set(this.compras.map(c => c.idProveedor)).size;
+  }
+
+  // =========================
+  // PRESENTACIÓN
+  // =========================
+
+  iniciales(nombre: string | null | undefined): string {
+    const partes = (nombre ?? '').trim().split(/\s+/).filter(Boolean);
+
+    if (!partes.length) {
+      return '—';
+    }
+
+    return partes
+      .slice(0, 2)
+      .map(p => p[0].toUpperCase())
+      .join('');
+  }
+
+  claseEstado(estado: string | null | undefined): string {
+    const valor = (estado ?? '').trim().toUpperCase();
+
+    if (['ANULADA', 'CANCELADA', 'ELIMINADA', 'RECHAZADA'].includes(valor)) {
+      return 'danger';
+    }
+
+    if (['PENDIENTE', 'BORRADOR', 'EN PROCESO'].includes(valor)) {
+      return 'warning';
+    }
+
+    if (['REGISTRADA', 'COMPLETADA', 'RECIBIDA', 'PAGADA', 'ACTIVA'].includes(valor)) {
+      return 'success';
+    }
+
+    return 'neutral';
+  }
+
+  limpiarBusqueda(): void {
+    this.buscarControl.setValue('');
   }
 
   nuevo(): void {

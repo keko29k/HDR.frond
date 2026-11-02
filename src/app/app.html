@@ -1,10 +1,10 @@
 @if (router.url.startsWith('/login')) {
   <router-outlet></router-outlet>
 } @else {
-<mat-sidenav-container class="sidenav-container">
+<mat-sidenav-container class="sidenav-container" autosize [class.compact]="menuCompacto && !isMobile">
 
   <!-- =========================
-       SIDENAV
+       MENÚ LATERAL
   ========================== -->
 
   <mat-sidenav
@@ -13,155 +13,72 @@
     (openedChange)="sidebarOpened = $event"
     class="sidenav">
 
-    <!-- MARCA -->
-    <div class="brand">
+    <div class="sidebar">
 
-      <svg
-        class="crown"
-        viewBox="0 0 48 48"
-        fill="none">
+      <!-- MARCA -->
+      <a class="brand" routerLink="/dashboard" aria-label="Ir al dashboard">
+        <span class="brand-mark">
+          <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
+            <path d="M20 6h8v14h14v8H28v14h-8V28H6v-8h14z" fill="currentColor"></path>
+          </svg>
+        </span>
+        <span class="brand-text">
+          <strong>Herederos del Rey</strong>
+          <small>Sistema de inventario</small>
+        </span>
+      </a>
 
-        <path
-          d="M20 6h8v14h14v8H28v14h-8V28H6v-8h14z"
-          fill="#ffffff">
-        </path>
+      <!-- NAVEGACIÓN -->
+      <nav class="nav" aria-label="Menú principal">
+        @for (grupo of menu; track grupo.titulo) {
+          @if (grupo.titulo) {
+            <div class="nav-eyebrow">
+              <span>{{ grupo.titulo }}</span>
+            </div>
+          }
 
-      </svg>
+          @for (item of grupo.items; track item.ruta) {
+            <a class="nav-item"
+              [routerLink]="item.ruta"
+              routerLinkActive="active"
+              #rla="routerLinkActive"
+              [attr.aria-current]="rla.isActive ? 'page' : null"
+              [matTooltip]="item.titulo"
+              matTooltipPosition="right"
+              [matTooltipDisabled]="!menuCompacto || isMobile">
+              <mat-icon>{{ item.icono }}</mat-icon>
+              <span class="nav-label">{{ item.titulo }}</span>
+              @if (item.alertaVencimientos && alertasVencimiento > 0) {
+                <span class="nav-badge" [attr.aria-label]="alertasVencimiento + ' lotes vencidos o por vencer en 7 días'">
+                  {{ alertasVencimiento > 99 ? '99+' : alertasVencimiento }}
+                </span>
+              }
+            </a>
+          }
+        }
+      </nav>
 
-      <div>
-        <h1>Herederos del Rey</h1>
-        <span>Sistema de inventario</span>
-      </div>
-
+      <!-- USUARIO -->
+      @if (usuarioAutenticado) {
+        <div class="sidebar-user">
+          <div class="avatar" aria-hidden="true">{{ inicialesUsuario }}</div>
+          <div class="sidebar-user-meta">
+            <strong>{{ nombreCompleto || 'Usuario' }}</strong>
+            <small>{{ usuarioActual?.rol || rolUsuarioSesion || 'Sin rol' }}</small>
+          </div>
+          <button type="button" class="sidebar-logout" (click)="cerrarSesion()"
+            matTooltip="Cerrar sesión" matTooltipPosition="right" aria-label="Cerrar sesión">
+            <mat-icon>logout</mat-icon>
+          </button>
+        </div>
+      } @else {
+        <a class="nav-item login-link" routerLink="/login"
+          matTooltip="Iniciar sesión" matTooltipPosition="right" [matTooltipDisabled]="!menuCompacto || isMobile">
+          <mat-icon>login</mat-icon>
+          <span class="nav-label">Iniciar sesión</span>
+        </a>
+      }
     </div>
-
-
-    <!-- =========================
-         MENÚ
-    ========================== -->
-
-    <mat-nav-list class="nav">
-
-      <!-- =========================
-           CATÁLOGO
-      ========================== -->
-
-      <div class="nav-eyebrow">Catálogo</div>
-
-      <!-- PRODUCTOS -->
-      <a mat-list-item routerLink="/productos" routerLinkActive="active-link">
-        <mat-icon matListItemIcon>inventory_2</mat-icon>
-        <span matListItemTitle>Productos</span>
-      </a>
-
-      <!-- INVENTARIO -->
-      <a mat-list-item routerLink="/inventario" routerLinkActive="active-link">
-        <mat-icon matListItemIcon>warehouse</mat-icon>
-        <span matListItemTitle>Inventario por sucursal</span>
-      </a>
-
-      <!-- LOTES -->
-      <a mat-list-item routerLink="/lotes" routerLinkActive="active-link">
-        <mat-icon matListItemIcon>layers</mat-icon>
-        <span matListItemTitle>Lotes</span>
-      </a>
-
-      <!-- CATEGORÍAS -->
-      <a mat-list-item routerLink="/categorias" routerLinkActive="active-link">
-        <mat-icon matListItemIcon>sell</mat-icon>
-        <span matListItemTitle>Categorías</span>
-      </a>
-
-      <!-- MARCAS -->
-      <a mat-list-item routerLink="/marcas" routerLinkActive="active-link">
-        <mat-icon matListItemIcon>branding_watermark</mat-icon>
-        <span matListItemTitle>Marcas</span>
-      </a>
-
-      <!-- PROVEEDORES -->
-      <a mat-list-item routerLink="/proveedores" routerLinkActive="active-link">
-        <mat-icon matListItemIcon>local_shipping</mat-icon>
-        <span matListItemTitle>Proveedores</span>
-      </a>
-
-
-      <!-- =========================
-           OPERACIONES
-      ========================== -->
-
-      <div class="nav-eyebrow">Operaciones</div>
-
-      <!-- VENTAS -->
-      <a mat-list-item routerLink="/ventas" routerLinkActive="active-link">
-        <mat-icon matListItemIcon>point_of_sale</mat-icon>
-        <span matListItemTitle>Ventas</span>
-      </a>
-
-      <!-- COMPRAS -->
-      <a mat-list-item routerLink="/compras" routerLinkActive="active-link">
-        <mat-icon matListItemIcon>shopping_cart</mat-icon>
-        <span matListItemTitle>Compras</span>
-      </a>
-
-      <!-- CAJAS -->
-      <a mat-list-item routerLink="/cajas" routerLinkActive="active-link">
-        <mat-icon matListItemIcon>payments</mat-icon>
-        <span matListItemTitle>Cajas</span>
-      </a>
-
-
-      <!-- =========================
-           GESTIÓN
-      ========================== -->
-
-      <div class="nav-eyebrow">Gestión</div>
-
-      <!-- CLIENTES -->
-      <a mat-list-item routerLink="/clientes" routerLinkActive="active-link">
-        <mat-icon matListItemIcon>group</mat-icon>
-        <span matListItemTitle>Clientes</span>
-      </a>
-
-      <!-- USUARIOS -->
-      <a mat-list-item routerLink="/usuarios" routerLinkActive="active-link">
-        <mat-icon matListItemIcon>manage_accounts</mat-icon>
-        <span matListItemTitle>Usuarios</span>
-      </a>
-
-      <!-- SUCURSALES (nuevo) -->
-      <a mat-list-item routerLink="/sucursales" routerLinkActive="active-link">
-        <mat-icon matListItemIcon>storefront</mat-icon>
-        <span matListItemTitle>Sucursales</span>
-      </a>
-
-
-      <!-- =========================
-           FINANZAS
-      ========================== -->
-
-      <div class="nav-eyebrow">Finanzas</div>
-
-      <!-- GASTOS -->
-      <a mat-list-item routerLink="/gastos" routerLinkActive="active-link">
-        <mat-icon matListItemIcon>receipt_long</mat-icon>
-        <span matListItemTitle>Gastos</span>
-      </a>
-
-      <!-- REPORTES -->
-      <a mat-list-item routerLink="/reportes" routerLinkActive="active-link">
-        <mat-icon matListItemIcon>bar_chart</mat-icon>
-        <span matListItemTitle>Reportes</span>
-      </a>
-
-      <div class="nav-eyebrow">Cuenta</div>
-
-      <a mat-list-item routerLink="/login" routerLinkActive="active-link">
-        <mat-icon matListItemIcon>login</mat-icon>
-        <span matListItemTitle>Iniciar sesión</span>
-      </a>
-
-    </mat-nav-list>
-
   </mat-sidenav>
 
 
@@ -169,71 +86,123 @@
        CONTENIDO PRINCIPAL
   ========================== -->
 
-  <mat-sidenav-content>
+  <mat-sidenav-content class="main">
 
-    <!-- TOOLBAR -->
-    <mat-toolbar class="toolbar">
+    <!-- CABECERA -->
+    <header class="topbar">
 
-      <button
-        mat-icon-button
-        type="button"
-        class="icon-btn"
-        aria-label="Mostrar u ocultar menú"
-        (click)="toggleMenu()">
-        <mat-icon>menu</mat-icon>
-      </button>
+      <div class="topbar-left">
+        <button type="button" class="icon-btn" (click)="toggleMenu()"
+          [attr.aria-label]="isMobile ? 'Abrir menú' : (menuCompacto ? 'Expandir menú' : 'Contraer menú')"
+          [matTooltip]="isMobile ? 'Menú' : (menuCompacto ? 'Expandir menú' : 'Contraer menú')">
+          <mat-icon>{{ isMobile ? 'menu' : (menuCompacto ? 'menu_open' : 'menu') }}</mat-icon>
+        </button>
 
-      <span class="title">Herederos del Rey</span>
-
-      <span class="spacer"></span>
+        <div class="page-title">
+          <span class="page-icon"><mat-icon>{{ paginaIcono }}</mat-icon></span>
+          <div class="page-text">
+            <nav class="breadcrumb" aria-label="Ruta">
+              <span>{{ paginaGrupo }}</span>
+              <mat-icon>chevron_right</mat-icon>
+              <span>{{ paginaTitulo }}</span>
+              @if (paginaAccion) {
+                <mat-icon>chevron_right</mat-icon>
+                <span>{{ paginaAccion }}</span>
+              }
+            </nav>
+            <strong>{{ paginaAccion || paginaTitulo }}</strong>
+          </div>
+        </div>
+      </div>
 
       @if (usuarioAutenticado) {
-        <div class="toolbar-context" aria-live="polite">
-          <div class="context-pill branch-pill" [title]="errorSucursal ? 'No se pudo consultar la sucursal' : 'Sucursal asignada al usuario'">
-            <mat-icon aria-hidden="true">storefront</mat-icon>
-            <span>{{ errorSucursal ? 'Sucursal no disponible' : (sucursalActual?.nombre || 'Cargando sucursal…') }}</span>
+        <div class="topbar-right" aria-live="polite">
+
+          <!-- SUCURSAL -->
+          <div class="chip branch-chip"
+            [class.chip-error]="errorSucursal"
+            [matTooltip]="errorSucursal ? 'No se pudo consultar la sucursal' : (sucursalActual?.direccion || 'Sucursal asignada')">
+            <mat-icon>storefront</mat-icon>
+            <span class="chip-text">
+              <small>Sucursal</small>
+              <strong>{{ errorSucursal ? 'No disponible' : (sucursalActual?.nombre || 'Cargando…') }}</strong>
+            </span>
           </div>
+
+          <!-- CAJA -->
           @if (cajaActual) {
-            <div class="context-pill caja-pill caja-open" [title]="estadoCajaTexto">
-              <span class="status-dot" aria-hidden="true"></span>
-              <span>{{ estadoCajaTexto }}</span>
+            <div class="chip caja-chip caja-open" [matTooltip]="estadoCajaTexto">
+              <span class="pulse" aria-hidden="true"></span>
+              <span class="chip-text">
+                <small>Caja</small>
+                <strong>Abierta · {{ horaCaja }}</strong>
+              </span>
             </div>
           } @else if (cargandoContexto) {
-            <div class="context-pill caja-pill" aria-live="polite">
+            <div class="chip caja-chip">
               <span class="status-dot" aria-hidden="true"></span>
-              <span>Consultando caja…</span>
+              <span class="chip-text">
+                <small>Caja</small>
+                <strong>Consultando…</strong>
+              </span>
             </div>
           } @else if (errorCaja) {
-            <button
-              type="button"
-              class="context-pill caja-pill caja-error caja-action"
-              title="Volver a consultar el estado de caja"
-              (click)="reintentarEstadoCaja()">
-              <span class="status-dot" aria-hidden="true"></span>
-              <span>Reintentar caja</span>
+            <button type="button" class="chip caja-chip caja-error" (click)="reintentarEstadoCaja()"
+              matTooltip="Volver a consultar el estado de caja">
+              <mat-icon>refresh</mat-icon>
+              <span class="chip-text">
+                <small>Caja</small>
+                <strong>Reintentar</strong>
+              </span>
             </button>
           } @else {
-            <button
-              type="button"
-              class="context-pill caja-pill caja-closed caja-action"
-              title="Abrir caja para esta sucursal"
-              (click)="abrirCaja()">
-            <span class="status-dot" aria-hidden="true"></span>
-              <mat-icon aria-hidden="true">add</mat-icon>
-              <span>Abrir caja</span>
+            <button type="button" class="chip caja-chip caja-closed" (click)="abrirCaja()"
+              matTooltip="Abrir caja para esta sucursal">
+              <mat-icon>add_circle</mat-icon>
+              <span class="chip-text">
+                <small>Caja cerrada</small>
+                <strong>Abrir caja</strong>
+              </span>
             </button>
           }
-          <div class="toolbar-user">
-            <div class="avatar" aria-hidden="true">{{ inicialesUsuario }}</div>
-            <div class="user-meta">
-              <span class="name">{{ nombreCompleto }}</span>
-              <span class="role">{{ usuarioActual?.rol || rolUsuarioSesion }}</span>
+
+          <span class="divider" aria-hidden="true"></span>
+
+          <!-- USUARIO -->
+          <button type="button" class="user-btn" [matMenuTriggerFor]="menuUsuario" aria-label="Menú de usuario">
+            <span class="avatar">{{ inicialesUsuario }}</span>
+            <span class="user-meta">
+              <strong>{{ nombreCompleto || 'Usuario' }}</strong>
+              <small>{{ usuarioActual?.rol || rolUsuarioSesion }}</small>
+            </span>
+            <mat-icon class="caret">expand_more</mat-icon>
+          </button>
+
+          <mat-menu #menuUsuario="matMenu" xPosition="before" class="user-menu">
+            <div class="user-menu-head" (click)="$event.stopPropagation()">
+              <span class="avatar lg">{{ inicialesUsuario }}</span>
+              <div>
+                <strong>{{ nombreCompleto || 'Usuario' }}</strong>
+                <small>{{ correoUsuario || (usuarioActual?.rol || rolUsuarioSesion) }}</small>
+              </div>
             </div>
-          </div>
+            <button mat-menu-item routerLink="/dashboard">
+              <mat-icon>space_dashboard</mat-icon>
+              <span>Dashboard</span>
+            </button>
+            <button mat-menu-item routerLink="/cajas">
+              <mat-icon>payments</mat-icon>
+              <span>Mis cajas</span>
+            </button>
+            <button mat-menu-item (click)="cerrarSesion()" class="logout-item">
+              <mat-icon>logout</mat-icon>
+              <span>Cerrar sesión</span>
+            </button>
+          </mat-menu>
         </div>
       }
 
-    </mat-toolbar>
+    </header>
 
     <!-- CONTENIDO DE LAS RUTAS -->
     <main class="content">

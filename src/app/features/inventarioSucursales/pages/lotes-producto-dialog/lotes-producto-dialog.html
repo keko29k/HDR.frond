@@ -1,0 +1,124 @@
+<div class="dialog">
+
+  <!-- ENCABEZADO -->
+  <header class="dialog-header">
+    <div class="title">
+      <span class="title-icon"><span class="material-icons">layers</span></span>
+      <div>
+        <span class="eyebrow">Lotes · {{ data.sucursalNombre }}</span>
+        <h2>{{ data.producto.nombre }}</h2>
+        <small>{{ data.producto.codigo }}</small>
+      </div>
+    </div>
+
+    <button type="button" class="close" aria-label="Cerrar" (click)="cerrar()">
+      <span class="material-icons">close</span>
+    </button>
+  </header>
+
+  <div class="dialog-body">
+
+    @if (loading) {
+      <div class="state" role="status">
+        <mat-spinner diameter="32"></mat-spinner>
+        <span>Cargando lotes...</span>
+      </div>
+    } @else if (error) {
+      <div class="state" role="alert">
+        <span class="material-icons state-icon error">cloud_off</span>
+        <strong>No se pudieron cargar los lotes</strong>
+        <button type="button" class="btn-secondary" (click)="cargarLotes()">
+          <span class="material-icons">refresh</span>
+          Reintentar
+        </button>
+      </div>
+    } @else if (!lotes.length) {
+      <div class="state">
+        <span class="material-icons state-icon">layers_clear</span>
+        <strong>Este producto no tiene lotes en la sucursal</strong>
+        <span class="muted">Los lotes se crean al registrar una compra del producto.</span>
+      </div>
+    } @else {
+
+      <!-- RESUMEN -->
+      <div class="summary">
+        <div class="summary-item">
+          <span>Lotes</span>
+          <strong>{{ lotes.length }}</strong>
+          <small>{{ lotesConStock }} con stock</small>
+        </div>
+        <div class="summary-item">
+          <span>Disponible en lotes</span>
+          <strong>{{ totalDisponible | number:'1.0-2' }}</strong>
+          @if (data.producto.stockActual != null) {
+            <small [class.warn]="totalDisponible !== data.producto.stockActual">
+              Stock del inventario: {{ data.producto.stockActual | number:'1.0-2' }}
+            </small>
+          } @else {
+            <small>Suma de todos los lotes</small>
+          }
+        </div>
+        <div class="summary-item">
+          <span>Próximo vencimiento</span>
+          @if (proximoVencimiento; as p) {
+            <strong>{{ fecha(p.fechaVencimiento) | date:'dd/MM/yyyy' }}</strong>
+            <small>Lote {{ p.numeroLote }}</small>
+          } @else {
+            <strong>—</strong>
+            <small>Sin fecha próxima</small>
+          }
+        </div>
+        <div class="summary-item" [class.alert]="lotesEnRiesgo > 0">
+          <span>En riesgo</span>
+          <strong>{{ lotesEnRiesgo }}</strong>
+          <small>Vencidos o por vencer (30 días)</small>
+        </div>
+      </div>
+
+      <!-- TABLA -->
+      <div class="table-wrap">
+        <table class="lotes-table">
+          <thead>
+            <tr>
+              <th>N.º de lote</th>
+              <th>Fabricación</th>
+              <th>Vencimiento</th>
+              <th class="right">Disponible</th>
+              <th class="right">Costo unit.</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (lote of lotes; track lote.id; let i = $index) {
+              <tr [class.muted-row]="estado(lote) === 'AGOTADO'">
+                <td>
+                  <span class="lote-num">
+                    {{ lote.numeroLote }}
+                    @if (i === 0 && estado(lote) !== 'AGOTADO' && estado(lote) !== 'VENCIDO') {
+                      <span class="next" matTooltip="Este lote se vende primero (FEFO)">Sale primero</span>
+                    }
+                  </span>
+                </td>
+                <td class="nowrap">{{ (fecha(lote.fechaFabricacion) | date:'dd/MM/yyyy') || '—' }}</td>
+                <td class="nowrap">{{ (fecha(lote.fechaVencimiento) | date:'dd/MM/yyyy') || 'Sin vencimiento' }}</td>
+                <td class="right">
+                  <div class="qty">
+                    <strong>{{ lote.cantidadDisponible | number:'1.0-2' }}</strong>
+                    <small>de {{ lote.cantidadInicial | number:'1.0-2' }}</small>
+                  </div>
+                  <div class="track"><div class="fill" [style.width.%]="porcentajeDisponible(lote)"></div></div>
+                </td>
+                <td class="right nowrap">Bs {{ lote.costoCompra | number:'1.2-2' }}</td>
+                <td><span class="status" [ngClass]="claseEstado(lote)">{{ textoEstado(lote) }}</span></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+
+  <footer class="dialog-footer">
+    <button type="button" class="btn-secondary" (click)="cerrar()">Cerrar</button>
+  </footer>
+</div>

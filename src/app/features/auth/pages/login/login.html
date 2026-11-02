@@ -1,51 +1,117 @@
 <main class="login-page">
+
+  <!-- PANEL DE MARCA -->
   <section class="brand-panel" aria-label="Herederos del Rey">
     <div class="brand-lockup">
-      <svg class="crown" viewBox="0 0 48 48" fill="none" aria-hidden="true">
-        <path d="M8 34 6 16l9 8 9-12 9 12 9-8-2 18Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round" fill="rgba(205,164,94,.08)"></path>
-        <circle cx="24" cy="38" r="1.6" fill="currentColor"></circle>
-      </svg>
-      <span>Herederos del Rey</span>
+      <span class="brand-mark">
+        <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
+          <path d="M20 6h8v14h14v8H28v14h-8V28H6v-8h14z" fill="currentColor"></path>
+        </svg>
+      </span>
+      <div>
+        <strong>Herederos del Rey</strong>
+        <span>Sistema de inventario</span>
+      </div>
     </div>
+
     <div class="brand-copy">
-      <span class="eyebrow">Sistema de inventario</span>
-      <h1>Control claro.<br>Operación segura.</h1>
+      <h1>Tu negocio, bajo control.</h1>
+      <p>Ventas, compras, inventario por sucursal y reportes en un solo lugar.</p>
+
+      <ul class="features">
+        <li>
+          <span class="feature-icon"><mat-icon>point_of_sale</mat-icon></span>
+          <span><strong>Punto de venta</strong><small>Cobros al contado y a crédito</small></span>
+        </li>
+        <li>
+          <span class="feature-icon"><mat-icon>layers</mat-icon></span>
+          <span><strong>Lotes y vencimientos</strong><small>Salida automática FEFO</small></span>
+        </li>
+        <li>
+          <span class="feature-icon"><mat-icon>insights</mat-icon></span>
+          <span><strong>Reportes en tiempo real</strong><small>Utilidad, gastos y cuentas por cobrar</small></span>
+        </li>
+      </ul>
     </div>
-    <span class="brand-foot">Acceso administrativo</span>
+
+    <span class="brand-foot">© {{ anio }} Herederos del Rey</span>
   </section>
 
+  <!-- FORMULARIO -->
   <section class="form-panel">
-    <div class="form-content">
-      <span class="eyebrow form-eyebrow">Bienvenido</span>
+    <div class="form-card">
+      <div class="mobile-brand">
+        <span class="brand-mark">
+          <svg viewBox="0 0 48 48" fill="none" aria-hidden="true">
+            <path d="M20 6h8v14h14v8H28v14h-8V28H6v-8h14z" fill="currentColor"></path>
+          </svg>
+        </span>
+        <strong>Herederos del Rey</strong>
+      </div>
+
       <h2>Iniciar sesión</h2>
-      <p class="form-caption">Ingresa tus credenciales para continuar.</p>
+      <p class="form-caption">Ingresa tus credenciales para acceder al sistema.</p>
 
-      <form [formGroup]="form" (ngSubmit)="iniciarSesion()">
-        <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
-          <mat-label>Correo electrónico</mat-label>
-          <input matInput type="email" formControlName="email" autocomplete="username">
-          <mat-error *ngIf="form.get('email')?.hasError('required')">
-            El correo es obligatorio
-          </mat-error>
-          <mat-error *ngIf="form.get('email')?.hasError('email')">
-            Ingresa un correo válido
-          </mat-error>
-        </mat-form-field>
+      @if (errorLogin) {
+        <div class="login-error" role="alert">
+          <mat-icon>error_outline</mat-icon>
+          <span>{{ errorLogin }}</span>
+        </div>
+      }
 
-        <mat-form-field appearance="outline" class="full-width" subscriptSizing="dynamic">
-          <mat-label>Contraseña</mat-label>
-          <input matInput type="password" formControlName="clave" autocomplete="current-password">
-          <mat-error *ngIf="form.get('clave')?.hasError('required')">
-            La contraseña es obligatoria
-          </mat-error>
-        </mat-form-field>
+      <form [formGroup]="form" (ngSubmit)="iniciarSesion()" novalidate>
 
-        <button class="submit-button" type="submit" [disabled]="loading">
-          <span *ngIf="!loading">Ingresar</span>
-          <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
+        <!-- CORREO -->
+        <div class="field" [class.invalid]="campoInvalido('email')">
+          <label for="email">Correo electrónico</label>
+          <div class="input-wrap">
+            <mat-icon class="input-icon">mail</mat-icon>
+            <input id="email" type="email" formControlName="email" autocomplete="username"
+              placeholder="usuario@empresa.com" (input)="errorLogin = ''">
+          </div>
+          @if (campoInvalido('email')) {
+            <span class="field-error">
+              {{ form.controls.email.hasError('required') ? 'El correo es obligatorio.' : 'Ingresa un correo válido.' }}
+            </span>
+          }
+        </div>
+
+        <!-- CONTRASEÑA -->
+        <div class="field" [class.invalid]="campoInvalido('clave')">
+          <label for="clave">Contraseña</label>
+          <div class="input-wrap">
+            <mat-icon class="input-icon">lock</mat-icon>
+            <input id="clave" [type]="mostrarClave ? 'text' : 'password'" formControlName="clave"
+              autocomplete="current-password" placeholder="••••••••"
+              (keydown)="detectarMayusculas($event)" (keyup)="detectarMayusculas($event)" (input)="errorLogin = ''">
+            <button type="button" class="toggle" (click)="mostrarClave = !mostrarClave"
+              [attr.aria-label]="mostrarClave ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+              [attr.aria-pressed]="mostrarClave">
+              <mat-icon>{{ mostrarClave ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+          </div>
+          @if (campoInvalido('clave')) {
+            <span class="field-error">La contraseña es obligatoria.</span>
+          } @else if (mayusculasActivas) {
+            <span class="field-warn"><mat-icon>keyboard_capslock</mat-icon>Bloq Mayús está activado.</span>
+          }
+        </div>
+
+        <button class="submit" type="submit" [disabled]="loading">
+          @if (loading) {
+            <mat-spinner diameter="20"></mat-spinner>
+            Ingresando...
+          } @else {
+            Ingresar
+            <mat-icon>arrow_forward</mat-icon>
+          }
         </button>
       </form>
+
+      <p class="help">
+        <mat-icon>shield</mat-icon>
+        ¿Olvidaste tu contraseña? Comunícate con el administrador del sistema.
+      </p>
     </div>
-    <span class="form-footer">Herederos del Rey <span aria-hidden="true">·</span> Gestión de inventario</span>
   </section>
 </main>

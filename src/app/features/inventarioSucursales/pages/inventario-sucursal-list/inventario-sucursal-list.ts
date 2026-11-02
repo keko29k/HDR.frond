@@ -3,6 +3,9 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatDialog } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { Router } from '@angular/router';
 
 import {
   catchError,
@@ -27,13 +30,17 @@ import { UsuarioService } from '../../../usuarios/services/usuario';
 import { Sucursal } from '../../../sucursales/models/sucursal.model';
 import { SucursalService } from '../../../sucursales/services/sucursal';
 
+// LOTES
+import { LotesProductoDialog, LotesProductoDialogData } from '../lotes-producto-dialog/lotes-producto-dialog';
+
 @Component({
   selector: 'app-inventario-sucursal-list',
   standalone: true,
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatPaginatorModule
+    MatPaginatorModule,
+    MatTooltipModule
   ],
   templateUrl: './inventario-sucursal-list.html',
   styleUrl: './inventario-sucursal-list.css',
@@ -48,6 +55,8 @@ export class InventarioSucursalList implements OnInit {
   private readonly usuarioService = inject(UsuarioService);
   private readonly sucursalService = inject(SucursalService);
   private readonly notificationService = inject(NotificationService);
+  private readonly dialog = inject(MatDialog);
+  private readonly router = inject(Router);
 
   // Control de recarga
   private readonly recargar$ = new Subject<void>();
@@ -340,6 +349,32 @@ export class InventarioSucursalList implements OnInit {
     this.meta.pageSize = event.pageSize;
 
     this.cargarProductos();
+  }
+
+  // =====================================================
+  // LOTES
+  // =====================================================
+
+  verLotes(producto: Producto): void {
+
+    if (!this.sucursalId) {
+      return;
+    }
+
+    this.dialog.open<LotesProductoDialog, LotesProductoDialogData>(LotesProductoDialog, {
+      width: '860px',
+      maxWidth: '95vw',
+      autoFocus: false,
+      data: {
+        producto,
+        sucursalId: this.sucursalId,
+        sucursalNombre: this.sucursalActual?.nombre ?? `Sucursal ${this.sucursalId}`
+      }
+    });
+  }
+
+  verTodosLosLotes(): void {
+    this.router.navigate(['/lotes']);
   }
 
   // =====================================================
