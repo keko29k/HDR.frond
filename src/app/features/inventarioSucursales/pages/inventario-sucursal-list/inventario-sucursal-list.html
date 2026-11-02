@@ -1,164 +1,369 @@
-<main class="inventory-page">
-  <header class="page-header">
-    <div>
-      <span class="eyebrow">CONTROL DE EXISTENCIAS</span>
-      <h1>Inventario por sucursal</h1>
-      <p>Consulta existencias y alertas según la sucursal seleccionada.</p>
+
+<div class="inventario-container">
+
+  <!-- ENCABEZADO -->
+  <div class="page-header">
+    <div class="header-content">
+      <div class="header-icon">
+        <span class="material-icons">inventory_2</span>
+      </div>
+
+      <div>
+        <h1>Inventario de sucursal</h1>
+        <p>Consulta y controla los productos de tu sucursal asignada.</p>
+      </div>
     </div>
-    <button class="refresh-button" type="button" (click)="cargarInventario()" [disabled]="loading">
+
+    <button
+      type="button"
+      class="btn-refresh"
+      (click)="cargarProductos()"
+      [disabled]="loading || cargandoSucursal || !sucursalId">
+
+      <span class="material-icons">refresh</span>
       Actualizar
     </button>
-  </header>
-
-  <div class="filters">
-    <select [formControl]="filtroSucursal" aria-label="Seleccionar sucursal">
-      <option value="todas">General · Todas las sucursales</option>
-      @for (sucursal of sucursales; track sucursal.id) {
-        <option [value]="sucursal.id">{{ sucursal.nombre }}</option>
-      }
-    </select>
-    <label class="search-box">
-      <span aria-hidden="true">⌕</span>
-      <input [formControl]="buscarControl" placeholder="Producto, sucursal o ubicación">
-    </label>
-    <select [formControl]="filtroEstado" aria-label="Filtrar por estado de stock">
-      <option value="todos">Todos los estados</option>
-      <option value="BAJO">Stock bajo</option>
-      <option value="SIN_EXISTENCIAS">Sin existencias</option>
-      <option value="NORMAL">Normal</option>
-      <option value="SOBRESTOCK">Sobrestock</option>
-    </select>
   </div>
 
-  @if (loading) {
-    <section class="panel loading-state" role="status">Cargando inventario y resumen…</section>
-  } @else if (errorCarga) {
-    <section class="panel error-state" role="alert">
-      <p>No se pudo cargar el inventario desde el servidor.</p>
-      <button class="refresh-button" type="button" (click)="cargarInventario()">Reintentar</button>
-    </section>
-  } @else {
-    <section class="summary-grid" aria-label="Resumen de inventario">
-      <article class="summary-card">
-        <span class="summary-label">Unidades en inventario</span>
-        <strong>{{ resumen?.unidadesEnInventario | number:'1.0-2' }}</strong>
-      </article>
-      <article class="summary-card warning-card">
-        <span class="summary-label">Stock bajo</span>
-        <strong>{{ resumen?.stockBajo }}</strong>
-      </article>
-      <article class="summary-card danger-card">
-        <span class="summary-label">Sin existencias</span>
-        <strong>{{ resumen?.sinExistencias }}</strong>
-      </article>
-      <article class="summary-card expiry-card">
-        <span class="summary-label">Lotes por vencer</span>
-        <strong>{{ resumen?.lotesPorVencer }}</strong>
-      </article>
-    </section>
+  <!-- INFORMACIÓN DE SUCURSAL -->
+  <div class="sucursal-card">
 
-    <section class="alerts-grid" aria-label="Alertas de inventario">
-      <article class="panel">
-        <header class="panel-header">
-          <div>
-            <span class="panel-kicker">REABASTECIMIENTO</span>
-            <h2>Productos con stock bajo</h2>
-          </div>
-          <strong>{{ resumen?.stockBajo }}</strong>
-        </header>
-        @if (resumen?.productosStockBajo?.length) {
-          <ul class="alert-list">
-            @for (item of resumen?.productosStockBajo; track item.id) {
-              <li>
-                <span><strong>{{ item.nombreProducto }}</strong><small>{{ item.nombreSucursal }}</small></span>
-                <span class="alert-stock">{{ item.stockActual | number:'1.0-2' }} / {{ item.stockMinimo | number:'1.0-2' }}</span>
-              </li>
-            }
-          </ul>
-        } @else {
-          <p class="empty-message">No hay productos con stock bajo.</p>
-        }
-      </article>
+    <div class="sucursal-icon">
+      <span class="material-icons">store</span>
+    </div>
 
-      <article class="panel">
-        <header class="panel-header">
-          <div>
-            <span class="panel-kicker expiry-kicker">FECHAS DE VENCIMIENTO</span>
-            <h2>Lotes por vencer</h2>
-          </div>
-          <strong>{{ resumen?.lotesPorVencer }}</strong>
-        </header>
-        @if (resumen?.detalleLotesPorVencer?.length) {
-          <ul class="alert-list">
-            @for (lote of resumen?.detalleLotesPorVencer; track lote.id) {
-              <li>
-                <span>
-                  <strong>{{ lote.nombreProducto }}</strong>
-                  <small>{{ lote.nombreSucursal }} · Lote {{ lote.numeroLote }}</small>
-                </span>
-                <span class="expiry-detail">
-                  <strong>{{ lote.diasParaVencer }} días</strong>
-                  <small>{{ lote.fechaVencimiento | date:'dd/MM/yyyy' }} · {{ lote.cantidadDisponible }} un.</small>
-                </span>
-              </li>
-            }
-          </ul>
-        } @else {
-          <p class="empty-message">No hay lotes próximos a vencer.</p>
-        }
-      </article>
-    </section>
+    <div class="sucursal-info">
 
-    <section class="panel stock-panel">
-      <header class="panel-header">
-        <div>
-          <span class="panel-kicker">EXISTENCIAS</span>
-          <h2>Stock por sucursal</h2>
-        </div>
-        <span class="result-count">{{ meta.totalCount }} registros</span>
-      </header>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Producto</th>
-              <th>Sucursal</th>
-              <th>Ubicación</th>
-              <th>Stock actual</th>
-              <th>Mínimo</th>
-              <th>Máximo</th>
-              <th>Estado</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (item of inventarios; track item.id) {
-              <tr>
-                <td><strong>{{ item.nombreProducto }}</strong></td>
-                <td>{{ item.nombreSucursal }}</td>
-                <td>{{ item.ubicacion || '—' }}</td>
-                <td class="quantity">{{ item.stockActual | number:'1.0-2' }}</td>
-                <td>{{ item.stockMinimo | number:'1.0-2' }}</td>
-                <td>{{ item.stockMaximo | number:'1.0-2' }}</td>
-                <td>
-                  <span class="status" [ngClass]="estadoClase(item.estadoStock)">
-                    {{ estadoTexto(item.estadoStock) }}
-                  </span>
-                </td>
-              </tr>
-            } @empty {
-              <tr><td colspan="7" class="empty-row">No hay existencias para los filtros seleccionados.</td></tr>
-            }
-          </tbody>
-        </table>
+      <span class="sucursal-label">Sucursal asignada</span>
+
+      <h3 *ngIf="sucursalActual">
+        {{ sucursalActual.nombre }}
+      </h3>
+
+      <h3 *ngIf="cargandoSucursal">
+        Consultando sucursal...
+      </h3>
+
+      <h3 *ngIf="!sucursalActual && !cargandoSucursal && errorCarga">
+        No disponible
+      </h3>
+
+      <span class="sucursal-description">
+        Inventario correspondiente al usuario conectado
+      </span>
+
+    </div>
+
+    <div class="sucursal-status" *ngIf="sucursalActual">
+      <span class="status-dot"></span>
+      Sucursal activa
+    </div>
+
+  </div>
+
+  <!-- TARJETAS DE RESUMEN -->
+  <div class="stats-grid">
+
+    <!-- PRODUCTOS -->
+    <div class="stat-card">
+
+      <div class="stat-icon products-icon">
+        <span class="material-icons">inventory_2</span>
       </div>
+
+      <div class="stat-content">
+        <span class="stat-label">Productos en página</span>
+        <h2>{{ productos.length }}</h2>
+        <small>Registros mostrados</small>
+      </div>
+
+    </div>
+
+    <!-- UNIDADES -->
+    <div class="stat-card">
+
+      <div class="stat-icon stock-icon">
+        <span class="material-icons">warehouse</span>
+      </div>
+
+      <div class="stat-content">
+        <span class="stat-label">Unidades en página</span>
+        <h2>{{ totalUnidades | number:'1.0-2' }}</h2>
+        <small>Existencias de los productos mostrados</small>
+      </div>
+
+    </div>
+
+    <!-- TOTAL REGISTROS -->
+    <div class="stat-card">
+
+      <div class="stat-icon total-icon">
+        <span class="material-icons">format_list_numbered</span>
+      </div>
+
+      <div class="stat-content">
+        <span class="stat-label">Total de productos</span>
+        <h2>{{ meta.totalCount }}</h2>
+        <small>Productos encontrados en la sucursal</small>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <div class="content-card">
+
+    <!-- CABECERA DE TABLA -->
+    <div class="content-header">
+
+      <div>
+        <h2>Productos registrados</h2>
+        <p>Listado de productos pertenecientes a tu sucursal.</p>
+      </div>
+
+      <div class="total-indicator" *ngIf="meta.totalCount > 0">
+        {{ meta.totalCount }} productos
+      </div>
+
+    </div>
+
+    <!-- BÚSQUEDA -->
+    <div class="filters-container">
+
+      <div class="search-box">
+
+        <span class="material-icons search-icon">search</span>
+
+        <input
+          type="text"
+          [formControl]="buscarControl"
+          placeholder="Buscar por código o nombre del producto..."
+          autocomplete="off"
+        />
+
+        <button
+          *ngIf="buscarControl.value"
+          type="button"
+          class="clear-search"
+          (click)="limpiarBusqueda()"
+          title="Limpiar búsqueda">
+
+          <span class="material-icons">close</span>
+
+        </button>
+
+      </div>
+
+    </div>
+
+    <!-- CARGANDO -->
+    <div
+      class="loading-container"
+      *ngIf="loading || cargandoSucursal">
+
+      <div class="spinner"></div>
+
+      <p>
+        {{
+          cargandoSucursal
+            ? 'Consultando sucursal...'
+            : 'Cargando productos...'
+        }}
+      </p>
+
+    </div>
+
+    <!-- ERROR -->
+    <div
+      class="error-container"
+      *ngIf="errorCarga && !loading && !cargandoSucursal">
+
+      <span class="material-icons error-icon">
+        error_outline
+      </span>
+
+      <h3>No se pudo cargar la información</h3>
+
+      <p>
+        Verifica tu conexión o la configuración de tu sucursal e intenta nuevamente.
+      </p>
+
+      <button
+        type="button"
+        class="btn-retry"
+        (click)="sucursalId ? cargarProductos() : cargarSucursalDeSesion()">
+
+        <span class="material-icons">refresh</span>
+        Reintentar
+
+      </button>
+
+    </div>
+
+    <!-- TABLA DE PRODUCTOS -->
+    <div
+      class="table-container"
+      *ngIf="!loading && !errorCarga && productos.length > 0">
+
+      <table class="inventory-table">
+
+        <thead>
+          <tr>
+            <th>CÓDIGO</th>
+            <th>PRODUCTO</th>
+            <th>CÓDIGO DE BARRAS</th>
+            <th>PRECIO COMPRA</th>
+            <th>PRECIO VENTA</th>
+            <th>STOCK ACTUAL</th>
+            <th>INVENTARIO</th>
+            <th>VENTA</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          <tr *ngFor="let producto of productos">
+
+            <!-- CÓDIGO -->
+            <td>
+              <span class="product-code">
+                {{ producto.codigo }}
+              </span>
+            </td>
+
+            <!-- PRODUCTO -->
+            <td>
+              <div class="product-name">
+
+                <strong>{{ producto.nombre }}</strong>
+
+                <small *ngIf="producto.nombreGenerico">
+                  {{ producto.nombreGenerico }}
+                </small>
+
+              </div>
+            </td>
+
+            <!-- CÓDIGO DE BARRAS -->
+            <td>
+              <span class="barcode">
+                {{ producto.codigoBarras || 'Sin código' }}
+              </span>
+            </td>
+
+            <!-- PRECIO COMPRA -->
+            <td>
+              <span class="price">
+                Bs {{ producto.precioCompra | number:'1.2-2' }}
+              </span>
+            </td>
+
+            <!-- PRECIO VENTA -->
+            <td>
+              <span class="price-sale">
+                Bs {{ producto.precioVenta | number:'1.2-2' }}
+              </span>
+            </td>
+
+            <!-- STOCK -->
+            <td>
+              <span
+                class="stock-badge"
+                [ngClass]="{
+                  'stock-empty': producto.stockActual <= 0,
+                  'stock-positive': producto.stockActual > 0
+                }">
+
+                {{ producto.stockActual }}
+
+              </span>
+            </td>
+
+            <!-- CONTROL DE INVENTARIO -->
+            <td>
+              <span
+                class="control-badge"
+                [ngClass]="producto.controlaInventario
+                  ? 'control-active'
+                  : 'control-inactive'">
+
+                {{ producto.controlaInventario ? 'Controlado' : 'No controlado' }}
+
+              </span>
+            </td>
+
+            <!-- PERMITE VENTA -->
+            <td>
+              <span
+                class="sale-badge"
+                [ngClass]="producto.permiteVenta
+                  ? 'sale-active'
+                  : 'sale-inactive'">
+
+                {{ producto.permiteVenta ? 'Disponible' : 'No permitido' }}
+
+              </span>
+            </td>
+
+          </tr>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+    <!-- SIN RESULTADOS -->
+    <div
+      class="empty-container"
+      *ngIf="
+        !loading &&
+        !errorCarga &&
+        productos.length === 0 &&
+        sucursalActual
+      ">
+
+      <div class="empty-icon">
+        <span class="material-icons">inventory_2</span>
+      </div>
+
+      <h3>No se encontraron productos</h3>
+
+      <p>
+        No existen productos registrados para esta sucursal
+        o no hay resultados para tu búsqueda.
+      </p>
+
+      <button
+        *ngIf="buscarControl.value"
+        type="button"
+        class="btn-retry"
+        (click)="limpiarBusqueda()">
+
+        Limpiar búsqueda
+
+      </button>
+
+    </div>
+
+    <!-- PAGINACIÓN -->
+    <div
+      class="paginator-container"
+      *ngIf="!errorCarga && meta.totalCount > 0">
+
       <mat-paginator
         [length]="meta.totalCount"
-        [pageSize]="meta.pageSize"
         [pageIndex]="meta.currentPage - 1"
+        [pageSize]="meta.pageSize"
         [pageSizeOptions]="pageSizeOptions"
-        showFirstLastButtons
-        (page)="cambiarPagina($event)">
+        [disabled]="loading"
+        (page)="cambiarPagina($event)"
+        showFirstLastButtons>
       </mat-paginator>
-    </section>
-  }
-</main>
+
+    </div>
+
+  </div>
+
+</div>

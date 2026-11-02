@@ -1,48 +1,84 @@
+
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+
 import {
   catchError,
   debounceTime,
   EMPTY,
   finalize,
-  forkJoin,
-  merge,
   Subject,
   switchMap
 } from 'rxjs';
 
 import { MetaData } from '../../../../core/models/metadata.model';
 import { NotificationService } from '../../../../core/services/notification.service';
-import {
-  EstadoStockFiltro,
-  InventarioSucursal,
-  InventarioSucursalResumen
-} from '../../models/inventarioSucursal.model';
-import { InventarioSucursalService } from '../../services/inventario-sucursal';
+
+// PRODUCTOS
+import { Producto } from '../../../productos/models/producto.model';
+import { ProductoService } from '../../../productos/services/producto';
+
+// USUARIOS
+import { UsuarioService } from '../../../usuarios/services/usuario';
+
+// SUCURSALES
 import { Sucursal } from '../../../sucursales/models/sucursal.model';
 import { SucursalService } from '../../../sucursales/services/sucursal';
 
 @Component({
   selector: 'app-inventario-sucursal-list',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatPaginatorModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatPaginatorModule
+  ],
   templateUrl: './inventario-sucursal-list.html',
   styleUrl: './inventario-sucursal-list.css',
 })
 export class InventarioSucursalList implements OnInit {
-  private readonly inventarioService = inject(InventarioSucursalService);
+
+  // =====================================================
+  // SERVICIOS
+  // =====================================================
+
+  private readonly productoService = inject(ProductoService);
+  private readonly usuarioService = inject(UsuarioService);
   private readonly sucursalService = inject(SucursalService);
   private readonly notificationService = inject(NotificationService);
+
+  // Control de recarga
   private readonly recargar$ = new Subject<void>();
 
-  inventarios: InventarioSucursal[] = [];
-  sucursales: Sucursal[] = [];
-  resumen: InventarioSucursalResumen | null = null;
+  // =====================================================
+  // DATOS
+  // =====================================================
+
+  productos: Producto[] = [];
+
+  sucursalActual: Sucursal | null = null;
+
+  sucursalId = 0;
+
+  // Totales de la página actual
+  totalUnidades = 0;
+
+  // =====================================================
+  // ESTADOS
+  // =====================================================
+
   loading = false;
+  cargandoSucursal = false;
   errorCarga = false;
+
+  // =====================================================
+  // PAGINACIÓN
+  // =====================================================
+
   readonly pageSizeOptions = [5, 10, 20, 50];
+
   meta: MetaData = {
     totalCount: 0,
     pageSize: 10,
@@ -52,42 +88,163 @@ export class InventarioSucursalList implements OnInit {
     hasPreviousPage: false
   };
 
-  readonly buscarControl = new FormControl('', { nonNullable: true });
-  readonly filtroEstado = new FormControl('todos', { nonNullable: true });
-  readonly filtroSucursal = new FormControl('todas', { nonNullable: true });
+  // =====================================================
+  // BÚSQUEDA
+  // =====================================================
+
+  readonly buscarControl = new FormControl('', {
+    nonNullable: true
+  });
+
+  // =====================================================
+  // INICIALIZACIÓN
+  // =====================================================
 
   ngOnInit(): void {
-    this.sucursalService.gets().subscribe({
-      next: sucursales => this.sucursales = sucursales,
-      error: error => {
-        console.error('Error al cargar sucursales para el inventario:', error);
-        this.notificationService.error('No se pudieron cargar las sucursales.');
-      }
-    });
+
+    this.configurarCargaProductos();
+
+    this.configurarBusqueda();
+
+    this.cargarSucursalDeSesion();
+  }
+
+  // =====================================================
+  // OBTENER SUCURSAL DEL USUARIO CONECTADO
+  // =====================================================
+
+  cargarSucursalDeSesion(): void {
+
+    const usuarioId = this.leerNumero('Id');
+
+    if (!usuarioId) {
+
+      this.errorCarga = true;
+
+      this.notificationService.error(
+        'No se encontró el usuario de la sesión. Inicia sesión nuevamente.'
+      );
+
+      return;
+    }
+
+    this.cargandoSucursal = true;
+    this.errorCarga = false;
+
+    this.usuarioService.getById(usuarioId)
+      .pipe(
+
+        switchMap(usuario => {
+
+          // Verificar que el usuario tenga sucursal asignada
+          if (
+            !Number.isInteger(usuario.idSucursal) ||
+            usuario.idSucursal <= 0
+          ) {
+
+            this.sucursalId = 0;
+            this.sucursalActual = null;
+            this.productos = [];
+            this.totalUnidades = 0;
+
+            this.errorCarga = true;
+
+            this.notificationService.error(
+              'El usuario no tiene una sucursal asignada.'
+            );
+
+            return EMPTY;
+          }
+
+          this.sucursalId = usuario.idSucursal;
+
+          // Consultar la sucursal asignada
+          return this.sucursalService.getById(this.sucursalId);
+        }),
+
+        finalize(() => {
+          this.cargandoSucursal = false;
+        })
+
+      )
+      .subscribe({
+
+        next: sucursal => {
+
+          this.sucursalActual = sucursal;
+
+          // Iniciar desde la primera página
+          this.meta.currentPage = 1;
+
+          // Consultar productos de esa sucursal
+          this.cargarProductos();
+        },
+
+        error: error => {
+
+          console.error(
+            'Error al consultar la sucursal del usuario:',
+            error
+          );
+
+          this.sucursalActual = null;
+          this.sucursalId = 0;
+          this.productos = [];
+          this.totalUnidades = 0;
+
+          this.errorCarga = true;
+
+          this.notificationService.error(
+            'No se pudo consultar la sucursal asignada a tu usuario.'
+          );
+        }
+
+      });
+  }
+
+  // =====================================================
+  // CONFIGURAR CONSULTA DE PRODUCTOS
+  // =====================================================
+
+  private configurarCargaProductos(): void {
 
     this.recargar$
       .pipe(
+
         switchMap(() => {
+
+          if (!this.sucursalId || this.sucursalId <= 0) {
+            return EMPTY;
+          }
+
           this.loading = true;
           this.errorCarga = false;
-          const idSucursal = this.filtroSucursal.value === 'todas'
-            ? null
-            : Number(this.filtroSucursal.value);
 
-          return forkJoin({
-            pagina: this.inventarioService.getPaginacion(
-              idSucursal,
-              this.meta.currentPage,
-              this.meta.pageSize,
-              this.buscarControl.value,
-              this.estadoSeleccionado()
-            ),
-            resumen: this.inventarioService.getResumen(idSucursal)
-          }).pipe(
-            finalize(() => this.loading = false),
+          return this.productoService.getBySucursal(
+            this.sucursalId,
+            {
+              pageNumber: this.meta.currentPage,
+              pageSize: this.meta.pageSize,
+              buscar: this.buscarControl.value
+            }
+          ).pipe(
+
+            finalize(() => {
+
+              
+              this.loading = false;
+            }),
+
             catchError(error => {
-              this.inventarios = [];
-              this.resumen = null;
+
+              console.error(
+                'Error al consultar productos de la sucursal:',
+                error
+              );
+
+              this.productos = [];
+              this.totalUnidades = 0;
+
               this.meta = {
                 ...this.meta,
                 totalCount: 0,
@@ -95,63 +252,107 @@ export class InventarioSucursalList implements OnInit {
                 hasNextPage: false,
                 hasPreviousPage: false
               };
+
               this.errorCarga = true;
-              console.error('Error al cargar inventario y resumen:', error);
-              this.notificationService.error('No se pudo cargar el inventario o su resumen.');
+
+              this.notificationService.error(
+                'No se pudieron cargar los productos de la sucursal.'
+              );
+
               return EMPTY;
             })
+
           );
         })
+
       )
-      .subscribe(({ pagina, resumen }) => {
-        this.inventarios = pagina.data;
-        this.meta = pagina.meta;
-        this.resumen = resumen;
+      .subscribe(response => {
+
+        // Guardar productos recibidos
+        this.productos = response.data ?? [];
+
+
+        console.log('Productos cargados:', this.productos);
+        // Actualizar metadatos de paginación
+        this.meta = response.meta;
+
+        // Calcular unidades de los productos de la página actual
+        this.totalUnidades = this.productos.reduce(
+          (total, producto) => total + (producto.stockActual || 0),
+          0
+        );
+
       });
-
-    merge(
-      this.buscarControl.valueChanges.pipe(debounceTime(350)),
-      this.filtroEstado.valueChanges,
-      this.filtroSucursal.valueChanges
-    ).subscribe(() => {
-      this.meta.currentPage = 1;
-      this.cargarInventario();
-    });
-
-    this.cargarInventario();
   }
 
-  cargarInventario(): void {
+  // =====================================================
+  // CONFIGURAR BÚSQUEDA
+  // =====================================================
+
+  private configurarBusqueda(): void {
+
+    this.buscarControl.valueChanges
+      .pipe(
+        debounceTime(350)
+      )
+      .subscribe(() => {
+
+        this.meta.currentPage = 1;
+
+        this.cargarProductos();
+      });
+  }
+
+  // =====================================================
+  // CARGAR PRODUCTOS
+  // =====================================================
+
+  cargarProductos(): void {
     this.recargar$.next();
   }
 
+  // Mantener este método por compatibilidad con el HTML anterior
+  cargarInventario(): void {
+    this.cargarProductos();
+  }
+
+  // =====================================================
+  // LIMPIAR BÚSQUEDA
+  // =====================================================
+
+  limpiarBusqueda(): void {
+
+    this.buscarControl.setValue('');
+
+    this.meta.currentPage = 1;
+
+    this.cargarProductos();
+  }
+
+  // =====================================================
+  // CAMBIAR PÁGINA
+  // =====================================================
+
   cambiarPagina(event: PageEvent): void {
+
     this.meta.currentPage = event.pageIndex + 1;
+
     this.meta.pageSize = event.pageSize;
-    this.cargarInventario();
+
+    this.cargarProductos();
   }
 
-  estadoTexto(estado: string): string {
-    switch (estado) {
-      case 'BAJO': return 'Stock bajo';
-      case 'SIN_EXISTENCIAS': return 'Sin existencias';
-      case 'SOBRESTOCK': return 'Sobrestock';
-      case 'NORMAL': return 'Normal';
-      default: return estado;
-    }
+  // =====================================================
+  // LEER DATOS DE SESIÓN
+  // =====================================================
+
+  private leerNumero(clave: string): number {
+
+    const valor = Number(localStorage.getItem(clave));
+
+    return Number.isInteger(valor) && valor > 0
+      ? valor
+      : 0;
   }
 
-  estadoClase(estado: string): string {
-    switch (estado) {
-      case 'BAJO': return 'status-low';
-      case 'SIN_EXISTENCIAS': return 'status-empty';
-      case 'SOBRESTOCK': return 'status-overstock';
-      default: return 'status-ok';
-    }
-  }
-
-  private estadoSeleccionado(): EstadoStockFiltro | null {
-    const estado = this.filtroEstado.value;
-    return estado === 'todos' ? null : estado as EstadoStockFiltro;
-  }
 }
