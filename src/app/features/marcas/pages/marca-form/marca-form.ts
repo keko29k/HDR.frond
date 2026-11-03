@@ -27,7 +27,11 @@ import {MatIconModule} from '@angular/material/icon';
     MatIconModule
   ],
   templateUrl: './marca-form.html',
-  styleUrl: './marca-form.css'
+  styleUrls: [
+    '../../../../shared/styles/operaciones.css',
+    '../../../../shared/styles/formulario.css',
+    './marca-form.css'
+  ]
 })
 export class MarcaFormComponent implements OnInit {
   private fb = inject(FormBuilder);

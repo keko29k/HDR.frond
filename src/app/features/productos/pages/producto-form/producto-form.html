@@ -1,498 +1,256 @@
-<div class="producto-form-container">
-
-  <mat-card class="producto-card">
-
-    <!-- ENCABEZADO -->
-    <mat-card-header>
-      <mat-card-title>
-        {{ titulo }}
-      </mat-card-title>
-
-      <mat-card-subtitle>
-        {{ editando
-          ? 'Modifica la información del producto'
-          : 'Registra un nuevo producto'
-        }}
-      </mat-card-subtitle>
-    </mat-card-header>
-
-
-    <mat-card-content>
-
-      <form
-        [formGroup]="form"
-        (ngSubmit)="guardar()"
-      >
-
-        <!-- ========================================= -->
-        <!-- INFORMACIÓN GENERAL -->
-        <!-- ========================================= -->
-
-        <h3 class="section-title">
-          Información general
-        </h3>
-
-        <div class="form-grid">
-
-          <!-- CATEGORÍA -->
-          <mat-form-field appearance="outline">
-
-            <mat-label>Categoría</mat-label>
-
-            <mat-select formControlName="idCategoria">
-
-              <mat-option [value]="0">
-                Seleccione una categoría
-              </mat-option>
-
-              @for (categoria of categorias; track categoria.id) {
-
-                <mat-option [value]="categoria.id">
-                  {{ categoria.nombre }}
-                </mat-option>
-
-              }
-
-            </mat-select>
-
-            @if (
-              form.get('idCategoria')?.hasError('required') ||
-              form.get('idCategoria')?.hasError('min')
-            ) {
-
-              <mat-error>
-                Seleccione una categoría
-              </mat-error>
-
-            }
-
-          </mat-form-field>
-
-
-          <!-- MARCA -->
-          <mat-form-field appearance="outline">
-
-            <mat-label>Marca</mat-label>
-
-            <mat-select formControlName="idMarca">
-
-              <mat-option [value]="null">
-                Sin marca
-              </mat-option>
-
-              @for (marca of marcas; track marca.id) {
-
-                <mat-option [value]="marca.id">
-                  {{ marca.nombre }}
-                </mat-option>
-
-              }
-
-            </mat-select>
-
-          </mat-form-field>
-
-
-          <!-- CÓDIGO -->
-          <mat-form-field appearance="outline">
-
-            <mat-label>Código</mat-label>
-
-            <input
-              matInput
-              type="text"
-              formControlName="codigo"
-              placeholder="Ej. PROD-001"
-            />
-
-            @if (form.get('codigo')?.hasError('required')) {
-
-              <mat-error>
-                El código es obligatorio
-              </mat-error>
-
-            }
-
-            @if (form.get('codigo')?.hasError('maxlength')) {
-
-              <mat-error>
-                Máximo 50 caracteres
-              </mat-error>
-
-            }
-
-          </mat-form-field>
-
-
-          <!-- CÓDIGO DE BARRAS -->
-          <mat-form-field appearance="outline">
-
-            <mat-label>Código de barras</mat-label>
-
-            <input
-              matInput
-              type="text"
-              formControlName="codigoBarras"
-              placeholder="Ej. 7801234567890"
-            />
-
-            @if (form.get('codigoBarras')?.hasError('maxlength')) {
-
-              <mat-error>
-                Máximo 50 caracteres
-              </mat-error>
-
-            }
-
-          </mat-form-field>
-
-
-          <!-- NOMBRE -->
-          <mat-form-field
-            appearance="outline"
-            class="full-width"
-          >
-
-            <mat-label>Nombre del producto</mat-label>
-
-            <input
-              matInput
-              type="text"
-              formControlName="nombre"
-              placeholder="Ej. Paracetamol 500 mg"
-            />
-
-            @if (form.get('nombre')?.hasError('required')) {
-
-              <mat-error>
-                El nombre es obligatorio
-              </mat-error>
-
-            }
-
-            @if (form.get('nombre')?.hasError('maxlength')) {
-
-              <mat-error>
-                Máximo 100 caracteres
-              </mat-error>
-
-            }
-
-          </mat-form-field>
-
-
-          <!-- NOMBRE GENÉRICO -->
-          <mat-form-field
-            appearance="outline"
-            class="full-width"
-          >
-
-            <mat-label>Nombre genérico</mat-label>
-
-            <input
-              matInput
-              type="text"
-              formControlName="nombreGenerico"
-              placeholder="Ej. Paracetamol"
-            />
-
-            @if (form.get('nombreGenerico')?.hasError('maxlength')) {
-
-              <mat-error>
-                Máximo 100 caracteres
-              </mat-error>
-
-            }
-
-          </mat-form-field>
-
-
-          <!-- DESCRIPCIÓN -->
-          <mat-form-field
-            appearance="outline"
-            class="full-width"
-          >
-
-            <mat-label>Descripción</mat-label>
-
-            <textarea
-              matInput
-              rows="4"
-              formControlName="descripcion"
-              placeholder="Ingrese una descripción del producto"
-            ></textarea>
-
-          </mat-form-field>
-
-        </div>
-
-
-        <!-- ========================================= -->
-        <!-- PRECIOS Y PESO -->
-        <!-- ========================================= -->
-
-        <h3 class="section-title">
-          Precios y peso
-        </h3>
-
-        <div class="form-grid">
-
-          <!-- PRECIO COMPRA -->
-          <mat-form-field appearance="outline">
-
-            <mat-label>Precio de compra</mat-label>
-
-            <span matTextPrefix>Bs&nbsp;</span>
-
-            <input
-              matInput
-              type="number"
-              min="0"
-              step="0.01"
-              formControlName="precioCompra"
-              placeholder="0.00"
-            />
-
-            @if (form.get('precioCompra')?.hasError('required')) {
-
-              <mat-error>
-                El precio de compra es obligatorio
-              </mat-error>
-
-            }
-
-            @if (form.get('precioCompra')?.hasError('min')) {
-
-              <mat-error>
-                El precio no puede ser negativo
-              </mat-error>
-
-            }
-
-          </mat-form-field>
-
-
-          <!-- PRECIO VENTA -->
-          <mat-form-field appearance="outline">
-
-            <mat-label>Precio de venta</mat-label>
-
-            <span matTextPrefix>Bs&nbsp;</span>
-
-            <input
-              matInput
-              type="number"
-              min="0"
-              step="0.01"
-              formControlName="precioVenta"
-              placeholder="0.00"
-            />
-
-            @if (form.get('precioVenta')?.hasError('required')) {
-
-              <mat-error>
-                El precio de venta es obligatorio
-              </mat-error>
-
-            }
-
-            @if (form.get('precioVenta')?.hasError('min')) {
-
-              <mat-error>
-                El precio no puede ser negativo
-              </mat-error>
-
-            }
-
-          </mat-form-field>
-
-
-          <!-- PESO -->
-          <mat-form-field appearance="outline">
-
-            <mat-label>Peso</mat-label>
-
-            <input
-              matInput
-              type="number"
-              min="0"
-              step="0.01"
-              formControlName="peso"
-              placeholder="Ej. 0.50"
-            />
-
-            <span matTextSuffix>
-              kg
-            </span>
-
-            @if (form.get('peso')?.hasError('min')) {
-
-              <mat-error>
-                El peso no puede ser negativo
-              </mat-error>
-
-            }
-
-          </mat-form-field>
-
-        </div>
-
-
-        <!-- ========================================= -->
-        <!-- CONFIGURACIÓN OPERATIVA -->
-        <!-- ========================================= -->
-
-        <h3 class="section-title">
-          Configuración operativa
-        </h3>
-
-        <div class="options-container">
-
-          <div class="option-item">
-
-            <div class="option-text">
-
-              <strong>
-                Inventario y venta
-              </strong>
-
-              <span>
-                Este producto siempre se maneja con inventario activo y venta habilitada.
-              </span>
-
+<form class="form-page" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
+
+  <header class="page-header">
+    <div class="heading">
+      <button type="button" class="back-btn" aria-label="Volver a productos" (click)="cancelar()">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div>
+        <span class="eyebrow">Productos</span>
+        <h1>{{ editando ? 'Editar producto' : 'Nuevo producto' }}</h1>
+        <p>{{ editando ? 'Modifica la información, precios o configuración del producto.' : 'Registra un medicamento o insumo en el catálogo.' }}</p>
+      </div>
+    </div>
+  </header>
+
+  @if (loading && editando && !form.value.nombre) {
+    <div class="loading-state" role="status">
+      <mat-spinner diameter="32"></mat-spinner>
+      <span>Cargando producto...</span>
+    </div>
+  } @else {
+    <div class="form-layout">
+      <div class="form-main">
+
+        <!-- IDENTIFICACIÓN -->
+        <section class="form-section">
+          <div class="section-head">
+            <span class="section-icon"><mat-icon>medication</mat-icon></span>
+            <div>
+              <h2>Identificación</h2>
+              <p>Nombre comercial, principio activo y códigos.</p>
             </div>
-
-            <div class="status-group">
-
-              <span class="status-chip success">
-                Inventario activo
-              </span>
-
-              <span class="status-chip success">
-                Venta habilitada
-              </span>
-
-            </div>
-
           </div>
-
-
-          <div class="option-item">
-
-            <div class="option-text">
-
-              <strong>
-                Manejo de lote
-              </strong>
-
-              <span>
-                El producto siempre se registra con control de lote.
-              </span>
-
-            </div>
-
-            <span class="status-chip info">
-              Lote requerido
-            </span>
-
-          </div>
-
-
-          <!-- TIENE VENCIMIENTO -->
-          <div class="option-item">
-
-            <div class="option-text">
-
-              <strong>
-                Tiene vencimiento
-              </strong>
-
-              <span>
-                Indica si este producto requiere control por fecha de vencimiento.
-              </span>
-
-            </div>
-
-            <mat-form-field
-              appearance="outline"
-              class="option-select"
-            >
-
-              <mat-label>Fecha de vencimiento</mat-label>
-
-              <mat-select formControlName="tieneVencimiento">
-
-                <mat-option [value]="true">
-                  Sí
-                </mat-option>
-
-                <mat-option [value]="false">
-                  No
-                </mat-option>
-
-              </mat-select>
-
+          <div class="section-body fields">
+            <mat-form-field appearance="outline" class="span-all">
+              <mat-label>Nombre del producto</mat-label>
+              <input matInput type="text" formControlName="nombre" placeholder="Ej. Paracetamol 500 mg x 10 comprimidos">
+              @if (form.get('nombre')?.hasError('required')) {
+                <mat-error>El nombre es obligatorio.</mat-error>
+              }
+              @if (form.get('nombre')?.hasError('maxlength')) {
+                <mat-error>Máximo 100 caracteres.</mat-error>
+              }
             </mat-form-field>
 
+            <mat-form-field appearance="outline" class="span-all">
+              <mat-label>Nombre genérico / principio activo</mat-label>
+              <mat-icon matPrefix>science</mat-icon>
+              <input matInput type="text" formControlName="nombreGenerico" placeholder="Ej. Paracetamol">
+              @if (form.get('nombreGenerico')?.hasError('maxlength')) {
+                <mat-error>Máximo 100 caracteres.</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Código</mat-label>
+              <mat-icon matPrefix>tag</mat-icon>
+              <input matInput type="text" formControlName="codigo" placeholder="Ej. FAR-001">
+              @if (form.get('codigo')?.hasError('required')) {
+                <mat-error>El código es obligatorio.</mat-error>
+              }
+              @if (form.get('codigo')?.hasError('maxlength')) {
+                <mat-error>Máximo 50 caracteres.</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Código de barras</mat-label>
+              <mat-icon matPrefix>qr_code_scanner</mat-icon>
+              <input matInput type="text" formControlName="codigoBarras" placeholder="Ej. 7771234567890">
+              @if (form.get('codigoBarras')?.hasError('maxlength')) {
+                <mat-error>Máximo 50 caracteres.</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Categoría</mat-label>
+              <mat-icon matPrefix>category</mat-icon>
+              <mat-select formControlName="idCategoria">
+                <mat-option [value]="0">Seleccione una categoría</mat-option>
+                @for (categoria of categorias; track categoria.id) {
+                  <mat-option [value]="categoria.id">{{ categoria.nombre }}</mat-option>
+                }
+              </mat-select>
+              @if (form.get('idCategoria')?.hasError('required') || form.get('idCategoria')?.hasError('min')) {
+                <mat-error>Selecciona una categoría.</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Marca / laboratorio</mat-label>
+              <mat-icon matPrefix>sell</mat-icon>
+              <mat-select formControlName="idMarca">
+                <mat-option [value]="null">Sin marca</mat-option>
+                @for (marca of marcas; track marca.id) {
+                  <mat-option [value]="marca.id">{{ marca.nombre }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="span-all">
+              <mat-label>Descripción</mat-label>
+              <textarea matInput rows="3" formControlName="descripcion"
+                placeholder="Presentación, indicaciones o si requiere receta (opcional)"></textarea>
+            </mat-form-field>
           </div>
+        </section>
 
+        <!-- PRECIOS -->
+        <section class="form-section">
+          <div class="section-head">
+            <span class="section-icon info"><mat-icon>payments</mat-icon></span>
+            <div>
+              <h2>Precios</h2>
+              <p>El margen se calcula al momento en la vista previa.</p>
+            </div>
+          </div>
+          <div class="section-body fields three">
+            <mat-form-field appearance="outline">
+              <mat-label>Precio de compra</mat-label>
+              <span matTextPrefix>Bs&nbsp;</span>
+              <input matInput type="number" min="0" step="0.01" formControlName="precioCompra" placeholder="0.00">
+              @if (form.get('precioCompra')?.hasError('required')) {
+                <mat-error>Obligatorio.</mat-error>
+              }
+              @if (form.get('precioCompra')?.hasError('min')) {
+                <mat-error>No puede ser negativo.</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Precio de venta</mat-label>
+              <span matTextPrefix>Bs&nbsp;</span>
+              <input matInput type="number" min="0" step="0.01" formControlName="precioVenta" placeholder="0.00">
+              @if (form.get('precioVenta')?.hasError('required')) {
+                <mat-error>Obligatorio.</mat-error>
+              }
+              @if (form.get('precioVenta')?.hasError('min')) {
+                <mat-error>No puede ser negativo.</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>Peso</mat-label>
+              <input matInput type="number" min="0" step="0.01" formControlName="peso" placeholder="Opcional">
+              <span matTextSuffix>&nbsp;kg</span>
+              @if (form.get('peso')?.hasError('min')) {
+                <mat-error>No puede ser negativo.</mat-error>
+              }
+            </mat-form-field>
+          </div>
+        </section>
+
+        <!-- CONTROL -->
+        <section class="form-section">
+          <div class="section-head">
+            <span class="section-icon warning"><mat-icon>tune</mat-icon></span>
+            <div>
+              <h2>Control de inventario</h2>
+              <p>Cómo se registra el stock de este producto.</p>
+            </div>
+          </div>
+          <div class="section-body">
+            <div class="fixed-options">
+              <span class="fixed-option"><mat-icon>inventory</mat-icon>Inventario activo</span>
+              <span class="fixed-option"><mat-icon>shopping_bag</mat-icon>Venta habilitada</span>
+              <span class="fixed-option"><mat-icon>layers</mat-icon>Control por lote</span>
+            </div>
+
+            <span class="field-label">¿Tiene fecha de vencimiento?</span>
+            <div class="choice-row" role="radiogroup" aria-label="Fecha de vencimiento">
+              <button type="button" class="choice" role="radio"
+                [class.on]="form.value.tieneVencimiento === true" [attr.aria-checked]="form.value.tieneVencimiento === true"
+                (click)="setVencimiento(true)">
+                <mat-icon>event</mat-icon>
+                <span>
+                  <strong>Sí, vence</strong>
+                  <small>Cada lote pide su fecha de vencimiento y aparece en las alertas.</small>
+                </span>
+              </button>
+              <button type="button" class="choice" role="radio"
+                [class.on]="form.value.tieneVencimiento === false" [attr.aria-checked]="form.value.tieneVencimiento === false"
+                (click)="setVencimiento(false)">
+                <mat-icon>event_busy</mat-icon>
+                <span>
+                  <strong>No vence</strong>
+                  <small>Para insumos como termómetros o algodón.</small>
+                </span>
+              </button>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- VISTA PREVIA -->
+      <aside class="form-aside">
+        <div class="preview">
+          <div class="preview-hero">
+            <span class="preview-label">Vista previa</span>
+            <span class="preview-avatar square"><mat-icon>medication</mat-icon></span>
+            <h3 [class.empty]="!form.value.nombre">{{ form.value.nombre || 'Nombre del producto' }}</h3>
+            <p>{{ form.value.nombreGenerico || 'Sin nombre genérico' }}</p>
+          </div>
+          <dl class="preview-list">
+            <div>
+              <dt><mat-icon>tag</mat-icon>Código</dt>
+              <dd [class.muted]="!form.value.codigo">{{ form.value.codigo || 'Sin código' }}</dd>
+            </div>
+            <div>
+              <dt><mat-icon>category</mat-icon>Categoría</dt>
+              <dd [class.muted]="!nombreCategoria">{{ nombreCategoria || 'Sin categoría' }}</dd>
+            </div>
+            <div>
+              <dt><mat-icon>sell</mat-icon>Marca</dt>
+              <dd [class.muted]="!nombreMarca">{{ nombreMarca || 'Sin marca' }}</dd>
+            </div>
+            <div>
+              <dt><mat-icon>event</mat-icon>Vencimiento</dt>
+              <dd>{{ form.value.tieneVencimiento ? 'Controlado' : 'No vence' }}</dd>
+            </div>
+          </dl>
+          <div class="price-box">
+            <div>
+              <span>Precio de venta</span>
+              <strong>Bs {{ (form.value.precioVenta || 0) | number:'1.2-2' }}</strong>
+            </div>
+            <div class="margin" [class.neg]="ganancia < 0" [class.low]="ganancia >= 0 && margen < 15">
+              <span>Ganancia por unidad</span>
+              <strong>Bs {{ ganancia | number:'1.2-2' }} · {{ margen | number:'1.0-1' }}%</strong>
+            </div>
+          </div>
         </div>
 
+        @if (ganancia < 0) {
+          <p class="tip warn">
+            <mat-icon>warning</mat-icon>
+            El precio de venta es menor que el de compra: venderías con pérdida.
+          </p>
+        }
 
-        <!-- ========================================= -->
-        <!-- BOTONES -->
-        <!-- ========================================= -->
-
-        <div class="form-actions">
-
-          <!-- CANCELAR -->
-          <button
-            mat-stroked-button
-            type="button"
-            (click)="cancelar()"
-            [disabled]="loading"
-          >
-            Cancelar
-          </button>
-
-
-          <!-- GUARDAR / ACTUALIZAR -->
-          <button
-            mat-flat-button
-            color="primary"
-            type="submit"
-            [disabled]="loading"
-          >
-
+        <div class="aside-actions">
+          <button type="submit" class="btn primary block" [disabled]="loading">
             @if (loading) {
-
-              <mat-spinner
-                diameter="20"
-              ></mat-spinner>
-
-              <span>
-                Guardando...
-              </span>
-
+              <mat-spinner diameter="18"></mat-spinner>
+              Guardando...
             } @else {
-
-              <span>
-                {{ editando
-                  ? 'Actualizar producto'
-                  : 'Guardar producto'
-                }}
-              </span>
-
+              <mat-icon>{{ editando ? 'save' : 'check_circle' }}</mat-icon>
+              {{ editando ? 'Guardar cambios' : 'Crear producto' }}
             }
-
           </button>
-
+          <button type="button" class="btn secondary block" [disabled]="loading" (click)="cancelar()">Cancelar</button>
         </div>
-
-      </form>
-
-    </mat-card-content>
-
-  </mat-card>
-
-</div>
+      </aside>
+    </div>
+  }
+</form>

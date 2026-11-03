@@ -1,0 +1,453 @@
+/* =========================================================
+   ESTILOS COMPARTIDOS · FORMULARIOS DE CATÁLOGO Y GESTIÓN
+   Se usa junto con operaciones.css (tokens --op-*, .btn, .page-header).
+========================================================= */
+
+.form-page {
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.back-btn {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  place-items: center;
+  border: 1px solid var(--op-border-strong);
+  border-radius: 12px;
+  background: var(--op-surface);
+  color: var(--op-text-2);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.back-btn:hover {
+  border-color: var(--op-primary);
+  color: var(--op-primary);
+}
+
+.back-btn:focus-visible {
+  outline: 2px solid var(--op-primary);
+  outline-offset: 2px;
+}
+
+/* ---------- LAYOUT ---------- */
+
+.form-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  align-items: start;
+  gap: 20px;
+}
+
+.form-main {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.form-aside {
+  position: sticky;
+  top: 84px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ---------- SECCIONES ---------- */
+
+.form-section {
+  overflow: hidden;
+  border: 1px solid var(--op-border);
+  border-radius: var(--op-radius);
+  background: var(--op-surface);
+  box-shadow: var(--op-shadow);
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 22px;
+  border-bottom: 1px solid var(--op-border);
+}
+
+.section-icon {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--op-primary-soft);
+  color: var(--op-primary);
+}
+
+.section-icon mat-icon {
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+}
+
+.section-icon.info { background: var(--op-info-soft); color: var(--op-info); }
+.section-icon.warning { background: var(--op-warning-soft); color: var(--op-warning); }
+
+.section-head h2 {
+  margin: 0;
+  color: var(--op-text);
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.section-head p {
+  margin: 2px 0 0;
+  color: var(--op-muted);
+  font-size: 12.5px;
+}
+
+.section-body {
+  padding: 20px 22px 8px;
+}
+
+.fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 16px;
+}
+
+.fields mat-form-field {
+  width: 100%;
+}
+
+.fields.three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.span-all {
+  grid-column: 1 / -1;
+}
+
+mat-form-field mat-icon[matPrefix],
+mat-form-field mat-icon[matIconPrefix] {
+  margin-right: 4px;
+  color: var(--op-muted);
+}
+
+/* ---------- OPCIONES TIPO TARJETA ---------- */
+
+.choice-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.choice {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 13px 14px;
+  border: 1px solid var(--op-border);
+  border-radius: 12px;
+  background: var(--op-surface);
+  color: var(--op-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.choice:hover {
+  border-color: var(--op-primary);
+}
+
+.choice.on {
+  border-color: var(--op-primary);
+  background: var(--op-primary-soft);
+  box-shadow: inset 0 0 0 1px var(--op-primary);
+}
+
+.choice:focus-visible {
+  outline: 2px solid var(--op-primary);
+  outline-offset: 2px;
+}
+
+.choice > mat-icon {
+  flex: 0 0 auto;
+  color: var(--op-muted);
+}
+
+.choice.on > mat-icon {
+  color: var(--op-primary);
+}
+
+.choice span {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.choice strong {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.choice small {
+  color: var(--op-muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.fixed-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.fixed-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 11px;
+  border-radius: 999px;
+  background: var(--op-primary-soft);
+  color: var(--op-primary-strong);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.fixed-option mat-icon {
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+}
+
+.field-error {
+  margin: -8px 0 14px;
+  color: var(--op-danger);
+  font-size: 12px;
+}
+
+.field-label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--op-text-2);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* ---------- VISTA PREVIA ---------- */
+
+.preview {
+  overflow: hidden;
+  border: 1px solid var(--op-border);
+  border-radius: var(--op-radius);
+  background: var(--op-surface);
+  box-shadow: var(--op-shadow);
+}
+
+.preview-hero {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 8px;
+  padding: 22px 18px 18px;
+  border-bottom: 1px solid var(--op-border);
+  background:
+    radial-gradient(circle at 50% 0%, rgb(11 110 85 / 10%), transparent 70%),
+    var(--op-surface-2);
+  text-align: center;
+}
+
+.preview-label {
+  color: var(--op-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.preview-avatar {
+  display: grid;
+  width: 64px;
+  height: 64px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--op-primary);
+  color: #ffffff;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.preview-avatar.square {
+  border-radius: 16px;
+}
+
+.preview-avatar mat-icon {
+  width: 30px;
+  height: 30px;
+  font-size: 30px;
+}
+
+.preview-hero h3 {
+  max-width: 100%;
+  margin: 2px 0 0;
+  overflow: hidden;
+  color: var(--op-text);
+  font-size: 16px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.preview-hero h3.empty {
+  color: var(--op-muted);
+  font-weight: 500;
+}
+
+.preview-hero p {
+  margin: 0;
+  color: var(--op-muted);
+  font-size: 12.5px;
+}
+
+.preview-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 16px 18px;
+}
+
+.preview-list > div {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+}
+
+.preview-list dt {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+  color: var(--op-muted);
+}
+
+.preview-list dt mat-icon {
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+}
+
+.preview-list dd {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  color: var(--op-text);
+  font-weight: 600;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.preview-list dd.muted {
+  color: var(--op-muted);
+  font-weight: 500;
+}
+
+/* ---------- ACCIONES ---------- */
+
+.aside-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.aside-actions mat-spinner {
+  --mat-progress-spinner-active-indicator-color: #ffffff;
+  --mdc-circular-progress-active-indicator-color: #ffffff;
+}
+
+.tip {
+  display: flex;
+  gap: 8px;
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--op-info-soft);
+  color: var(--op-text-2);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+.tip mat-icon {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  color: var(--op-info);
+  font-size: 18px;
+}
+
+.loading-state {
+  display: flex;
+  min-height: 320px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 10px;
+  border: 1px solid var(--op-border);
+  border-radius: var(--op-radius);
+  background: var(--op-surface);
+  color: var(--op-muted);
+}
+
+/* ---------- RESPONSIVE ---------- */
+
+/* Los campos se acomodan según el ancho real de la columna del formulario. */
+.form-main {
+  container-type: inline-size;
+}
+
+@container (max-width: 640px) {
+  .fields.three {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container (max-width: 520px) {
+  .fields,
+  .fields.three {
+    grid-template-columns: 1fr;
+  }
+
+  .section-head,
+  .section-body {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+}
+
+@media (max-width: 1180px) {
+  .form-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .form-aside {
+    position: static;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 300px);
+    align-items: start;
+  }
+}
+
+@media (max-width: 700px) {
+  .form-aside {
+    grid-template-columns: 1fr;
+  }
+}

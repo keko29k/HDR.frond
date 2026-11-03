@@ -20,6 +20,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatIconModule } from '@angular/material/icon';
 
 import { ProductoService } from '../../services/producto';
@@ -41,11 +42,15 @@ import { Producto } from '../../models/producto.model';
     MatInputModule,
     MatPaginatorModule,
     MatProgressSpinnerModule,
+    MatTooltipModule,
     MatIconModule
   ],
 
   templateUrl: './producto-list.html',
-  styleUrl: './producto-list.css'
+  styleUrls: [
+    '../../../../shared/styles/operaciones.css',
+    './producto-list.css'
+  ]
 })
 
 
@@ -74,15 +79,10 @@ export class ProductoListComponent implements OnInit {
   // ==========================================
 
   displayedColumns: string[] = [
-    'id',
-    'codigo',
     'nombre',
-     'stock',
-    'nombreGenerico',
-    'precioCompra',
-    'precioVenta',
-    'tieneVencimiento',
-    'operacion',
+    'stock',
+    'precios',
+    'control',
     'acciones'
   ];
 
@@ -233,6 +233,37 @@ export class ProductoListComponent implements OnInit {
   // ==========================================
   // NUEVO PRODUCTO
   // ==========================================
+
+  // =====================================
+  // PRESENTACIÓN (solo lectura)
+  // =====================================
+
+  /** Cuántos registros de la página tienen el campo con dato. */
+  conDato(campo: keyof Producto): number {
+    return this.productos.filter(item => String(item[campo] ?? '').trim() !== '').length;
+  }
+
+  /** Productos de la página sin stock. */
+  get sinStock(): number {
+    return this.productos.filter(p => (p.stockActual ?? 0) <= 0).length;
+  }
+
+  /** Margen sobre el precio de venta, en %. */
+  margen(p: Producto): number {
+    return p.precioVenta > 0 ? ((p.precioVenta - p.precioCompra) / p.precioVenta) * 100 : 0;
+  }
+
+  iniciales(...partes: (string | null | undefined)[]): string {
+    const letras = partes
+      .join(' ')
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map(p => p[0].toUpperCase())
+      .join('');
+    return letras || '?';
+  }
 
   nuevo(): void {
 

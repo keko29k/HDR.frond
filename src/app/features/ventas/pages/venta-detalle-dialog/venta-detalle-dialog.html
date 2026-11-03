@@ -1,0 +1,199 @@
+<div class="dialog">
+
+  <!-- ENCABEZADO -->
+  <header class="dialog-header">
+    <div class="title">
+      <span class="title-icon"><span class="material-icons">point_of_sale</span></span>
+      <div>
+        <h2>
+          Venta #{{ idVenta }}
+          @if (venta) {
+            <span class="status" [ngClass]="estado.clase">{{ estado.texto }}</span>
+          }
+        </h2>
+        @if (venta) {
+          <small>{{ venta.fechaVenta | date:'dd/MM/yyyy · HH:mm' }}</small>
+        }
+      </div>
+    </div>
+    <button type="button" class="close" aria-label="Cerrar" (click)="cerrar()">
+      <span class="material-icons">close</span>
+    </button>
+  </header>
+
+  <div class="dialog-body">
+    @if (loading) {
+      <div class="state" role="status">
+        <mat-spinner diameter="34"></mat-spinner>
+        <span>Cargando detalle...</span>
+      </div>
+    } @else if (error || !venta) {
+      <div class="state" role="alert">
+        <span class="material-icons error">cloud_off</span>
+        <strong>No se pudo cargar el detalle de la venta</strong>
+        <span>Verifica que el servidor esté en ejecución con la última versión.</span>
+        <button type="button" class="btn secondary" (click)="cargar()">
+          <span class="material-icons">refresh</span>
+          Reintentar
+        </button>
+      </div>
+    } @else {
+
+      <!-- DATOS -->
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="material-icons">person</span>
+          <div>
+            <small>Cliente</small>
+            <strong [title]="venta.cliente">{{ venta.cliente }}</strong>
+            @if (venta.clienteDocumento) {
+              <small>NIT/CI {{ venta.clienteDocumento }}</small>
+            }
+          </div>
+        </div>
+        <div class="info-item">
+          <span class="material-icons">badge</span>
+          <div>
+            <small>Vendedor</small>
+            <strong [title]="venta.vendedor">{{ venta.vendedor }}</strong>
+          </div>
+        </div>
+        <div class="info-item">
+          <span class="material-icons">storefront</span>
+          <div>
+            <small>Sucursal</small>
+            <strong [title]="venta.sucursal">{{ venta.sucursal }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="layout">
+
+        <!-- PRODUCTOS -->
+        <section>
+          <h3 class="section-title">
+            Productos vendidos
+            <span>{{ venta.items.length }} líneas · {{ unidades | number:'1.0-2' }} unid.</span>
+          </h3>
+          <div class="table-wrap">
+            <table class="items">
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th>Lote</th>
+                  <th class="right">Cant.</th>
+                  <th class="right">Precio</th>
+                  <th class="right">Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (i of venta.items; track $index) {
+                  <tr>
+                    <td>
+                      <span class="product">
+                        <strong>{{ i.producto }}</strong>
+                        <small class="mono">{{ i.codigo }}</small>
+                      </span>
+                    </td>
+                    <td>
+                      @if (i.numeroLote) {
+                        <span class="lot">
+                          <strong>{{ i.numeroLote }}</strong>
+                          @if (i.fechaVencimiento) {
+                            <small>Vence {{ fechaCorta(i.fechaVencimiento) }}</small>
+                          }
+                        </span>
+                      } @else {
+                        <span class="muted">—</span>
+                      }
+                    </td>
+                    <td class="right">{{ i.cantidad | number:'1.0-2' }}</td>
+                    <td class="right nowrap">Bs {{ i.precioVenta | number:'1.2-2' }}</td>
+                    <td class="right"><span class="money">Bs {{ i.subTotal | number:'1.2-2' }}</span></td>
+                  </tr>
+                } @empty {
+                  <tr><td colspan="5" class="muted">Esta venta no tiene productos registrados.</td></tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <!-- PAGOS -->
+          <h3 class="section-title pagos-title">
+            Pagos y abonos
+            <span>{{ venta.pagos.length }} {{ venta.pagos.length === 1 ? 'registro' : 'registros' }}</span>
+          </h3>
+          @if (venta.pagos.length) {
+            <ol class="timeline">
+              @for (p of venta.pagos; track p.id) {
+                <li>
+                  <span class="dot" [class.abono]="esAbono(p.fecha)">
+                    <span class="material-icons">{{ iconoMetodo(p.metodoPago) }}</span>
+                  </span>
+                  <div class="tl-body">
+                    <div class="tl-head">
+                      <strong>{{ esAbono(p.fecha) ? 'Abono' : 'Pago al vender' }}</strong>
+                      <strong class="tl-amount">Bs {{ p.monto | number:'1.2-2' }}</strong>
+                    </div>
+                    <small>
+                      {{ p.fecha | date:'dd/MM/yyyy HH:mm' }} · {{ p.metodoPago | titlecase }} · Caja #{{ p.idCaja }}
+                      @if (p.referencia) { · Ref. {{ p.referencia }} }
+                    </small>
+                    @if (p.observacion) {
+                      <small class="tl-note">{{ p.observacion }}</small>
+                    }
+                  </div>
+                </li>
+              }
+            </ol>
+          } @else {
+            <p class="muted empty-pagos">Sin pagos registrados: la venta se hizo a crédito sin pago inicial.</p>
+          }
+        </section>
+
+        <!-- TOTALES -->
+        <aside>
+          <dl class="totals">
+            <div><dt>Tipo</dt><dd>{{ venta.acredito ? 'Crédito' : 'Contado' }}</dd></div>
+            <div><dt>Unidades</dt><dd>{{ unidades | number:'1.0-2' }}</dd></div>
+            <div><dt>Pagado</dt><dd class="pos">Bs {{ venta.montoPagado | number:'1.2-2' }}</dd></div>
+            @if (venta.acredito) {
+              <div><dt>Saldo</dt><dd [class.neg]="venta.saldoPendiente > 0">Bs {{ venta.saldoPendiente | number:'1.2-2' }}</dd></div>
+              @if (venta.fechaLimitePago && venta.saldoPendiente > 0) {
+                <div>
+                  <dt>Fecha límite</dt>
+                  <dd [class.neg]="creditoVencido">{{ fechaCorta(venta.fechaLimitePago) }}{{ creditoVencido ? ' · vencido' : '' }}</dd>
+                </div>
+              }
+            }
+            <div class="grand"><dt>Total</dt><dd>Bs {{ venta.total | number:'1.2-2' }}</dd></div>
+          </dl>
+
+          @if (venta.observacion) {
+            <div class="note">
+              <strong>Observación</strong>
+              {{ venta.observacion }}
+            </div>
+          }
+        </aside>
+      </div>
+    }
+  </div>
+
+  <!-- ACCIONES -->
+  <footer class="dialog-footer">
+    <button type="button" class="btn secondary" (click)="cerrar()">Cerrar</button>
+    @if (venta) {
+      <button type="button" class="btn secondary" (click)="reimprimir()">
+        <span class="material-icons">print</span>
+        Reimprimir comprobante
+      </button>
+      @if (venta.acredito && venta.saldoPendiente > 0) {
+        <button type="button" class="btn primary" (click)="abonar()">
+          <span class="material-icons">payments</span>
+          Registrar abono
+        </button>
+      }
+    }
+  </footer>
+</div>

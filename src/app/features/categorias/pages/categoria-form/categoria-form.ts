@@ -12,6 +12,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatIconModule } from '@angular/material/icon';
 import { CategoriaService } from '../../services/categoria';
 
 @Component({
@@ -25,10 +26,15 @@ import { CategoriaService } from '../../services/categoria';
     MatInputModule,
     MatButtonModule,
     MatSelectModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatIconModule
   ],
   templateUrl: './categoria-form.html',
-  styleUrl: './categoria-form.css'
+  styleUrls: [
+    '../../../../shared/styles/operaciones.css',
+    '../../../../shared/styles/formulario.css',
+    './categoria-form.css'
+  ]
 })
 export class CategoriaFormComponent implements OnInit {
   private fb = inject(FormBuilder);

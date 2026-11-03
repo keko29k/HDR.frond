@@ -12,6 +12,7 @@ import { Venta } from '../models/venta.model';
 import { VentaCreate } from '../models/venta-create.model';
 import { VentaUpdate } from '../models/venta-update.model';
 import { VentaDetalleDto } from '../models/VentaDetalle.model';
+import { VentaVista } from '../models/venta-vista.model';
 
 // DTO PARA REGISTRAR ABONOS A CRÉDITO
 export interface RegistrarAbonoCreditoDto {
@@ -53,6 +54,16 @@ export class VentaService {
 
     return this.http.get<Venta>(
       `${this.apiUrl}/${id}`
+    );
+  }
+
+  // ==========================================
+  // DETALLE COMPLETO (productos, lotes y pagos)
+  // ==========================================
+  getDetalle(id: number): Observable<VentaVista> {
+
+    return this.http.get<VentaVista>(
+      `${this.apiUrl}/${id}/detalle`
     );
   }
 

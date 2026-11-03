@@ -1,194 +1,86 @@
-<div class="marca-form-container">
+<form class="form-page" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
 
-  <!-- HEADER -->
+  <header class="page-header">
+    <div class="heading">
+      <button type="button" class="back-btn" aria-label="Volver a marcas" (click)="cancelar()">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div>
+        <span class="eyebrow">Marcas</span>
+        <h1>{{ editando ? 'Editar marca' : 'Nueva marca' }}</h1>
+        <p>{{ editando ? 'Modifica la información de la marca o laboratorio.' : 'Registra una marca o laboratorio para asociarla a los productos.' }}</p>
+      </div>
+    </div>
+  </header>
 
-  <div class="header">
-    <div>
-      <h1>{{ titulo }}</h1>
+  @if (loading && editando && !form.value.nombre) {
+    <div class="loading-state" role="status">
+      <mat-spinner diameter="32"></mat-spinner>
+      <span>Cargando marca...</span>
+    </div>
+  } @else {
+    <div class="form-layout">
+      <div class="form-main">
+        <section class="form-section">
+          <div class="section-head">
+            <span class="section-icon"><mat-icon>sell</mat-icon></span>
+            <div>
+              <h2>Datos de la marca</h2>
+              <p>Nombre comercial o del laboratorio fabricante.</p>
+            </div>
+          </div>
+          <div class="section-body fields">
+            <mat-form-field appearance="outline" class="span-all">
+              <mat-label>Nombre de la marca</mat-label>
+              <mat-icon matPrefix>sell</mat-icon>
+              <input matInput formControlName="nombre" maxlength="100" placeholder="Ej. Laboratorios Inti">
+              @if (form.get('nombre')?.hasError('required')) {
+                <mat-error>El nombre de la marca es obligatorio.</mat-error>
+              }
+              @if (form.get('nombre')?.hasError('maxlength')) {
+                <mat-error>Máximo 100 caracteres.</mat-error>
+              }
+            </mat-form-field>
 
-```
-  <p>
-    {{ editando
-      ? 'Modifique la información de la marca'
-      : 'Registre una nueva marca' }}
-  </p>
-</div>
-```
+            <mat-form-field appearance="outline" class="span-all">
+              <mat-label>Descripción</mat-label>
+              <textarea matInput formControlName="descripcion" rows="4" maxlength="250"
+                placeholder="Ej. Laboratorio farmacéutico nacional"></textarea>
+              <mat-hint align="end">{{ form.value.descripcion?.length || 0 }}/250</mat-hint>
+              @if (form.get('descripcion')?.hasError('required')) {
+                <mat-error>La descripción es obligatoria.</mat-error>
+              }
+              @if (form.get('descripcion')?.hasError('maxlength')) {
+                <mat-error>Máximo 250 caracteres.</mat-error>
+              }
+            </mat-form-field>
+          </div>
+        </section>
+      </div>
 
-  </div>
+      <aside class="form-aside">
+        <div class="preview">
+          <div class="preview-hero">
+            <span class="preview-label">Vista previa</span>
+            <span class="preview-avatar square">{{ (form.value.nombre || '?').charAt(0).toUpperCase() }}</span>
+            <h3 [class.empty]="!form.value.nombre">{{ form.value.nombre || 'Nombre de la marca' }}</h3>
+            <p>{{ form.value.descripcion || 'Sin descripción' }}</p>
+          </div>
+        </div>
 
-  <!-- CARD DEL FORMULARIO -->
-
-  <mat-card class="form-card">
-
-```
-<form
-  [formGroup]="form"
-  (ngSubmit)="guardar()">
-
-  <!-- TÍTULO -->
-  <div class="section-title">
-
-    <h2>Información de la marca</h2>
-
-    <p>
-      Ingrese los datos correspondientes a la marca.
-    </p>
-
-  </div>
-
-
-  <!-- CAMPOS -->
-  <div class="form-grid">
-
-    <!-- NOMBRE -->
-    <mat-form-field
-      appearance="outline"
-      class="full-width">
-
-      <mat-label>
-        Nombre de la marca
-      </mat-label>
-
-      <input
-        matInput
-        formControlName="nombre"
-        placeholder="Ej. Bayer"
-        maxlength="100">
-
-
-      <!-- ERROR NOMBRE REQUERIDO -->
-      @if (
-        form.get('nombre')?.hasError('required') &&
-        form.get('nombre')?.touched
-      ) {
-
-        <mat-error>
-          El nombre de la marca es obligatorio.
-        </mat-error>
-
-      }
-
-
-      <!-- ERROR NOMBRE MÁXIMO -->
-      @if (
-        form.get('nombre')?.hasError('maxlength')
-      ) {
-
-        <mat-error>
-          Máximo 100 caracteres.
-        </mat-error>
-
-      }
-
-    </mat-form-field>
-
-
-    <!-- DESCRIPCIÓN -->
-    <mat-form-field
-      appearance="outline"
-      class="full-width">
-
-      <mat-label>
-        Descripción
-      </mat-label>
-
-      <textarea
-        matInput
-        formControlName="descripcion"
-        rows="5"
-        maxlength="250"
-        placeholder="Ingrese una descripción de la marca...">
-      </textarea>
-
-
-      <!-- CONTADOR -->
-      <mat-hint align="end">
-        {{ form.get('descripcion')?.value?.length || 0 }}/250
-      </mat-hint>
-
-
-      <!-- ERROR DESCRIPCIÓN REQUERIDA -->
-      @if (
-        form.get('descripcion')?.hasError('required') &&
-        form.get('descripcion')?.touched
-      ) {
-
-        <mat-error>
-          La descripción es obligatoria.
-        </mat-error>
-
-      }
-
-
-      <!-- ERROR DESCRIPCIÓN MÁXIMO -->
-      @if (
-        form.get('descripcion')?.hasError('maxlength')
-      ) {
-
-        <mat-error>
-          Máximo 250 caracteres.
-        </mat-error>
-
-      }
-
-    </mat-form-field>
-
-  </div>
-
-
-  <!-- BOTONES -->
-  <div class="form-actions">
-
-    <!-- CANCELAR -->
-    <button
-      mat-stroked-button
-      type="button"
-      (click)="cancelar()"
-      [disabled]="loading">
-
-      Cancelar
-
-    </button>
-
-
-    <!-- GUARDAR / ACTUALIZAR -->
-    <button
-      mat-raised-button
-      color="primary"
-      type="submit"
-      [disabled]="loading">
-
-      <!-- SPINNER -->
-      <mat-spinner
-        [hidden]="!loading"
-        diameter="20">
-      </mat-spinner>
-
-
-      <!-- ICONO -->
-      <mat-icon
-        [hidden]="loading"
-        [textContent]="editando ? 'save' : 'add'">
-      </mat-icon>
-
-
-      <!-- TEXTO -->
-      <span [hidden]="loading">
-
-        {{ editando
-          ? 'Actualizar marca'
-          : 'Guardar marca' }}
-
-      </span>
-
-    </button>
-
-  </div>
-
+        <div class="aside-actions">
+          <button type="submit" class="btn primary block" [disabled]="loading">
+            @if (loading) {
+              <mat-spinner diameter="18"></mat-spinner>
+              Guardando...
+            } @else {
+              <mat-icon>{{ editando ? 'save' : 'check_circle' }}</mat-icon>
+              {{ editando ? 'Guardar cambios' : 'Crear marca' }}
+            }
+          </button>
+          <button type="button" class="btn secondary block" [disabled]="loading" (click)="cancelar()">Cancelar</button>
+        </div>
+      </aside>
+    </div>
+  }
 </form>
-```
-
-  </mat-card>
-
-</div>

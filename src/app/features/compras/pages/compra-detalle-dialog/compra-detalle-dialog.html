@@ -1,0 +1,162 @@
+<div class="dialog">
+
+  <!-- ENCABEZADO -->
+  <header class="dialog-header">
+    <div class="title">
+      <span class="title-icon info"><span class="material-icons">shopping_cart</span></span>
+      <div>
+        <h2>
+          Compra #{{ idCompra }}
+          @if (compra) {
+            <span class="status" [ngClass]="claseEstado">{{ compra.estadoCompra | titlecase }}</span>
+          }
+        </h2>
+        @if (compra) {
+          <small>{{ fechaCorta(compra.fechaCompra) }} · {{ compra.tipoDocumento }}{{ compra.numeroDocumento ? ' N.º ' + compra.numeroDocumento : '' }}</small>
+        }
+      </div>
+    </div>
+    <button type="button" class="close" aria-label="Cerrar" (click)="cerrar()">
+      <span class="material-icons">close</span>
+    </button>
+  </header>
+
+  <div class="dialog-body">
+    @if (loading) {
+      <div class="state" role="status">
+        <mat-spinner diameter="34"></mat-spinner>
+        <span>Cargando detalle...</span>
+      </div>
+    } @else if (error || !compra) {
+      <div class="state" role="alert">
+        <span class="material-icons error">cloud_off</span>
+        <strong>No se pudo cargar el detalle de la compra</strong>
+        <span>Verifica que el servidor esté en ejecución con la última versión.</span>
+        <button type="button" class="btn secondary" (click)="cargar()">
+          <span class="material-icons">refresh</span>
+          Reintentar
+        </button>
+      </div>
+    } @else {
+
+      <!-- DATOS -->
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="material-icons">local_shipping</span>
+          <div>
+            <small>Proveedor</small>
+            <strong [title]="compra.proveedor">{{ compra.proveedor }}</strong>
+            @if (compra.proveedorNit) {
+              <small>NIT {{ compra.proveedorNit }}</small>
+            }
+          </div>
+        </div>
+        <div class="info-item">
+          <span class="material-icons">description</span>
+          <div>
+            <small>Documento</small>
+            <strong>{{ compra.tipoDocumento }}</strong>
+            <small class="mono">{{ compra.numeroDocumento || 'Sin número' }}</small>
+          </div>
+        </div>
+        <div class="info-item">
+          <span class="material-icons">storefront</span>
+          <div>
+            <small>Sucursal</small>
+            <strong [title]="compra.sucursal">{{ compra.sucursal }}</strong>
+          </div>
+        </div>
+        <div class="info-item">
+          <span class="material-icons">badge</span>
+          <div>
+            <small>Registrado por</small>
+            <strong [title]="compra.usuario">{{ compra.usuario }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="layout">
+
+        <!-- PRODUCTOS -->
+        <section>
+          <h3 class="section-title">
+            Productos comprados
+            <span>
+              {{ compra.items.length }} líneas · {{ unidades | number:'1.0-2' }} unid.
+              @if (conLotes) { · {{ conLotes }} con lote }
+            </span>
+          </h3>
+          <div class="table-wrap">
+            <table class="items">
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  <th>Lote creado</th>
+                  <th class="right">Cant.</th>
+                  <th class="right">Costo unit.</th>
+                  <th class="right">Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (i of compra.items; track $index) {
+                  <tr>
+                    <td>
+                      <span class="product">
+                        <strong>{{ i.producto }}</strong>
+                        <small class="mono">{{ i.codigo }}</small>
+                      </span>
+                    </td>
+                    <td>
+                      @if (i.numeroLote) {
+                        <span class="lot">
+                          <strong>{{ i.numeroLote }}</strong>
+                          <small>{{ i.fechaVencimiento ? 'Vence ' + fechaCorta(i.fechaVencimiento) : 'Sin vencimiento' }}</small>
+                        </span>
+                      } @else {
+                        <span class="muted">—</span>
+                      }
+                    </td>
+                    <td class="right">{{ i.cantidad | number:'1.0-2' }}</td>
+                    <td class="right nowrap">Bs {{ i.precioCompra | number:'1.2-2' }}</td>
+                    <td class="right"><span class="money">Bs {{ i.subTotal | number:'1.2-2' }}</span></td>
+                  </tr>
+                } @empty {
+                  <tr><td colspan="5" class="muted">Esta compra no tiene productos registrados.</td></tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- TOTALES -->
+        <aside>
+          <dl class="totals">
+            <div><dt>Unidades</dt><dd>{{ unidades | number:'1.0-2' }}</dd></div>
+            <div><dt>Subtotal</dt><dd>Bs {{ compra.subTotal | number:'1.2-2' }}</dd></div>
+            <div><dt>Descuento</dt><dd>− Bs {{ compra.descuento | number:'1.2-2' }}</dd></div>
+            <div><dt>Impuesto</dt><dd>Bs {{ compra.impuesto | number:'1.2-2' }}</dd></div>
+            <div class="grand"><dt>Total</dt><dd>Bs {{ compra.total | number:'1.2-2' }}</dd></div>
+          </dl>
+
+          @if (compra.observacion) {
+            <div class="note">
+              <strong>Observación</strong>
+              {{ compra.observacion }}
+            </div>
+          }
+        </aside>
+      </div>
+    }
+  </div>
+
+  <!-- ACCIONES -->
+  <footer class="dialog-footer">
+    <button type="button" class="btn secondary" (click)="cerrar()">Cerrar</button>
+    @if (compra) {
+      <button type="button" class="btn primary" (click)="imprimir()">
+        <span class="material-icons">print</span>
+        Imprimir
+      </button>
+    }
+  </footer>
+</div>

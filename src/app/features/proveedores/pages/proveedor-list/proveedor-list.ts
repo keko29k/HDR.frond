@@ -20,6 +20,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatIconModule } from '@angular/material/icon';
 
 import { ProveedorService } from '../../services/proveedor';
@@ -41,11 +42,15 @@ import { Proveedor } from '../../models/proveedor.model';
     MatInputModule,
     MatPaginatorModule,
     MatProgressSpinnerModule,
+    MatTooltipModule,
     MatIconModule
   ],
 
   templateUrl: './proveedor-list.html',
-  styleUrl: './proveedor-list.css'
+  styleUrls: [
+    '../../../../shared/styles/operaciones.css',
+    './proveedor-list.css'
+  ]
 })
 
 
@@ -76,12 +81,8 @@ export class ProveedorListComponent implements OnInit {
   displayedColumns: string[] = [
     'id',
     'nombre',
-    'telefono',
     'contacto',
-    'nit',
-    'correo',
     'direccion',
-    'observacion',
     'acciones'
   ];
 
@@ -221,6 +222,27 @@ export class ProveedorListComponent implements OnInit {
   // ==========================================
   // NUEVO PROVEEDOR
   // ==========================================
+
+  // =====================================
+  // PRESENTACIÓN (solo lectura)
+  // =====================================
+
+  /** Cuántos registros de la página tienen el campo con dato. */
+  conDato(campo: keyof Proveedor): number {
+    return this.proveedores.filter(item => String(item[campo] ?? '').trim() !== '').length;
+  }
+
+  iniciales(...partes: (string | null | undefined)[]): string {
+    const letras = partes
+      .join(' ')
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map(p => p[0].toUpperCase())
+      .join('');
+    return letras || '?';
+  }
 
   nuevo(): void {
 

@@ -27,6 +27,7 @@ import {
   PageEvent
 } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatIconModule } from '@angular/material/icon';
 
 import { SucursalService } from '../../../sucursales/services/sucursal';
@@ -48,11 +49,15 @@ import { Sucursal } from '../../../sucursales/models/sucursal.model';
     MatInputModule,
     MatPaginatorModule,
     MatProgressSpinnerModule,
+    MatTooltipModule,
     MatIconModule
   ],
 
   templateUrl: './usuario-list.html',
-  styleUrl: './usuario-list.css'
+  styleUrls: [
+    '../../../../shared/styles/operaciones.css',
+    './usuario-list.css'
+  ]
 })
 
 
@@ -89,12 +94,9 @@ export class UsuarioListComponent implements OnInit {
   displayedColumns: string[] = [
     'id',
     'nombres',
-    'apellidos',
-    'sucursal',
     'rol',
-    'usuario1',
-    'telefono',
-    'correo',
+    'sucursal',
+    'contacto',
     'acciones'
   ];
 
@@ -271,6 +273,46 @@ export class UsuarioListComponent implements OnInit {
   // ==========================================
   // NUEVO USUARIO
   // ==========================================
+
+  // =====================================
+  // PRESENTACIÓN (solo lectura)
+  // =====================================
+
+  /** Cuántos registros de la página tienen el campo con dato. */
+  conDato(campo: keyof Usuario): number {
+    return this.usuarios.filter(item => String(item[campo] ?? '').trim() !== '').length;
+  }
+
+  contarRol(rol: string): number {
+    return this.usuarios.filter(u => (u.rol ?? '').trim().toLowerCase() === rol).length;
+  }
+
+  claseRol(rol: string | null | undefined): string {
+    switch ((rol ?? '').trim().toLowerCase()) {
+      case 'administrador':
+      case 'admin':
+        return 'warning';
+      case 'vendedor':
+        return 'success';
+      case 'cajero':
+      case 'supervisor':
+        return 'info';
+      default:
+        return 'neutral';
+    }
+  }
+
+  iniciales(...partes: (string | null | undefined)[]): string {
+    const letras = partes
+      .join(' ')
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map(p => p[0].toUpperCase())
+      .join('');
+    return letras || '?';
+  }
 
   nuevo(): void {
 

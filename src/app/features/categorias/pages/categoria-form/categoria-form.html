@@ -1,38 +1,80 @@
-<div class="page-container">
-  <mat-card class="form-card">
-    <h2>{{ titulo }}</h2>
+<form class="form-page" [formGroup]="form" (ngSubmit)="guardar()" novalidate>
 
-    <div class="loading-container" *ngIf="loading">
-      <mat-spinner diameter="42"></mat-spinner>
-    </div>
-
-    <form [formGroup]="form" (ngSubmit)="guardar()" *ngIf="!loading">
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Nombre de Categoria</mat-label>
-        <input matInput formControlName="nombre" />
-        <mat-error *ngIf="form.get('nombre')?.hasError('required')">
-          El nombre es obligatorio
-        </mat-error>
-        <mat-error *ngIf="form.get('nombre')?.hasError('maxlength')">
-          Máximo 100 caracteres
-        </mat-error>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>descripcion</mat-label>
-        <input matInput type="text" formControlName="descripcion" />
-      </mat-form-field>
-
-  
-      <div class="actions">
-        <button mat-raised-button color="primary" type="submit" [disabled]="loading">
-          {{ editando ? 'Actualizar' : 'Guardar' }}
-        </button>
-
-        <button mat-stroked-button color="accent" type="button" (click)="cancelar()">
-          Cancelar
-        </button>
+  <header class="page-header">
+    <div class="heading">
+      <button type="button" class="back-btn" aria-label="Volver a categorías" (click)="cancelar()">
+        <mat-icon>arrow_back</mat-icon>
+      </button>
+      <div>
+        <span class="eyebrow">Categorías</span>
+        <h1>{{ editando ? 'Editar categoría' : 'Nueva categoría' }}</h1>
+        <p>{{ editando ? 'Actualiza el nombre y la descripción de la categoría.' : 'Crea un grupo para organizar los productos del catálogo.' }}</p>
       </div>
-    </form>
-  </mat-card>
-</div>
+    </div>
+  </header>
+
+  @if (loading && editando && !form.value.nombre) {
+    <div class="loading-state" role="status">
+      <mat-spinner diameter="32"></mat-spinner>
+      <span>Cargando categoría...</span>
+    </div>
+  } @else {
+    <div class="form-layout">
+      <div class="form-main">
+        <section class="form-section">
+          <div class="section-head">
+            <span class="section-icon"><mat-icon>category</mat-icon></span>
+            <div>
+              <h2>Datos de la categoría</h2>
+              <p>El nombre aparece al registrar y filtrar productos.</p>
+            </div>
+          </div>
+          <div class="section-body fields">
+            <mat-form-field appearance="outline" class="span-all">
+              <mat-label>Nombre de la categoría</mat-label>
+              <mat-icon matPrefix>label</mat-icon>
+              <input matInput formControlName="nombre" maxlength="100" placeholder="Ej. Analgésicos y antiinflamatorios">
+              @if (form.get('nombre')?.hasError('required')) {
+                <mat-error>El nombre es obligatorio.</mat-error>
+              }
+              @if (form.get('nombre')?.hasError('maxlength')) {
+                <mat-error>Máximo 100 caracteres.</mat-error>
+              }
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="span-all">
+              <mat-label>Descripción</mat-label>
+              <textarea matInput formControlName="descripcion" rows="4" maxlength="300"
+                placeholder="Qué tipo de productos agrupa esta categoría (opcional)"></textarea>
+              <mat-hint align="end">{{ form.value.descripcion?.length || 0 }}/300</mat-hint>
+            </mat-form-field>
+          </div>
+        </section>
+      </div>
+
+      <aside class="form-aside">
+        <div class="preview">
+          <div class="preview-hero">
+            <span class="preview-label">Vista previa</span>
+            <span class="preview-avatar square"><mat-icon>category</mat-icon></span>
+            <h3 [class.empty]="!form.value.nombre">{{ form.value.nombre || 'Nombre de la categoría' }}</h3>
+            <p>{{ form.value.descripcion || 'Sin descripción' }}</p>
+          </div>
+        </div>
+
+        <div class="aside-actions">
+          <button type="submit" class="btn primary block" [disabled]="loading">
+            @if (loading) {
+              <mat-spinner diameter="18"></mat-spinner>
+              Guardando...
+            } @else {
+              <mat-icon>{{ editando ? 'save' : 'check_circle' }}</mat-icon>
+              {{ editando ? 'Guardar cambios' : 'Crear categoría' }}
+            }
+          </button>
+          <button type="button" class="btn secondary block" [disabled]="loading" (click)="cancelar()">Cancelar</button>
+        </div>
+      </aside>
+    </div>
+  }
+</form>

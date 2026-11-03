@@ -28,6 +28,7 @@ import {
   PageEvent
 } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatIconModule } from '@angular/material/icon';
 
 
@@ -46,11 +47,15 @@ import { MatIconModule } from '@angular/material/icon';
     MatInputModule,
     MatPaginatorModule,
     MatProgressSpinnerModule,
+    MatTooltipModule,
     MatIconModule
   ],
 
   templateUrl: './sucursal-list.html',
-  styleUrl: './sucursal-list.css'
+  styleUrls: [
+    '../../../../shared/styles/operaciones.css',
+    './sucursal-list.css'
+  ]
 })
 export class SucursalListComponent implements OnInit {
 
@@ -81,9 +86,8 @@ export class SucursalListComponent implements OnInit {
   displayedColumns: string[] = [
     'id',
     'nombre',
-    'telefono',
     'direccion',
-    'correo',
+    'contacto',
     'acciones'
   ];
 
@@ -226,6 +230,27 @@ export class SucursalListComponent implements OnInit {
   // ==========================================
   // NUEVA SUCURSAL
   // ==========================================
+
+  // =====================================
+  // PRESENTACIÓN (solo lectura)
+  // =====================================
+
+  /** Cuántos registros de la página tienen el campo con dato. */
+  conDato(campo: keyof Sucursal): number {
+    return this.sucursales.filter(item => String(item[campo] ?? '').trim() !== '').length;
+  }
+
+  iniciales(...partes: (string | null | undefined)[]): string {
+    const letras = partes
+      .join(' ')
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map(p => p[0].toUpperCase())
+      .join('');
+    return letras || '?';
+  }
 
   nuevo(): void {
 

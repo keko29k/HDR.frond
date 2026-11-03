@@ -12,6 +12,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatIconModule } from '@angular/material/icon';
 
 import { ProductoService } from '../../services/producto';
 
@@ -35,10 +36,15 @@ import { ProductoUpdate } from '../../models/producto-update.model';
     MatInputModule,
     MatButtonModule,
     MatSelectModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatIconModule
   ],
   templateUrl: './producto-form.html',
-  styleUrl: './producto-form.css'
+  styleUrls: [
+    '../../../../shared/styles/operaciones.css',
+    '../../../../shared/styles/formulario.css',
+    './producto-form.css'
+  ]
 })
 export class ProductoFormComponent implements OnInit {
 
@@ -52,6 +58,34 @@ export class ProductoFormComponent implements OnInit {
 
   categorias: Categoria[] = [];
   marcas: Marca[] = [];
+
+  // =========================
+  // VISTA PREVIA (solo lectura)
+  // =========================
+
+  get nombreCategoria(): string {
+    const id = this.form.get('idCategoria')?.value;
+    return this.categorias.find(c => c.id === id)?.nombre ?? '';
+  }
+
+  get nombreMarca(): string {
+    const id = this.form.get('idMarca')?.value;
+    return id ? this.marcas.find(m => m.id === id)?.nombre ?? '' : '';
+  }
+
+  get ganancia(): number {
+    return (Number(this.form.get('precioVenta')?.value) || 0) - (Number(this.form.get('precioCompra')?.value) || 0);
+  }
+
+  /** Margen sobre el precio de venta, en %. */
+  get margen(): number {
+    const venta = Number(this.form.get('precioVenta')?.value) || 0;
+    return venta > 0 ? (this.ganancia / venta) * 100 : 0;
+  }
+
+  setVencimiento(valor: boolean): void {
+    this.form.get('tieneVencimiento')?.setValue(valor);
+  }
 
   editando = false;
   productoId = 0;

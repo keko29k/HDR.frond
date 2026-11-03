@@ -20,6 +20,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatIconModule } from '@angular/material/icon';
 
 import { MarcaService } from '../../services/marca';
@@ -39,10 +40,14 @@ import { Marca } from '../../models/marca.model';
     MatInputModule,
     MatPaginatorModule,
     MatProgressSpinnerModule,
+    MatTooltipModule,
     MatIconModule
   ],
   templateUrl: './marca-list.html',
-  styleUrl: './marca-list.css'
+  styleUrls: [
+    '../../../../shared/styles/operaciones.css',
+    './marca-list.css'
+  ]
 })
 export class MarcaListComponent implements OnInit {
 
@@ -198,6 +203,27 @@ export class MarcaListComponent implements OnInit {
   // ==========================================
   // NUEVA MARCA
   // ==========================================
+
+  // =====================================
+  // PRESENTACIÓN (solo lectura)
+  // =====================================
+
+  /** Cuántos registros de la página tienen el campo con dato. */
+  conDato(campo: keyof Marca): number {
+    return this.marcas.filter(item => String(item[campo] ?? '').trim() !== '').length;
+  }
+
+  iniciales(...partes: (string | null | undefined)[]): string {
+    const letras = partes
+      .join(' ')
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map(p => p[0].toUpperCase())
+      .join('');
+    return letras || '?';
+  }
 
   nuevo(): void {
 

@@ -1,34 +1,57 @@
 <main class="page">
+
   <header class="page-header">
     <div class="heading">
-      <span class="eyebrow">Organización</span>
-      <h1>Sucursales</h1>
-      <p>Administra las ubicaciones y datos de contacto de tu organización.</p>
-      @if (loading) {
-        <span class="record-count"><mat-icon>storefront</mat-icon>Cargando sucursales</span>
-      } @else if (error) {
-        <span class="record-count"><mat-icon>storefront</mat-icon>Conteo no disponible</span>
-      } @else {
-        <span class="record-count">
-          <mat-icon>storefront</mat-icon>
-          {{ meta.totalCount }} {{ meta.totalCount === 1 ? 'sucursal' : 'sucursales' }}
-        </span>
-      }
+      <span class="heading-icon"><mat-icon>storefront</mat-icon></span>
+      <div>
+        <span class="eyebrow">Gestión</span>
+        <h1>Sucursales</h1>
+        <p>Puntos de venta de la empresa, con su ubicación y contacto.</p>
+      </div>
     </div>
-    <button class="btn primary" type="button" (click)="nuevo()">
-      <mat-icon>add_business</mat-icon>
-      Nueva sucursal
-    </button>
+    <div class="header-actions">
+      <button class="btn primary" type="button" (click)="nuevo()">
+        <mat-icon>add_business</mat-icon>
+        Nueva sucursal
+      </button>
+    </div>
   </header>
 
-  <mat-card class="list-card">
-    <div class="toolbar">
-      <div class="toolbar-copy">
+  <section class="summary-row" aria-label="Resumen de sucursales">
+    <article class="summary-card">
+      <span class="summary-icon"><mat-icon>storefront</mat-icon></span>
+      <div>
+        <span class="summary-label">Sucursales</span>
+        <strong>{{ loading || error ? '—' : meta.totalCount }}</strong>
+        <small>{{ filter.buscar ? 'Según la búsqueda' : 'Total' }}</small>
+      </div>
+    </article>
+    <article class="summary-card">
+      <span class="summary-icon info"><mat-icon>place</mat-icon></span>
+      <div>
+        <span class="summary-label">Con dirección</span>
+        <strong>{{ loading || error ? '—' : conDato('direccion') + ' de ' + sucursales.length }}</strong>
+        <small>En esta página</small>
+      </div>
+    </article>
+    <article class="summary-card">
+      <span class="summary-icon warning"><mat-icon>call</mat-icon></span>
+      <div>
+        <span class="summary-label">Con teléfono</span>
+        <strong>{{ loading || error ? '—' : conDato('telefono') + ' de ' + sucursales.length }}</strong>
+        <small>En esta página</small>
+      </div>
+    </article>
+  </section>
+
+  <mat-card class="panel">
+    <div class="panel-head">
+      <div>
         <h2>Ubicaciones registradas</h2>
-        <p>Busca sucursales por nombre, teléfono o dirección.</p>
+        <p>Busca por nombre, teléfono o dirección.</p>
       </div>
       <mat-form-field appearance="outline" class="search" subscriptSizing="dynamic">
-        <mat-label>Buscar sucursales</mat-label>
+        <mat-label>Buscar sucursal</mat-label>
         <mat-icon matPrefix>search</mat-icon>
         <input matInput [formControl]="buscarControl" placeholder="Nombre, teléfono o dirección">
         @if (buscarControl.value) {
@@ -39,7 +62,7 @@
       </mat-form-field>
     </div>
 
-    <div class="table-wrap">
+    <div class="table-container">
       @if (loading) {
         <div class="state-panel" role="status">
           <mat-spinner diameter="34"></mat-spinner>
@@ -47,46 +70,55 @@
         </div>
       } @else if (error) {
         <div class="state-panel" role="alert">
-          <mat-icon class="state-icon error-icon">cloud_off</mat-icon>
+          <span class="state-icon error"><mat-icon>cloud_off</mat-icon></span>
           <h3>No se pudieron cargar las sucursales</h3>
           <p>Comprueba la conexión e inténtalo nuevamente.</p>
-          <button class="btn secondary" type="button" (click)="cargarSucursales()">Reintentar</button>
+          <button class="btn secondary small" type="button" (click)="cargarSucursales()"><mat-icon>refresh</mat-icon>Reintentar</button>
         </div>
       } @else if (sucursales.length) {
-        <table mat-table [dataSource]="sucursales" class="table medium-table">
+        <table mat-table [dataSource]="sucursales" class="table">
           <ng-container matColumnDef="id">
-            <th mat-header-cell *matHeaderCellDef>ID</th>
-            <td mat-cell *matCellDef="let sucursal" class="mono faint">{{ sucursal.id }}</td>
+            <th mat-header-cell *matHeaderCellDef>N.º</th>
+            <td mat-cell *matCellDef="let s"><span class="id-tag">#{{ s.id }}</span></td>
           </ng-container>
           <ng-container matColumnDef="nombre">
             <th mat-header-cell *matHeaderCellDef>Sucursal</th>
-            <td mat-cell *matCellDef="let sucursal" class="strong">{{ sucursal.nombre }}</td>
-          </ng-container>
-          <ng-container matColumnDef="telefono">
-            <th mat-header-cell *matHeaderCellDef>Teléfono</th>
-            <td mat-cell *matCellDef="let sucursal">{{ sucursal.telefono || '—' }}</td>
+            <td mat-cell *matCellDef="let s">
+              <div class="entity">
+                <span class="avatar square"><mat-icon>storefront</mat-icon></span>
+                <span class="entity-text"><strong>{{ s.nombre }}</strong></span>
+              </div>
+            </td>
           </ng-container>
           <ng-container matColumnDef="direccion">
             <th mat-header-cell *matHeaderCellDef>Dirección</th>
-            <td mat-cell *matCellDef="let sucursal" class="wrap">{{ sucursal.direccion || '—' }}</td>
+            <td mat-cell *matCellDef="let s" class="desc">
+              <span class="with-icon" [class.muted]="!s.direccion"><mat-icon>place</mat-icon>{{ s.direccion || 'Sin dirección' }}</span>
+            </td>
           </ng-container>
-          <ng-container matColumnDef="correo">
-            <th mat-header-cell *matHeaderCellDef>Correo</th>
-            <td mat-cell *matCellDef="let sucursal">
-              @if (sucursal.correo) {
-                <a class="mail" [href]="'mailto:' + sucursal.correo">{{ sucursal.correo }}</a>
-              } @else {
-                <span class="faint">—</span>
-              }
+          <ng-container matColumnDef="contacto">
+            <th mat-header-cell *matHeaderCellDef>Contacto</th>
+            <td mat-cell *matCellDef="let s">
+              <div class="contact">
+                @if (s.telefono) {
+                  <a [href]="'tel:' + s.telefono"><mat-icon>call</mat-icon>{{ s.telefono }}</a>
+                }
+                @if (s.correo) {
+                  <a [href]="'mailto:' + s.correo"><mat-icon>mail</mat-icon>{{ s.correo }}</a>
+                }
+                @if (!s.telefono && !s.correo) {
+                  <span class="muted">Sin datos de contacto</span>
+                }
+              </div>
             </td>
           </ng-container>
           <ng-container matColumnDef="acciones">
             <th mat-header-cell *matHeaderCellDef class="right">Acciones</th>
-            <td mat-cell *matCellDef="let sucursal" class="actions-cell">
-              <button mat-icon-button type="button" [attr.aria-label]="'Editar ' + sucursal.nombre" (click)="editar(sucursal.id)">
+            <td mat-cell *matCellDef="let s" class="actions-cell">
+              <button type="button" class="icon-action" matTooltip="Editar" [attr.aria-label]="'Editar ' + s.nombre" (click)="editar(s.id)">
                 <mat-icon>edit</mat-icon>
               </button>
-              <button mat-icon-button type="button" class="danger" [attr.aria-label]="'Eliminar ' + sucursal.nombre" (click)="eliminar(sucursal)">
+              <button type="button" class="icon-action danger" matTooltip="Eliminar" [attr.aria-label]="'Eliminar ' + s.nombre" (click)="eliminar(s)">
                 <mat-icon>delete_outline</mat-icon>
               </button>
             </td>
@@ -96,25 +128,21 @@
         </table>
       } @else {
         <div class="state-panel">
-          <mat-icon class="state-icon">store_mall_directory</mat-icon>
+          <span class="state-icon"><mat-icon>{{ filter.buscar ? 'search_off' : 'storefront' }}</mat-icon></span>
           <h3>{{ filter.buscar ? 'No hay resultados' : 'Aún no hay sucursales' }}</h3>
           <p>{{ filter.buscar ? 'Prueba con otros términos de búsqueda.' : 'Registra la primera sucursal para comenzar.' }}</p>
-          @if (!filter.buscar) {
-            <button class="btn secondary" type="button" (click)="nuevo()">Crear sucursal</button>
+          @if (filter.buscar) {
+            <button class="btn secondary small" type="button" (click)="limpiarBusqueda()">Limpiar búsqueda</button>
+          } @else {
+            <button class="btn primary small" type="button" (click)="nuevo()"><mat-icon>add_business</mat-icon>Crear sucursal</button>
           }
         </div>
       }
     </div>
 
     @if (!loading && !error && sucursales.length) {
-      <mat-paginator
-        [length]="meta.totalCount"
-        [pageSize]="filter.pageSize"
-        [pageIndex]="filter.pageNumber - 1"
-        [pageSizeOptions]="[5, 10, 25, 50]"
-        [selectConfig]="{ panelClass: 'hr-dark-panel' }"
-        (page)="cambiarPagina($event)"
-        showFirstLastButtons>
+      <mat-paginator [length]="meta.totalCount" [pageSize]="filter.pageSize" [pageIndex]="filter.pageNumber - 1"
+        [pageSizeOptions]="[5, 10, 25, 50]" showFirstLastButtons (page)="cambiarPagina($event)">
       </mat-paginator>
     }
   </mat-card>

@@ -22,6 +22,7 @@ import { VentaService } from '../../services/venta';
 import { Venta } from '../../models/venta.model';
 import { MatDialog } from '@angular/material/dialog';
 import { AbonarCredito } from '../abonar-credito/abonar-credito';
+import { VentaDetalleDialog, VentaDetalleResultado } from '../venta-detalle-dialog/venta-detalle-dialog';
 
 @Component({
   selector: 'app-venta-list',
@@ -227,6 +228,22 @@ export class VentaListComponent implements OnInit {
     if (this.esCreditoPendiente(venta)) return 'row-credit-pending';
     if (this.esCreditoCancelado(venta)) return 'row-credit-paid';
     return '';
+  }
+
+  verDetalle(venta: Venta): void {
+    this.dialog
+      .open<VentaDetalleDialog, number, VentaDetalleResultado>(VentaDetalleDialog, {
+        width: '980px',
+        maxWidth: '96vw',
+        autoFocus: false,
+        data: venta.id
+      })
+      .afterClosed()
+      .subscribe(resultado => {
+        if (resultado === 'abonar') {
+          this.abonarCredito(venta);
+        }
+      });
   }
 
   abonarCredito(venta: Venta): void {

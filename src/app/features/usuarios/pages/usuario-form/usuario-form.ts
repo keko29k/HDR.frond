@@ -26,6 +26,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatIconModule } from '@angular/material/icon';
 
 import { SucursalService } from '../../../sucursales/services/sucursal';
 import { Sucursal } from '../../../sucursales/models/sucursal.model';
@@ -46,11 +47,16 @@ import { UsuarioUpdate } from '../../models/usuario-update.model';
     MatInputModule,
     MatButtonModule,
     MatSelectModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatIconModule
   ],
 
   templateUrl: './usuario-form.html',
-  styleUrl: './usuario-form.css'
+  styleUrls: [
+    '../../../../shared/styles/operaciones.css',
+    '../../../../shared/styles/formulario.css',
+    './usuario-form.css'
+  ]
 })
 export class UsuarioFormComponent implements OnInit {
 
@@ -69,6 +75,27 @@ export class UsuarioFormComponent implements OnInit {
 
 
   sucursales: Sucursal[] = [];
+
+  /** Roles disponibles (mismos valores que antes). */
+  readonly roles = [
+    { valor: 'Administrador', icono: 'admin_panel_settings', descripcion: 'Acceso total al sistema' },
+    { valor: 'Vendedor', icono: 'point_of_sale', descripcion: 'Ventas, clientes y caja' },
+    { valor: 'Almacenero', icono: 'inventory_2', descripcion: 'Compras, lotes e inventario' },
+    { valor: 'Supervisor', icono: 'supervisor_account', descripcion: 'Control y reportes' }
+  ];
+
+  mostrarClave = false;
+
+  /** Nombre de la sucursal elegida (para la vista previa). */
+  get nombreSucursal(): string {
+    const id = this.form.get('idSucursal')?.value;
+    return this.sucursales.find(s => s.id === id)?.nombre ?? '';
+  }
+
+  elegirRol(rol: string): void {
+    this.form.get('rol')?.setValue(rol);
+    this.form.get('rol')?.markAsTouched();
+  }
 
 
   editando = false;

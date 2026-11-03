@@ -10,6 +10,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatIconModule } from '@angular/material/icon';
 import { ClienteService } from '../../services/cliente';
 
 @Component({
@@ -22,10 +23,15 @@ import { ClienteService } from '../../services/cliente';
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatIconModule
   ],
   templateUrl: './cliente-form.html',
-  styleUrl: './cliente-form.css'
+  styleUrls: [
+    '../../../../shared/styles/operaciones.css',
+    '../../../../shared/styles/formulario.css',
+    './cliente-form.css'
+  ]
 })
 export class ClienteFormComponent implements OnInit {
   private fb = inject(FormBuilder);

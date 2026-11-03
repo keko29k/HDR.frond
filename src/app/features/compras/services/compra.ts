@@ -9,6 +9,7 @@ import { CompraCreate } from '../models/compraCreate.model';
 import { CompraUpdate } from '../models/compraUpdate.model';
 import { CompraDetalleDto } from '../models/compraDetalleDto';
 import { RegistrarCompraDto } from '../models/registrar-compra.model';
+import { CompraVista } from '../models/compra-vista.model';
 
 @Injectable({
   providedIn: 'root',
@@ -28,6 +29,11 @@ export class CompraService {
 
   getById(id: number): Observable<Compra> {
     return this.http.get<Compra>(`${this.apiUrl}/${id}`);
+  }
+
+  /** Detalle completo: cabecera y productos con nombres y lotes. */
+  getDetalle(id: number): Observable<CompraVista> {
+    return this.http.get<CompraVista>(`${this.apiUrl}/${id}/detalle`);
   }
 
   create(data: CompraCreate): Observable<Compra> {

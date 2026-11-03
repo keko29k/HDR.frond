@@ -17,6 +17,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatIconModule } from '@angular/material/icon';
 import { CategoriaService } from '../../services/categoria';
 import { Categoria } from '../../models/categoria.model';
@@ -34,10 +35,14 @@ import { Categoria } from '../../models/categoria.model';
     MatInputModule,
     MatPaginatorModule,
     MatProgressSpinnerModule,
+    MatTooltipModule,
     MatIconModule
   ],
   templateUrl: './categoria-list.html',
-  styleUrl: './categoria-list.css'
+  styleUrls: [
+    '../../../../shared/styles/operaciones.css',
+    './categoria-list.css'
+  ]
 })
 export class CategoriaListComponent implements OnInit {
   private categoriaService = inject(CategoriaService);
@@ -104,6 +109,27 @@ export class CategoriaListComponent implements OnInit {
     this.filter.pageNumber = event.pageIndex + 1;
     this.filter.pageSize = event.pageSize;
     this.cargarCategorias();
+  }
+
+  // =====================================
+  // PRESENTACIÓN (solo lectura)
+  // =====================================
+
+  /** Cuántos registros de la página tienen el campo con dato. */
+  conDato(campo: keyof Categoria): number {
+    return this.categorias.filter(item => String(item[campo] ?? '').trim() !== '').length;
+  }
+
+  iniciales(...partes: (string | null | undefined)[]): string {
+    const letras = partes
+      .join(' ')
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map(p => p[0].toUpperCase())
+      .join('');
+    return letras || '?';
   }
 
   nuevo(): void {

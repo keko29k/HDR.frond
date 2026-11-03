@@ -44,7 +44,11 @@ import { SucursalUpdate } from '../../models/sucursal-update.model';
   ],
 
   templateUrl: './sucursal-form.html',
-  styleUrl: './sucursal-form.css'
+  styleUrls: [
+    '../../../../shared/styles/operaciones.css',
+    '../../../../shared/styles/formulario.css',
+    './sucursal-form.css'
+  ]
 })
 export class SucursalFormComponent implements OnInit {
 

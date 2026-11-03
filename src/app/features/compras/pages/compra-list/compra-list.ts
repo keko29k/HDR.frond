@@ -20,6 +20,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { CompraService } from '../../services/compra';
 import { Compra } from '../../models/compra.model';
+import { MatDialog } from '@angular/material/dialog';
+import { CompraDetalleDialog } from '../compra-detalle-dialog/compra-detalle-dialog';
 
 @Component({
   selector: 'app-compra-list',
@@ -48,6 +50,7 @@ export class CompraListComponent implements OnInit {
   private compraService = inject(CompraService);
   private notificationService = inject(NotificationService);
   private router = inject(Router);
+  private dialog = inject(MatDialog);
 
   compras: Compra[] = [];
 
@@ -184,6 +187,15 @@ export class CompraListComponent implements OnInit {
 
   nuevo(): void {
     this.router.navigate(['/compras/nuevo']);
+  }
+
+  verDetalle(id: number): void {
+    this.dialog.open<CompraDetalleDialog, number>(CompraDetalleDialog, {
+      width: '980px',
+      maxWidth: '96vw',
+      autoFocus: false,
+      data: id
+    });
   }
 
   editar(id: number): void {

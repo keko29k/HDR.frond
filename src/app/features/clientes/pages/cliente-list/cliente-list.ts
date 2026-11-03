@@ -16,6 +16,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatIconModule } from '@angular/material/icon';
 
 import { ClienteService } from '../../services/cliente';
@@ -34,10 +35,14 @@ import { Cliente } from '../../models/cliente.model';
     MatInputModule,
     MatPaginatorModule,
     MatProgressSpinnerModule,
+    MatTooltipModule,
     MatIconModule
   ],
   templateUrl: './cliente-list.html',
-  styleUrl: './cliente-list.css'
+  styleUrls: [
+    '../../../../shared/styles/operaciones.css',
+    './cliente-list.css'
+  ]
 })
 export class ClienteListComponent implements OnInit {
 
@@ -50,10 +55,8 @@ export class ClienteListComponent implements OnInit {
   displayedColumns: string[] = [
     'id',
     'nombres',
-    'apellidos',
     'nitCi',
-    'telefono',
-    'correo',
+    'contacto',
     'direccion',
     'acciones'
   ];
@@ -136,6 +139,27 @@ export class ClienteListComponent implements OnInit {
     this.filter.pageSize = event.pageSize;
 
     this.cargarClientes();
+  }
+
+  // =====================================
+  // PRESENTACIÓN (solo lectura)
+  // =====================================
+
+  /** Cuántos registros de la página tienen el campo con dato. */
+  conDato(campo: keyof Cliente): number {
+    return this.clientes.filter(item => String(item[campo] ?? '').trim() !== '').length;
+  }
+
+  iniciales(...partes: (string | null | undefined)[]): string {
+    const letras = partes
+      .join(' ')
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map(p => p[0].toUpperCase())
+      .join('');
+    return letras || '?';
   }
 
   nuevo(): void {
