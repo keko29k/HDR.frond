@@ -213,11 +213,19 @@
                     @if (tieneProductosConLotes) {
                       <td>
                         @if (detalle.manejaLotes) {
-                          <input class="cell-input lot" type="text" placeholder="N.º lote"
-                            [class.invalid]="!detalle.numeroLote.trim()"
-                            [attr.aria-label]="'Lote de ' + detalle.nombreProducto"
-                            [value]="detalle.numeroLote"
-                            (input)="actualizarNumeroLote(i, $any($event.target).value)">
+                          <div class="lot-field">
+                            <input class="cell-input lot" type="text" placeholder="Sin generar" readonly
+                              [class.invalid]="!detalle.numeroLote.trim()"
+                              [attr.aria-label]="'Lote de ' + detalle.nombreProducto"
+                              [value]="detalle.numeroLote">
+                            <button type="button" class="lot-btn"
+                              [matTooltip]="detalle.numeroLote ? 'Generar otro código' : 'Generar código de lote'"
+                              [attr.aria-label]="'Generar lote de ' + detalle.nombreProducto"
+                              (click)="generarNumeroLote(i)">
+                              <mat-icon>{{ detalle.numeroLote ? 'autorenew' : 'qr_code_2' }}</mat-icon>
+                              @if (!detalle.numeroLote) { <span>Generar</span> }
+                            </button>
+                          </div>
                         } @else {
                           <span class="na">No aplica</span>
                         }

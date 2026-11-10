@@ -268,8 +268,26 @@ export class CompraFormComponent implements OnInit {
   // ACTUALIZAR DATOS DEL LOTE
   // =========================
 
-  actualizarNumeroLote(index: number, valor: string): void {
-    this.detalles[index].numeroLote = valor;
+  // Genera el número de lote: L + fecha (AAMMDD) + 4 caracteres aleatorios.
+  // Ej.: L251110-7KQ3. No se repite dentro de la misma compra.
+  generarNumeroLote(index: number): void {
+    const caracteres = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // sin 0/O ni 1/I
+    const hoy = new Date();
+    const fecha =
+      String(hoy.getFullYear()).slice(-2) +
+      String(hoy.getMonth() + 1).padStart(2, '0') +
+      String(hoy.getDate()).padStart(2, '0');
+
+    let codigo: string;
+    do {
+      let sufijo = '';
+      for (let i = 0; i < 4; i++) {
+        sufijo += caracteres[Math.floor(Math.random() * caracteres.length)];
+      }
+      codigo = `L${fecha}-${sufijo}`;
+    } while (this.detalles.some((d, i) => i !== index && d.numeroLote === codigo));
+
+    this.detalles[index].numeroLote = codigo;
   }
 
   actualizarFechaFabricacion(index: number, valor: string): void {
@@ -366,7 +384,7 @@ export class CompraFormComponent implements OnInit {
         !detalle.numeroLote.trim()
       ) {
         this.notificationService.error(
-          `Ingresa el número de lote de ${detalle.nombreProducto}`
+          `Genera el número de lote de ${detalle.nombreProducto}`
         );
         return false;
       }

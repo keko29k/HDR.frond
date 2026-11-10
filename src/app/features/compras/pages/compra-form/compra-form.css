@@ -287,7 +287,51 @@
 
 .cell-input.qty { width: 80px; text-align: center; }
 .cell-input.price { width: 110px; text-align: right; }
-.cell-input.lot { width: 130px; }
+.cell-input.lot {
+  width: 130px;
+  background: var(--op-surface-muted, #f6f8f7);
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  letter-spacing: 0.02em;
+  cursor: default;
+}
+
+.lot-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.lot-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 36px;
+  min-width: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--op-primary);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--op-primary);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.lot-btn:hover { background: rgb(11 110 85 / 8%); }
+
+.lot-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgb(11 110 85 / 20%);
+}
+
+.lot-btn mat-icon {
+  width: 18px;
+  height: 18px;
+  font-size: 18px;
+}
 .cell-input.date { width: 150px; }
 
 .na {
