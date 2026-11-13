@@ -1,3 +1,4 @@
+import { esVendedor } from '../../../../core/services/permisos';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -55,6 +56,15 @@ import { Producto } from '../../models/producto.model';
 
 
 export class ProductoListComponent implements OnInit {
+
+  /** El vendedor solo consulta: sin crear, editar ni eliminar. */
+  readonly soloConsulta = esVendedor();
+
+  get columnasVisibles(): string[] {
+    return this.soloConsulta
+      ? this.displayedColumns.filter(c => c !== 'acciones')
+      : this.displayedColumns;
+  }
 
   // ==========================================
   // INYECCIÓN DE SERVICIOS

@@ -14,10 +14,12 @@
         <mat-icon>layers</mat-icon>
         Ver lotes
       </button>
-      <button class="btn primary" type="button" (click)="nuevo()">
-        <mat-icon>add</mat-icon>
-        Nuevo producto
-      </button>
+      @if (!soloConsulta) {
+        <button class="btn primary" type="button" (click)="nuevo()">
+          <mat-icon>add</mat-icon>
+          Nuevo producto
+        </button>
+      }
     </div>
   </header>
 
@@ -164,8 +166,8 @@
             </td>
           </ng-container>
 
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+          <tr mat-header-row *matHeaderRowDef="columnasVisibles"></tr>
+          <tr mat-row *matRowDef="let row; columns: columnasVisibles"></tr>
         </table>
       } @else {
         <div class="state-panel">
@@ -174,7 +176,7 @@
           <p>{{ filter.buscar ? 'Prueba con otros términos de búsqueda.' : 'Registra el primer producto para comenzar el catálogo.' }}</p>
           @if (filter.buscar) {
             <button class="btn secondary small" type="button" (click)="buscarControl.setValue('')">Limpiar búsqueda</button>
-          } @else {
+          } @else if (!soloConsulta) {
             <button class="btn primary small" type="button" (click)="nuevo()"><mat-icon>add</mat-icon>Crear producto</button>
           }
         </div>

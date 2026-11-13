@@ -12,6 +12,8 @@ import {
   debounceTime,
   EMPTY,
   finalize,
+  map,
+  Observable,
   Subject,
   switchMap
 } from 'rxjs';
@@ -70,6 +72,10 @@ export class InventarioSucursalList implements OnInit {
   sucursalActual: Sucursal | null = null;
 
   sucursalId = 0;
+
+  // El administrador puede ver el inventario de cualquier sucursal.
+  esAdmin = false;
+  sucursales: Sucursal[] = [];
 
   // Totales de la página actual
   totalUnidades = 0;
@@ -143,7 +149,30 @@ export class InventarioSucursalList implements OnInit {
     this.usuarioService.getById(usuarioId)
       .pipe(
 
-        switchMap(usuario => {
+        switchMap((usuario): Observable<Sucursal | null> => {
+
+          const rol = (usuario.rol ?? '').trim().toUpperCase();
+          this.esAdmin = rol === 'ADMINISTRADOR' || rol === 'ADMIN';
+
+          // Administrador: carga todas las sucursales y empieza por la suya
+          // (o por la primera si no tiene una asignada).
+          if (this.esAdmin) {
+            return this.sucursalService
+              .getAll({ pageNumber: 1, pageSize: 100, buscar: '' })
+              .pipe(
+                map(respuesta => {
+                  this.sucursales = respuesta.data ?? [];
+
+                  const inicial =
+                    this.sucursales.find(s => s.id === usuario.idSucursal) ??
+                    this.sucursales[0] ??
+                    null;
+
+                  this.sucursalId = inicial?.id ?? 0;
+                  return inicial;
+                })
+              );
+          }
 
           // Verificar que el usuario tenga sucursal asignada
           if (
@@ -179,6 +208,13 @@ export class InventarioSucursalList implements OnInit {
       .subscribe({
 
         next: sucursal => {
+
+          if (!sucursal) {
+            this.sucursalActual = null;
+            this.errorCarga = true;
+            this.notificationService.error('No hay sucursales registradas.');
+            return;
+          }
 
           this.sucursalActual = sucursal;
 
@@ -322,6 +358,26 @@ export class InventarioSucursalList implements OnInit {
 
   // Mantener este método por compatibilidad con el HTML anterior
   cargarInventario(): void {
+    this.cargarProductos();
+  }
+
+  // =====================================================
+  // CAMBIAR SUCURSAL (solo administrador)
+  // =====================================================
+
+  cambiarSucursal(valor: string): void {
+
+    const id = Number(valor);
+    const sucursal = this.sucursales.find(s => s.id === id);
+
+    if (!this.esAdmin || !sucursal || id === this.sucursalId) {
+      return;
+    }
+
+    this.sucursalId = sucursal.id;
+    this.sucursalActual = sucursal;
+    this.meta.currentPage = 1;
+
     this.cargarProductos();
   }
 

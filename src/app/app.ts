@@ -18,6 +18,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 import { AuthService } from './features/auth/services/auth';
 import { LoteService } from './features/lotes/services/lote';
+import { puedeVerRuta, rolDeSesion } from './core/services/permisos';
 
 interface ItemMenu {
   ruta: string;
@@ -112,6 +113,17 @@ export class App {
       ]
     }
   ];
+
+  /** Menú según el rol: el vendedor solo ve las secciones que tiene permitidas. */
+  get menuVisible(): GrupoMenu[] {
+    const rol = this.rolUsuarioSesion || rolDeSesion();
+    return this.menu
+      .map(grupo => ({
+        ...grupo,
+        items: grupo.items.filter(item => puedeVerRuta(item.ruta, rol))
+      }))
+      .filter(grupo => grupo.items.length > 0);
+  }
 
   /** Páginas que no están en el menú pero necesitan título en la cabecera. */
   private readonly paginasExtra: Record<string, { grupo: string; titulo: string; icono: string }> = {

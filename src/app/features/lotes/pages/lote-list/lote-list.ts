@@ -1,3 +1,4 @@
+import { esVendedor } from '../../../../core/services/permisos';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -39,6 +40,15 @@ import { MatTableModule } from '@angular/material/table';
   styleUrl: './lote-list.css'
 })
 export class LoteList implements OnInit {
+
+  /** El vendedor solo consulta: sin crear, editar ni eliminar. */
+  readonly soloConsulta = esVendedor();
+
+  get columnasVisibles(): string[] {
+    return this.soloConsulta
+      ? this.displayedColumns.filter(c => c !== 'acciones')
+      : this.displayedColumns;
+  }
   private loteService = inject(LoteService);
   private productoService = inject(ProductoService);
   private sucursalService = inject(SucursalService);

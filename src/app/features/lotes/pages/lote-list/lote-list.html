@@ -11,10 +11,12 @@
         </span>
       }
     </div>
-    <button class="btn primary" type="button" (click)="nuevo()">
-      <mat-icon>add</mat-icon>
-      Nuevo lote
-    </button>
+    @if (!soloConsulta) {
+      <button class="btn primary" type="button" (click)="nuevo()">
+        <mat-icon>add</mat-icon>
+        Nuevo lote
+      </button>
+    }
   </header>
 
   <section class="summary" aria-label="Resumen de lotes">
@@ -154,10 +156,10 @@
             </td>
           </ng-container>
 
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+          <tr mat-header-row *matHeaderRowDef="columnasVisibles"></tr>
+          <tr mat-row *matRowDef="let row; columns: columnasVisibles"></tr>
           <tr class="empty-row" *matNoDataRow>
-            <td [attr.colspan]="displayedColumns.length">
+            <td [attr.colspan]="columnasVisibles.length">
               <mat-icon>inventory_2</mat-icon>
               <span>
                 {{ lotes.length

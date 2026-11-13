@@ -30,7 +30,7 @@
 
       <!-- NAVEGACIÓN -->
       <nav class="nav" aria-label="Menú principal">
-        @for (grupo of menu; track grupo.titulo) {
+        @for (grupo of menuVisible; track grupo.titulo) {
           @if (grupo.titulo) {
             <div class="nav-eyebrow">
               <span>{{ grupo.titulo }}</span>

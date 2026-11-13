@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { permisoGuard } from './core/guards/permiso-guard';
 
 const loadLoginComponent = () =>
 import('./features/auth/pages/login/login')
@@ -180,7 +181,7 @@ import('./features/lotes/pages/vencimientos/vencimientos')
 RUTAS
 ========================================================= */
 
-export const routes: Routes = [
+const rutas: Routes = [
 
 {
 path: 'login',
@@ -502,3 +503,18 @@ redirectTo: 'dashboard'
 }
 
 ];
+/* =======================================================
+PERMISOS POR ROL
+ Todas las rutas (menos login y redirecciones) pasan por
+ permisoGuard: el vendedor solo entra a sus secciones.
+======================================================= */
+
+export const routes: Routes = rutas.map(ruta =>
+  ruta.path === 'login' || ruta.redirectTo
+    ? ruta
+    : {
+        ...ruta,
+        canActivate: [permisoGuard],
+        ...(ruta.children ? { canActivateChild: [permisoGuard] } : {})
+      }
+);

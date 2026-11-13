@@ -46,9 +46,21 @@
 
     <div class="sucursal-info">
 
-      <span class="sucursal-label">Sucursal asignada</span>
+      <span class="sucursal-label">{{ esAdmin ? 'Ver inventario de' : 'Sucursal asignada' }}</span>
 
-      <h3 *ngIf="sucursalActual">
+      <select
+        *ngIf="esAdmin && sucursales.length > 0"
+        class="sucursal-select"
+        aria-label="Filtrar inventario por sucursal"
+        [value]="sucursalId"
+        [disabled]="loading"
+        (change)="cambiarSucursal($any($event.target).value)">
+        <option *ngFor="let s of sucursales" [value]="s.id" [selected]="s.id === sucursalId">
+          {{ s.nombre }}
+        </option>
+      </select>
+
+      <h3 *ngIf="sucursalActual && !esAdmin">
         {{ sucursalActual.nombre }}
       </h3>
 
@@ -61,7 +73,7 @@
       </h3>
 
       <span class="sucursal-description">
-        Inventario correspondiente al usuario conectado
+        {{ esAdmin ? 'Como administrador puedes revisar el inventario de cualquier sucursal' : 'Inventario correspondiente al usuario conectado' }}
       </span>
 
     </div>

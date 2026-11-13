@@ -79,9 +79,7 @@ export class UsuarioFormComponent implements OnInit {
   /** Roles disponibles (mismos valores que antes). */
   readonly roles = [
     { valor: 'Administrador', icono: 'admin_panel_settings', descripcion: 'Acceso total al sistema' },
-    { valor: 'Vendedor', icono: 'point_of_sale', descripcion: 'Ventas, clientes y caja' },
-    { valor: 'Almacenero', icono: 'inventory_2', descripcion: 'Compras, lotes e inventario' },
-    { valor: 'Supervisor', icono: 'supervisor_account', descripcion: 'Control y reportes' }
+    { valor: 'Vendedor', icono: 'point_of_sale', descripcion: 'Ventas, compras, caja y clientes de su sucursal' },
   ];
 
   mostrarClave = false;
