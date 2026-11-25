@@ -2,6 +2,18 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  ciNitBolivia,
+  correoValido,
+  fechaHaceAnios,
+  fechaNacimientoValida,
+  nombrePersona,
+  telefonoBolivia,
+  textoConContenido
+} from '../../../../shared/validators/validaciones';
+
+/** Edad mínima de un cliente (cámbiala aquí si lo necesitas). */
+const EDAD_MINIMA_CLIENTE = 18;
 import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { NotificationService } from '../../../../core/services/notification.service';
@@ -43,14 +55,20 @@ export class ClienteFormComponent implements OnInit {
   clienteId = 0;
   titulo = 'Nuevo cliente';
   loading = false;
+  /** Edad mínima para registrar un cliente. */
+  readonly edadMinima = EDAD_MINIMA_CLIENTE;
+  /** Límites del calendario: no deja elegir hoy ni fechas futuras. */
+  readonly fechaMaxima = fechaHaceAnios(EDAD_MINIMA_CLIENTE);
+  readonly fechaMinima = fechaHaceAnios(110);
+
   form = this.fb.group({
-    nombres: ['', [Validators.required, Validators.maxLength(100)]],
-    apellidos: ['', [Validators.required, Validators.maxLength(100)]],
-    nitCi: ['', [Validators.required, Validators.maxLength(20)]],
-    telefono: ['', [Validators.required, Validators.maxLength(20)]],
-    correo: ['', [Validators.email, Validators.maxLength(150)]],
-    direccion: ['', [Validators.maxLength(250)]],
-    fechaNacimiento: [''],
+    nombres: ['', [Validators.required, Validators.maxLength(100), nombrePersona()]],
+    apellidos: ['', [Validators.required, Validators.maxLength(100), nombrePersona()]],
+    nitCi: ['', [Validators.required, Validators.maxLength(20), ciNitBolivia()]],
+    telefono: ['', [Validators.required, Validators.maxLength(20), telefonoBolivia()]],
+    correo: ['', [Validators.maxLength(150), correoValido()]],
+    direccion: ['', [Validators.maxLength(250), textoConContenido(5)]],
+    fechaNacimiento: ['', [fechaNacimientoValida(EDAD_MINIMA_CLIENTE)]],
     observacion: ['', [Validators.maxLength(500)]]
   });
   ngOnInit(): void {

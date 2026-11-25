@@ -34,6 +34,9 @@
               <mat-label>Nombre de la sucursal</mat-label>
               <mat-icon matIconPrefix>storefront</mat-icon>
               <input matInput formControlName="nombre" maxlength="100" autocomplete="off" placeholder="Ej. Sucursal Central">
+              @if (form.controls.nombre.getError('invalido'); as msg) {
+                <mat-error>{{ msg }}</mat-error>
+              }
               @if (form.controls.nombre.hasError('required')) {
                 <mat-error>Escribe el nombre de la sucursal.</mat-error>
               }
@@ -57,8 +60,8 @@
               <mat-label>Teléfono</mat-label>
               <mat-icon matIconPrefix>call</mat-icon>
               <input matInput formControlName="telefono" type="tel" maxlength="30" autocomplete="off" placeholder="Ej. 2 2412345">
-              @if (form.controls.telefono.hasError('pattern')) {
-                <mat-error>Solo números, espacios, + y -.</mat-error>
+              @if (form.controls.telefono.getError('invalido'); as msg) {
+                <mat-error>{{ msg }}</mat-error>
               }
             </mat-form-field>
 
@@ -66,8 +69,8 @@
               <mat-label>Correo</mat-label>
               <mat-icon matIconPrefix>mail</mat-icon>
               <input matInput formControlName="correo" type="email" maxlength="150" autocomplete="off" placeholder="sucursal@empresa.com">
-              @if (form.controls.correo.hasError('email')) {
-                <mat-error>Escribe un correo válido.</mat-error>
+              @if (form.controls.correo.getError('invalido'); as msg) {
+                <mat-error>{{ msg }}</mat-error>
               }
             </mat-form-field>
 

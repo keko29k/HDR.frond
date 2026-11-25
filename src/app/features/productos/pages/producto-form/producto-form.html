@@ -35,6 +35,9 @@
             <mat-form-field appearance="outline" class="span-all">
               <mat-label>Nombre del producto</mat-label>
               <input matInput type="text" formControlName="nombre" placeholder="Ej. Paracetamol 500 mg x 10 comprimidos">
+              @if (form.get('nombre')?.getError('invalido'); as msg) {
+                <mat-error>{{ msg }}</mat-error>
+              }
               @if (form.get('nombre')?.hasError('required')) {
                 <mat-error>El nombre es obligatorio.</mat-error>
               }
@@ -56,6 +59,9 @@
               <mat-label>Código</mat-label>
               <mat-icon matPrefix>tag</mat-icon>
               <input matInput type="text" formControlName="codigo" placeholder="Ej. FAR-001">
+              @if (form.get('codigo')?.getError('invalido'); as msg) {
+                <mat-error>{{ msg }}</mat-error>
+              }
               @if (form.get('codigo')?.hasError('required')) {
                 <mat-error>El código es obligatorio.</mat-error>
               }
@@ -68,6 +74,9 @@
               <mat-label>Código de barras</mat-label>
               <mat-icon matPrefix>qr_code_scanner</mat-icon>
               <input matInput type="text" formControlName="codigoBarras" placeholder="Ej. 7771234567890">
+              @if (form.get('codigoBarras')?.getError('invalido'); as msg) {
+                <mat-error>{{ msg }}</mat-error>
+              }
               @if (form.get('codigoBarras')?.hasError('maxlength')) {
                 <mat-error>Máximo 50 caracteres.</mat-error>
               }
@@ -132,6 +141,9 @@
               <mat-label>Precio de venta</mat-label>
               <span matTextPrefix>Bs&nbsp;</span>
               <input matInput type="number" min="0" step="0.01" formControlName="precioVenta" placeholder="0.00">
+              @if (form.get('precioVenta')?.getError('invalido'); as msg) {
+                <mat-error>{{ msg }}</mat-error>
+              }
               @if (form.get('precioVenta')?.hasError('required')) {
                 <mat-error>Obligatorio.</mat-error>
               }

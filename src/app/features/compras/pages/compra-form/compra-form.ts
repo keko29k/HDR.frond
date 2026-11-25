@@ -2,6 +2,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { fechaNoFutura, hoyIso } from '../../../../shared/validators/validaciones';
 import { Router } from '@angular/router';
 import { finalize, forkJoin } from 'rxjs';
 
@@ -65,6 +66,9 @@ interface DetalleCompraFormulario {
 })
 export class CompraFormComponent implements OnInit {
 
+  /** Hoy en formato AAAA-MM-DD: límite del calendario para fechas que no pueden ser futuras. */
+  readonly hoy = hoyIso();
+
   private fb = inject(FormBuilder);
   private compraService = inject(CompraService);
   private proveedorService = inject(ProveedorService);
@@ -92,7 +96,7 @@ export class CompraFormComponent implements OnInit {
     idProveedor: [null as number | null, Validators.required],
     tipoDocumento: ['Factura', Validators.required],
     numeroDocumento: [''],
-    fechaCompra: [this.obtenerFechaActual(), Validators.required],
+    fechaCompra: [this.obtenerFechaActual(), [Validators.required, fechaNoFutura()]],
     observacion: ['']
   });
 

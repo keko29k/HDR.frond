@@ -8,6 +8,7 @@ import {
   ValidatorFn,
   Validators
 } from '@angular/forms';
+import { fechaNoFutura, hoyIso } from '../../../../shared/validators/validaciones';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EMPTY, finalize, forkJoin, map, of, switchMap } from 'rxjs';
 
@@ -61,6 +62,9 @@ const fechaVencimientoPosteriorAElaboracion: ValidatorFn = (
   styleUrl: './lote-form.css'
 })
 export class LoteForm implements OnInit {
+
+  /** Hoy en formato AAAA-MM-DD: límite del calendario para fechas que no pueden ser futuras. */
+  readonly hoy = hoyIso();
   private fb = inject(FormBuilder);
   private loteService = inject(LoteService);
   private productoService = inject(ProductoService);
@@ -82,7 +86,7 @@ export class LoteForm implements OnInit {
   form = this.fb.group({
     idProducto: [0, [Validators.required, Validators.min(1)]],
     numeroLote: ['', [Validators.required, Validators.maxLength(100)]],
-    fechaFabricacion: ['', Validators.required],
+    fechaFabricacion: ['', [Validators.required, fechaNoFutura()]],
     fechaVencimiento: ['', Validators.required],
     cantidadInicial: [0, [Validators.required, Validators.min(0.01)]],
     cantidadDisponible: [0, [Validators.required, Validators.min(0)]],

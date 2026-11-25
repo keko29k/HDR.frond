@@ -5,6 +5,13 @@ import {
   ReactiveFormsModule,
   Validators
 } from '@angular/forms';
+import {
+  claveSegura,
+  correoValido,
+  nombrePersona,
+  nombreUsuario,
+  telefonoBolivia
+} from '../../../../shared/validators/validaciones';
 
 import {
   ActivatedRoute,
@@ -114,12 +121,14 @@ export class UsuarioFormComponent implements OnInit {
 
     nombres: ['', [
       Validators.required,
-      Validators.maxLength(100)
+      Validators.maxLength(100),
+      nombrePersona()
     ]],
 
     apellidos: ['', [
       Validators.required,
-      Validators.maxLength(100)
+      Validators.maxLength(100),
+      nombrePersona()
     ]],
 
     rol: ['', [
@@ -128,7 +137,8 @@ export class UsuarioFormComponent implements OnInit {
 
     usuario1: ['', [
       Validators.required,
-      Validators.maxLength(100)
+      Validators.maxLength(100),
+      nombreUsuario()
     ]],
 
     clave: ['', [
@@ -136,11 +146,13 @@ export class UsuarioFormComponent implements OnInit {
     ]],
 
     telefono: ['', [
-      Validators.maxLength(30)
+      Validators.maxLength(30),
+      telefonoBolivia()
     ]],
 
     correo: ['', [
-      Validators.maxLength(150)
+      Validators.maxLength(150),
+      correoValido()
     ]]
 
   });
@@ -166,7 +178,10 @@ export class UsuarioFormComponent implements OnInit {
 
       this.form
         .get('clave')
-        ?.clearValidators();
+        ?.setValidators([
+          Validators.maxLength(255),
+          claveSegura()
+        ]);
 
       this.form
         .get('clave')
@@ -183,8 +198,8 @@ export class UsuarioFormComponent implements OnInit {
         .get('clave')
         ?.setValidators([
           Validators.required,
-          Validators.minLength(6),
-          Validators.maxLength(255)
+          Validators.maxLength(255),
+          claveSegura()
         ]);
 
       this.form

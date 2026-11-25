@@ -35,6 +35,9 @@
               <mat-label>Nombre o razón social</mat-label>
               <mat-icon matPrefix>business</mat-icon>
               <input matInput formControlName="nombre" placeholder="Ej. Droguería Inti S.A.">
+              @if (form.get('nombre')?.getError('invalido'); as msg) {
+                <mat-error>{{ msg }}</mat-error>
+              }
               @if (form.get('nombre')?.hasError('required')) {
                 <mat-error>El nombre es obligatorio.</mat-error>
               }
@@ -47,6 +50,9 @@
               <mat-label>NIT</mat-label>
               <mat-icon matPrefix>badge</mat-icon>
               <input matInput formControlName="nit" placeholder="Ej. 1003375021">
+              @if (form.get('nit')?.getError('invalido'); as msg) {
+                <mat-error>{{ msg }}</mat-error>
+              }
               @if (form.get('nit')?.hasError('maxlength')) {
                 <mat-error>Máximo 30 caracteres.</mat-error>
               }
@@ -76,6 +82,9 @@
               <mat-label>Persona de contacto</mat-label>
               <mat-icon matPrefix>person</mat-icon>
               <input matInput formControlName="contacto" placeholder="Ej. Ramiro Choque">
+              @if (form.get('contacto')?.getError('invalido'); as msg) {
+                <mat-error>{{ msg }}</mat-error>
+              }
               @if (form.get('contacto')?.hasError('maxlength')) {
                 <mat-error>Máximo 100 caracteres.</mat-error>
               }
@@ -85,6 +94,9 @@
               <mat-label>Teléfono</mat-label>
               <mat-icon matPrefix>call</mat-icon>
               <input matInput type="tel" formControlName="telefono" placeholder="Ej. 76123456">
+              @if (form.get('telefono')?.getError('invalido'); as msg) {
+                <mat-error>{{ msg }}</mat-error>
+              }
               @if (form.get('telefono')?.hasError('required')) {
                 <mat-error>El teléfono es obligatorio.</mat-error>
               }
@@ -97,8 +109,8 @@
               <mat-label>Correo electrónico</mat-label>
               <mat-icon matPrefix>mail</mat-icon>
               <input matInput type="email" formControlName="correo" placeholder="pedidos@proveedor.com">
-              @if (form.get('correo')?.hasError('email')) {
-                <mat-error>Ingresa un correo válido.</mat-error>
+              @if (form.get('correo')?.getError('invalido'); as msg) {
+                <mat-error>{{ msg }}</mat-error>
               }
               @if (form.get('correo')?.hasError('maxlength')) {
                 <mat-error>Máximo 150 caracteres.</mat-error>

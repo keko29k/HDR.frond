@@ -3,6 +3,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { finalize, forkJoin } from 'rxjs';
+import { codigoSinEspacios, mayorQueCero, noMenorQue, textoConContenido } from '../../../../shared/validators/validaciones';
 
 import { NotificationService } from '../../../../core/services/notification.service';
 
@@ -102,16 +103,19 @@ export class ProductoFormComponent implements OnInit {
 
     codigo: ['', [
       Validators.required,
-      Validators.maxLength(50)
+      Validators.maxLength(50),
+      codigoSinEspacios()
     ]],
 
     codigoBarras: [null as string | null, [
-      Validators.maxLength(50)
+      Validators.maxLength(50),
+      codigoSinEspacios(true)
     ]],
 
     nombre: ['', [
       Validators.required,
-      Validators.maxLength(100)
+      Validators.maxLength(100),
+      textoConContenido(3)
     ]],
 
     nombreGenerico: [null as string | null, [
@@ -127,7 +131,9 @@ export class ProductoFormComponent implements OnInit {
 
     precioVenta: [0, [
       Validators.required,
-      Validators.min(0)
+      Validators.min(0),
+      mayorQueCero('El precio de venta debe ser mayor a 0.'),
+      noMenorQue('precioCompra', 'El precio de venta no puede ser menor al de compra.')
     ]],
 
     peso: [null as number | null, [
@@ -140,6 +146,11 @@ export class ProductoFormComponent implements OnInit {
   });
 
   ngOnInit(): void {
+
+    // Si cambia el precio de compra, revisar de nuevo el precio de venta.
+    this.form.get('precioCompra')?.valueChanges.subscribe(() =>
+      this.form.get('precioVenta')?.updateValueAndValidity({ emitEvent: false })
+    );
 
     const id = this.route.snapshot.paramMap.get('id');
 

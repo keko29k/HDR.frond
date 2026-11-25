@@ -35,6 +35,9 @@
             <mat-form-field appearance="outline">
               <mat-label>Nombres</mat-label>
               <input matInput type="text" formControlName="nombres" placeholder="Ej. Juan Carlos">
+              @if (form.get('nombres')?.getError('invalido'); as msg) {
+                <mat-error>{{ msg }}</mat-error>
+              }
               @if (form.get('nombres')?.hasError('required')) {
                 <mat-error>Los nombres son obligatorios.</mat-error>
               }
@@ -46,6 +49,9 @@
             <mat-form-field appearance="outline">
               <mat-label>Apellidos</mat-label>
               <input matInput type="text" formControlName="apellidos" placeholder="Ej. Pérez López">
+              @if (form.get('apellidos')?.getError('invalido'); as msg) {
+                <mat-error>{{ msg }}</mat-error>
+              }
               @if (form.get('apellidos')?.hasError('required')) {
                 <mat-error>Los apellidos son obligatorios.</mat-error>
               }
@@ -58,6 +64,9 @@
               <mat-label>Teléfono</mat-label>
               <mat-icon matPrefix>call</mat-icon>
               <input matInput type="tel" formControlName="telefono" placeholder="Ej. 76123456">
+              @if (form.get('telefono')?.getError('invalido'); as msg) {
+                <mat-error>{{ msg }}</mat-error>
+              }
               @if (form.get('telefono')?.hasError('maxlength')) {
                 <mat-error>Máximo 30 caracteres.</mat-error>
               }
@@ -67,6 +76,9 @@
               <mat-label>Correo electrónico</mat-label>
               <mat-icon matPrefix>mail</mat-icon>
               <input matInput type="email" formControlName="correo" placeholder="usuario@empresa.com" autocomplete="email">
+              @if (form.get('correo')?.getError('invalido'); as msg) {
+                <mat-error>{{ msg }}</mat-error>
+              }
               @if (form.get('correo')?.hasError('maxlength')) {
                 <mat-error>Máximo 150 caracteres.</mat-error>
               }
@@ -88,6 +100,9 @@
               <mat-label>Nombre de usuario</mat-label>
               <mat-icon matPrefix>alternate_email</mat-icon>
               <input matInput type="text" formControlName="usuario1" placeholder="Ej. jperez" autocomplete="username">
+              @if (form.get('usuario1')?.getError('invalido'); as msg) {
+                <mat-error>{{ msg }}</mat-error>
+              }
               @if (form.get('usuario1')?.hasError('required')) {
                 <mat-error>El nombre de usuario es obligatorio.</mat-error>
               }
@@ -100,7 +115,10 @@
               <mat-label>{{ editando ? 'Nueva contraseña' : 'Contraseña' }}</mat-label>
               <mat-icon matPrefix>key</mat-icon>
               <input matInput [type]="mostrarClave ? 'text' : 'password'" formControlName="clave"
-                placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+                placeholder="Mínimo 6, con letras y números" autocomplete="new-password">
+              @if (form.get('clave')?.getError('invalido'); as msg) {
+                <mat-error>{{ msg }}</mat-error>
+              }
               <button mat-icon-button matSuffix type="button" (click)="mostrarClave = !mostrarClave"
                 [attr.aria-label]="mostrarClave ? 'Ocultar contraseña' : 'Mostrar contraseña'">
                 <mat-icon>{{ mostrarClave ? 'visibility_off' : 'visibility' }}</mat-icon>

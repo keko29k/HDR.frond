@@ -70,8 +70,10 @@
         <div class="grid-2">
           <mat-form-field appearance="outline">
             <mat-label>Fecha de fabricación</mat-label>
-            <input matInput type="date" formControlName="fechaFabricacion">
-            @if (form.controls.fechaFabricacion.invalid && form.controls.fechaFabricacion.touched) {
+            <input matInput type="date" formControlName="fechaFabricacion" [max]="hoy">
+            @if (form.controls.fechaFabricacion.getError('invalido'); as msg) {
+              <mat-error>{{ msg }}</mat-error>
+            } @else if (form.controls.fechaFabricacion.invalid && form.controls.fechaFabricacion.touched) {
               <mat-error>Ingrese la fecha de fabricación.</mat-error>
             }
           </mat-form-field>
