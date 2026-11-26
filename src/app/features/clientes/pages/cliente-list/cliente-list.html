@@ -53,7 +53,7 @@
       <mat-form-field appearance="outline" class="search" subscriptSizing="dynamic">
         <mat-label>Buscar cliente</mat-label>
         <mat-icon matPrefix>search</mat-icon>
-        <input matInput [formControl]="buscarControl" placeholder="Nombre, NIT/CI, teléfono o correo">
+        <input matInput [formControl]="buscarControl" placeholder="Nombre, NIT/CI, celular o correo">
         @if (buscarControl.value) {
           <button mat-icon-button matSuffix type="button" aria-label="Limpiar búsqueda" (click)="buscarControl.setValue('')">
             <mat-icon>close</mat-icon>

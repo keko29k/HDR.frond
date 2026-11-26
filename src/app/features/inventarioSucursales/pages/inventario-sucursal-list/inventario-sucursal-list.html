@@ -133,6 +133,27 @@
 
     </div>
 
+    <!-- BAJO MÍNIMO -->
+    <button
+      type="button"
+      class="stat-card stat-card-action"
+      [class.activa]="soloStockBajo"
+      [disabled]="loading || !sucursalId"
+      (click)="cambiarSoloStockBajo(!soloStockBajo)"
+      [matTooltip]="soloStockBajo ? 'Ver todos los productos' : 'Ver solo los productos bajo mínimo'">
+
+      <div class="stat-icon low-icon">
+        <span class="material-icons">production_quantity_limits</span>
+      </div>
+
+      <div class="stat-content">
+        <span class="stat-label">Bajo mínimo</span>
+        <h2>{{ totalBajoMinimo }}</h2>
+        <small>{{ soloStockBajo ? 'Mostrando solo estos' : 'Productos por reponer' }}</small>
+      </div>
+
+    </button>
+
   </div>
 
   <!-- CONTENIDO PRINCIPAL -->
@@ -178,6 +199,15 @@
         </button>
 
       </div>
+
+      <label class="filtro-stock-bajo">
+        <input
+          type="checkbox"
+          [checked]="soloStockBajo"
+          [disabled]="loading || !sucursalId"
+          (change)="cambiarSoloStockBajo($any($event.target).checked)" />
+        Solo stock bajo
+      </label>
 
     </div>
 
@@ -240,6 +270,7 @@
             <th>PRECIO COMPRA</th>
             <th>PRECIO VENTA</th>
             <th>STOCK ACTUAL</th>
+            <th>MÍN / MÁX</th>
             <th>LOTES</th>
             <th>INVENTARIO</th>
             <th>VENTA</th>
@@ -293,16 +324,49 @@
 
             <!-- STOCK -->
             <td>
-              <span
-                class="stock-badge"
-                [ngClass]="{
-                  'stock-empty': producto.stockActual <= 0,
-                  'stock-positive': producto.stockActual > 0
-                }">
+              <div class="stock-cell">
+                <span
+                  class="stock-badge"
+                  [ngClass]="{
+                    'stock-empty': producto.stockActual <= 0,
+                    'stock-low': producto.stockActual > 0 && estaBajoMinimo(producto),
+                    'stock-positive': producto.stockActual > 0 && !estaBajoMinimo(producto)
+                  }"
+                  [matTooltip]="producto.stockActual <= 0
+                    ? 'Agotado'
+                    : (estaBajoMinimo(producto) ? 'Bajo el stock mínimo' : 'Stock normal')">
 
-                {{ producto.stockActual }}
+                  {{ producto.stockActual | number:'1.0-2' }}
 
-              </span>
+                </span>
+
+                <small class="sugerido" *ngIf="cantidadSugerida(producto) > 0">
+                  Comprar {{ cantidadSugerida(producto) | number:'1.0-2' }}
+                </small>
+              </div>
+            </td>
+
+            <!-- STOCK MÍNIMO / MÁXIMO -->
+            <td>
+              <div class="limites-cell">
+                <span class="limites" *ngIf="(producto.stockMinimo ?? 0) > 0 || producto.stockMaximo; else sinLimites">
+                  {{ (producto.stockMinimo ?? 0) | number:'1.0-2' }}
+                  /
+                  {{ producto.stockMaximo ? (producto.stockMaximo | number:'1.0-2') : '—' }}
+                </span>
+
+                <ng-template #sinLimites>
+                  <span class="sin-limites">Sin definir</span>
+                </ng-template>
+
+                <button
+                  type="button"
+                  class="btn-editar-limites"
+                  [matTooltip]="'Editar stock mínimo y máximo de ' + producto.nombre"
+                  (click)="editarLimites(producto)">
+                  <span class="material-icons">edit</span>
+                </button>
+              </div>
             </td>
 
             <!-- LOTES -->
@@ -374,10 +438,25 @@
 
       <h3>No se encontraron productos</h3>
 
-      <p>
+      <p *ngIf="!soloStockBajo">
         No existen productos registrados para esta sucursal
         o no hay resultados para tu búsqueda.
       </p>
+
+      <p *ngIf="soloStockBajo">
+        Ningún producto está en su stock mínimo o por debajo.
+        Define el mínimo con el lápiz de la columna "Mín / Máx".
+      </p>
+
+      <button
+        *ngIf="soloStockBajo"
+        type="button"
+        class="btn-retry"
+        (click)="cambiarSoloStockBajo(false)">
+
+        Ver todos los productos
+
+      </button>
 
       <button
         *ngIf="buscarControl.value"

@@ -14,8 +14,10 @@
     <div class="header-actions">
       <mat-form-field appearance="outline" subscriptSizing="dynamic" class="branch">
         <mat-icon matPrefix>storefront</mat-icon>
-        <mat-select [(ngModel)]="idSucursal" (selectionChange)="cargar()" aria-label="Sucursal">
-          <mat-option [value]="0">Todas las sucursales</mat-option>
+        <mat-select [(ngModel)]="idSucursal" [disabled]="!esAdmin" (selectionChange)="cargar()" aria-label="Sucursal">
+          @if (esAdmin) {
+            <mat-option [value]="0">Todas las sucursales</mat-option>
+          }
           @for (s of sucursales; track s.id) {
             <mat-option [value]="s.id">{{ s.nombre }}</mat-option>
           }

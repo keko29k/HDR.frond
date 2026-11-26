@@ -51,4 +51,24 @@ export class InventarioSucursalService {
 
     return this.http.get<InventarioSucursalResumen>(`${this.apiUrl}/Resumen`, { params });
   }
+
+  /**
+   * Guarda el stock mínimo y máximo de un producto en una sucursal.
+   * El backend expone este controlador como "InventarioSucursalControler".
+   * Al vendedor el backend siempre le aplica su propia sucursal.
+   */
+  guardarLimites(limites: StockLimites): Observable<void> {
+    return this.http.put<void>(
+      `${environment.apiUrl}/InventarioSucursalControler/stock-limites`,
+      limites
+    );
+  }
+}
+
+export interface StockLimites {
+  idProducto: number;
+  idSucursal: number;
+  stockMinimo: number;
+  /** null = sin máximo. */
+  stockMaximo: number | null;
 }

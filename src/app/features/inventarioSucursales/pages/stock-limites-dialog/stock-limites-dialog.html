@@ -1,0 +1,55 @@
+<h2 mat-dialog-title class="titulo">
+  <mat-icon>tune</mat-icon>
+  Stock mínimo y máximo
+</h2>
+
+<form [formGroup]="form" (ngSubmit)="guardar()">
+  <mat-dialog-content class="contenido">
+    <div class="producto">
+      <strong>{{ data.producto.nombre }}</strong>
+      <span>{{ data.sucursalNombre }} · Stock actual: <b>{{ data.producto.stockActual | number:'1.0-2' }}</b></span>
+    </div>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Stock mínimo</mat-label>
+      <input matInput type="number" min="0" step="1" formControlName="stockMinimo" cdkFocusInitial>
+      <mat-hint>Al llegar a esta cantidad el producto se marca como "Bajo mínimo". 0 = sin alerta.</mat-hint>
+      @if (form.controls.stockMinimo.hasError('min')) {
+        <mat-error>No puede ser negativo.</mat-error>
+      }
+      @if (form.controls.stockMinimo.hasError('required')) {
+        <mat-error>Ingrese el stock mínimo (0 si no quiere alerta).</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Stock máximo (opcional)</mat-label>
+      <input matInput type="number" min="0" step="1" formControlName="stockMaximo">
+      <mat-hint>Hasta cuánto reponer. Sirve para calcular cuánto comprar.</mat-hint>
+      @if (form.controls.stockMaximo.hasError('min')) {
+        <mat-error>No puede ser negativo.</mat-error>
+      }
+    </mat-form-field>
+
+    @if (form.hasError('maximoMenor')) {
+      <p class="error-form">El stock máximo no puede ser menor que el stock mínimo.</p>
+    }
+
+    @if (sugerido > 0) {
+      <p class="sugerencia">
+        <mat-icon>shopping_cart</mat-icon>
+        Con estos valores se sugiere comprar <b>{{ sugerido | number:'1.0-2' }}</b> unidades.
+      </p>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button type="button" class="btn ghost" (click)="cancelar()" [disabled]="guardando">Cancelar</button>
+    <button type="submit" class="btn primary" [disabled]="guardando">
+      @if (guardando) {
+        <mat-spinner diameter="18"></mat-spinner>
+      }
+      Guardar
+    </button>
+  </mat-dialog-actions>
+</form>

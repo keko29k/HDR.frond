@@ -17,6 +17,7 @@ import { VentaService } from '../../../ventas/services/venta';
 import { Venta } from '../../../ventas/models/venta.model';
 import { SucursalService } from '../../../sucursales/services/sucursal';
 import { Sucursal } from '../../../sucursales/models/sucursal.model';
+import { esAdministrador, idSucursalDeSesion } from '../../../../core/services/permisos';
 
 @Component({
   selector: 'app-dashboard',
@@ -56,9 +57,12 @@ export class DashboardComponent implements OnInit {
   mesAnterior: ReporteGeneral | null = null;
   ultimasVentas: Venta[] = [];
 
+  /** El administrador elige sucursal; el vendedor ve fija la suya. */
+  readonly esAdmin = esAdministrador();
+
   sucursales: Sucursal[] = [];
-  /** 0 = todas las sucursales. */
-  idSucursal = 0;
+  /** 0 = todas las sucursales (solo administrador). */
+  idSucursal = this.esAdmin ? 0 : idSucursalDeSesion();
 
   loading = false;
   error = false;
@@ -70,7 +74,9 @@ export class DashboardComponent implements OnInit {
     this.nombreUsuario = this.leerNombreUsuario();
 
     this.sucursalService.gets().subscribe({
-      next: sucursales => this.sucursales = sucursales,
+      next: sucursales => this.sucursales = this.esAdmin
+        ? sucursales
+        : sucursales.filter(s => s.id === this.idSucursal),
       error: () => this.sucursales = []
     });
 

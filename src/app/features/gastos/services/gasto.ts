@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { QueryFilter } from '../../../core/models/query-filter.model';
+import { QueryFilter, conSucursal } from '../../../core/models/query-filter.model';
 import { ApiResponse } from '../../../core/models/api-response.model';
 import { Gasto } from '../models/gasto.model';
 import { GastoUpdate } from '../models/gasto-update.model';
@@ -24,7 +24,7 @@ getAll(filter: QueryFilter): Observable<ApiResponse<Gasto[]>> {
 
   return this.http.get<ApiResponse<Gasto[]>>(
     `${this.apiUrl}/Paginacion`,
-    { params }
+    { params: conSucursal(params, filter) }
   );
 }
   

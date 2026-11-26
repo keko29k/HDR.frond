@@ -89,3 +89,20 @@ app-root * {
 
 html, body { height: 100%; }
 body { margin: 0; }
+
+/* Filtro de sucursal + buscador en la cabecera de los listados */
+.filtros-lista {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.filtros-lista app-filtro-sucursal {
+  flex: 0 0 230px;
+}
+
+.filtros-lista .search {
+  flex: 1 1 260px;
+}

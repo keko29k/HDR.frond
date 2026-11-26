@@ -332,7 +332,9 @@
   height: 18px;
   font-size: 18px;
 }
-.cell-input.date { width: 150px; }
+.cell-input.date { width: 118px; }
+.cell-date { display: inline-flex; align-items: center; gap: 2px; white-space: nowrap; }
+.cell-date mat-datepicker-toggle { --mat-icon-button-state-layer-size: 34px; }
 
 .na {
   color: var(--op-muted);

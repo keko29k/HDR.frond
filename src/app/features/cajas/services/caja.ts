@@ -2,7 +2,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../../environments/environment';
-import { QueryFilter } from '../../../core/models/query-filter.model';
+import { QueryFilter, conSucursal } from '../../../core/models/query-filter.model';
 import { Observable, Subject, tap } from 'rxjs';
 import { ApiResponse } from '../../../core/models/api-response.model';
 import { CajaCreate } from '../models/caja-create.model';
@@ -28,7 +28,7 @@ export class CajaService {
 
     return this.http.get<ApiResponse<Caja[]>>(
       `${this.apiUrl}/paginacion`,
-      { params }
+      { params: conSucursal(params, filter) }
     );
   }
 

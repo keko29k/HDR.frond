@@ -50,7 +50,10 @@
           <mat-form-field appearance="outline">
             <mat-label>Fecha de compra</mat-label>
             <mat-icon matPrefix>event</mat-icon>
-            <input matInput type="date" formControlName="fechaCompra" [max]="hoy">
+            <input matInput [matDatepicker]="pCompra" formControlName="fechaCompra" [max]="hoy"
+              placeholder="dd/mm/aaaa" (click)="pCompra.open()">
+            <mat-datepicker-toggle matIconSuffix [for]="pCompra"></mat-datepicker-toggle>
+            <mat-datepicker #pCompra></mat-datepicker>
             @if (form.controls.fechaCompra.getError('invalido'); as msg) {
               <mat-error>{{ msg }}</mat-error>
             } @else {
@@ -239,10 +242,15 @@
                     @if (tieneProductosConFabricacion) {
                       <td>
                         @if (detalle.manejaLotes || detalle.tieneVencimiento) {
-                          <input class="cell-input date" type="date"
-                            [attr.aria-label]="'Fecha de fabricación de ' + detalle.nombreProducto"
-                            [value]="detalle.fechaFabricacion"
-                            (change)="actualizarFechaFabricacion(i, $any($event.target).value)">
+                          <span class="cell-date">
+                            <input class="cell-input date" [matDatepicker]="pFab" [max]="hoy"
+                              placeholder="dd/mm/aaaa" (click)="pFab.open()"
+                              [attr.aria-label]="'Fecha de fabricación de ' + detalle.nombreProducto"
+                              [value]="detalle.fechaFabricacion"
+                              (dateChange)="actualizarFechaFabricacion(i, $event.value ?? '')">
+                            <mat-datepicker-toggle [for]="pFab"></mat-datepicker-toggle>
+                            <mat-datepicker #pFab></mat-datepicker>
+                          </span>
                         } @else {
                           <span class="na">No aplica</span>
                         }
@@ -252,11 +260,16 @@
                     @if (tieneProductosConVencimiento) {
                       <td>
                         @if (detalle.tieneVencimiento) {
-                          <input class="cell-input date" type="date"
-                            [class.invalid]="!detalle.fechaVencimiento"
-                            [attr.aria-label]="'Fecha de vencimiento de ' + detalle.nombreProducto"
-                            [value]="detalle.fechaVencimiento"
-                            (change)="actualizarFechaVencimiento(i, $any($event.target).value)">
+                          <span class="cell-date">
+                            <input class="cell-input date" [matDatepicker]="pVen"
+                              placeholder="dd/mm/aaaa" (click)="pVen.open()"
+                              [class.invalid]="!detalle.fechaVencimiento"
+                              [attr.aria-label]="'Fecha de vencimiento de ' + detalle.nombreProducto"
+                              [value]="detalle.fechaVencimiento"
+                              (dateChange)="actualizarFechaVencimiento(i, $event.value ?? '')">
+                            <mat-datepicker-toggle [for]="pVen"></mat-datepicker-toggle>
+                            <mat-datepicker #pVen></mat-datepicker>
+                          </span>
                         } @else {
                           <span class="na">No aplica</span>
                         }

@@ -57,9 +57,9 @@
           </div>
           <div class="section-body fields">
             <mat-form-field appearance="outline">
-              <mat-label>Teléfono</mat-label>
-              <mat-icon matIconPrefix>call</mat-icon>
-              <input matInput formControlName="telefono" type="tel" maxlength="30" autocomplete="off" placeholder="Ej. 2 2412345">
+              <mat-label>Número de celular</mat-label>
+              <mat-icon matIconPrefix>smartphone</mat-icon>
+              <input matInput formControlName="telefono" type="tel" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="Ej. 76123456">
               @if (form.controls.telefono.getError('invalido'); as msg) {
                 <mat-error>{{ msg }}</mat-error>
               }
@@ -93,8 +93,8 @@
           </div>
           <dl class="preview-list">
             <div>
-              <dt><mat-icon>call</mat-icon>Teléfono</dt>
-              <dd [class.muted]="!form.controls.telefono.value">{{ form.controls.telefono.value || 'Sin teléfono' }}</dd>
+              <dt><mat-icon>smartphone</mat-icon>Celular</dt>
+              <dd [class.muted]="!form.controls.telefono.value">{{ form.controls.telefono.value || 'Sin celular' }}</dd>
             </div>
             <div>
               <dt><mat-icon>mail</mat-icon>Correo</dt>

@@ -49,7 +49,8 @@ export class ProductoService {
     const params = new HttpParams()
       .set('PageNumber', filter.pageNumber)
       .set('PageSize', filter.pageSize)
-      .set('Buscar', filter.buscar || '');
+      .set('Buscar', filter.buscar || '')
+      .set('SoloStockBajo', !!filter.soloStockBajo);
 
     return this.http.get<ApiResponse<Producto[]>>(
       `${this.apiUrl}/Sucursal/${idSucursal}/Paginacion`,

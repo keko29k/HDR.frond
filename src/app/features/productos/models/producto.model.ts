@@ -15,4 +15,7 @@ export interface Producto {
   tieneVencimiento: boolean;
   permiteVenta: boolean;
   stockActual: number;
+  /** Límites de la sucursal (solo en el inventario por sucursal). */
+  stockMinimo?: number;
+  stockMaximo?: number | null;
 }

@@ -133,22 +133,23 @@ export function correoValido(): ValidatorFn {
   };
 }
 
-/** Teléfono boliviano: fijo de 7 dígitos o celular de 8 que empieza en 6 o 7 (acepta +591). */
-export function telefonoBolivia(): ValidatorFn {
+/** Número de celular de Bolivia: exactamente 8 dígitos y empieza en 6 o 7. */
+export function celularBolivia(): ValidatorFn {
   return control => {
     const valor = texto(control);
     if (!valor) return null;
 
-    if (!/^[0-9+\s()-]+$/.test(valor)) return error('Solo números, espacios, + y -.');
+    if (!/^\d+$/.test(valor)) return error('Solo números, sin espacios ni guiones.');
+    if (valor.length !== 8) return error('El celular debe tener 8 dígitos.');
+    if (!/^[67]/.test(valor)) return error('El celular debe empezar con 6 o 7.');
 
-    let digitos = valor.replace(/\D/g, '');
-    if (digitos.startsWith('591') && digitos.length > 8) digitos = digitos.slice(3);
-
-    if (digitos.length === 8 && /^[67]/.test(digitos)) return null;
-    if (digitos.length === 7) return null;
-
-    return error('Celular de 8 dígitos (6… o 7…) o teléfono fijo de 7 dígitos.');
+    return null;
   };
+}
+
+/** @deprecated Usa celularBolivia(). Se mantiene por compatibilidad. */
+export function telefonoBolivia(): ValidatorFn {
+  return celularBolivia();
 }
 
 /** CI o NIT boliviano: 5 a 12 dígitos, con complemento opcional (-1A) y extensión (LP, CB...). "0" = sin NIT. */

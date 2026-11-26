@@ -200,9 +200,31 @@
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 18px;
   margin-bottom: 22px;
+}
+
+/* Tarjeta "Bajo mínimo": funciona como filtro */
+.stat-card-action {
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.stat-card-action:disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+
+.stat-card-action.activa {
+  border-color: #f97316;
+  box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.15);
+}
+
+.low-icon {
+  background: #ffedd5;
+  color: #ea580c;
 }
 
 .stat-card {
@@ -323,6 +345,8 @@
 
 .filters-container {
   display: flex;
+  flex-wrap: wrap;
+  row-gap: 10px;
   align-items: center;
   padding: 0 24px 20px;
 }
@@ -504,6 +528,80 @@
 .stock-empty {
   background: #fee2e2;
   color: #dc2626;
+}
+
+.stock-low {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.stock-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.sugerido {
+  font-size: 11px;
+  font-weight: 600;
+  color: #c2410c;
+  white-space: nowrap;
+}
+
+/* =========================================
+   STOCK MÍNIMO / MÁXIMO
+========================================= */
+
+.limites-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.limites {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.sin-limites {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.btn-editar-limites {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #2563eb;
+  cursor: pointer;
+}
+
+.btn-editar-limites:hover {
+  background: #eff6ff;
+}
+
+.btn-editar-limites .material-icons {
+  font-size: 16px;
+}
+
+.filtro-stock-bajo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 16px;
+  font-size: 14px;
+  color: #334155;
+  white-space: nowrap;
+  cursor: pointer;
 }
 
 /* =========================================

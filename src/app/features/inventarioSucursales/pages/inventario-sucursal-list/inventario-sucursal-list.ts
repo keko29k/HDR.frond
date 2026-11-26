@@ -35,6 +35,9 @@ import { SucursalService } from '../../../sucursales/services/sucursal';
 // LOTES
 import { LotesProductoDialog, LotesProductoDialogData } from '../lotes-producto-dialog/lotes-producto-dialog';
 
+// STOCK MÍNIMO / MÁXIMO
+import { StockLimitesDialog, StockLimitesDialogData } from '../stock-limites-dialog/stock-limites-dialog';
+
 @Component({
   selector: 'app-inventario-sucursal-list',
   standalone: true,
@@ -79,6 +82,13 @@ export class InventarioSucursalList implements OnInit {
 
   // Totales de la página actual
   totalUnidades = 0;
+
+  // Productos de la sucursal en o por debajo de su stock mínimo
+  // (incluye agotados). Se consulta aparte para la tarjeta de resumen.
+  totalBajoMinimo = 0;
+
+  // Filtro "Solo stock bajo"
+  soloStockBajo = false;
 
   // =====================================================
   // ESTADOS
@@ -270,7 +280,8 @@ export class InventarioSucursalList implements OnInit {
             {
               pageNumber: this.meta.currentPage,
               pageSize: this.meta.pageSize,
-              buscar: this.buscarControl.value
+              buscar: this.buscarControl.value,
+              soloStockBajo: this.soloStockBajo
             }
           ).pipe(
 
@@ -354,6 +365,86 @@ export class InventarioSucursalList implements OnInit {
 
   cargarProductos(): void {
     this.recargar$.next();
+    this.contarBajoMinimo();
+  }
+
+  // =====================================================
+  // STOCK MÍNIMO / MÁXIMO
+  // =====================================================
+
+  /** Cuenta los productos bajo mínimo de la sucursal (usa el total de la paginación). */
+  private contarBajoMinimo(): void {
+
+    if (!this.sucursalId || this.sucursalId <= 0) {
+      this.totalBajoMinimo = 0;
+      return;
+    }
+
+    const sucursalConsultada = this.sucursalId;
+
+    this.productoService.getBySucursal(sucursalConsultada, {
+      pageNumber: 1,
+      pageSize: 1,
+      buscar: '',
+      soloStockBajo: true
+    }).subscribe({
+      next: respuesta => {
+        if (sucursalConsultada === this.sucursalId) {
+          this.totalBajoMinimo = respuesta.meta?.totalCount ?? 0;
+        }
+      },
+      error: () => {
+        this.totalBajoMinimo = 0;
+      }
+    });
+  }
+
+  /** Stock en el mínimo o por debajo (solo si el producto tiene mínimo definido). */
+  estaBajoMinimo(producto: Producto): boolean {
+    const minimo = producto.stockMinimo ?? 0;
+    return minimo > 0 && (producto.stockActual || 0) <= minimo;
+  }
+
+  /** Cantidad sugerida a comprar = máximo − stock actual (solo si está bajo mínimo). */
+  cantidadSugerida(producto: Producto): number {
+    const maximo = producto.stockMaximo ?? 0;
+    const actual = producto.stockActual || 0;
+
+    if (!this.estaBajoMinimo(producto) || maximo <= actual) {
+      return 0;
+    }
+
+    return maximo - actual;
+  }
+
+  cambiarSoloStockBajo(valor: boolean): void {
+    this.soloStockBajo = valor;
+    this.meta.currentPage = 1;
+    this.cargarProductos();
+  }
+
+  editarLimites(producto: Producto): void {
+
+    if (!this.sucursalId) {
+      return;
+    }
+
+    this.dialog.open<StockLimitesDialog, StockLimitesDialogData, boolean>(StockLimitesDialog, {
+      width: '480px',
+      maxWidth: '95vw',
+      autoFocus: false,
+      data: {
+        producto,
+        sucursalId: this.sucursalId,
+        sucursalNombre: this.sucursalActual?.nombre ?? `Sucursal ${this.sucursalId}`
+      }
+    })
+      .afterClosed()
+      .subscribe(guardado => {
+        if (guardado) {
+          this.cargarProductos();
+        }
+      });
   }
 
   // Mantener este método por compatibilidad con el HTML anterior

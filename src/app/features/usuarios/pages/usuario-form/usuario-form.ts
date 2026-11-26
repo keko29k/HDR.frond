@@ -10,7 +10,7 @@ import {
   correoValido,
   nombrePersona,
   nombreUsuario,
-  telefonoBolivia
+  celularBolivia
 } from '../../../../shared/validators/validaciones';
 
 import {
@@ -147,7 +147,7 @@ export class UsuarioFormComponent implements OnInit {
 
     telefono: ['', [
       Validators.maxLength(30),
-      telefonoBolivia()
+      celularBolivia()
     ]],
 
     correo: ['', [

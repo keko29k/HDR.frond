@@ -5,7 +5,7 @@ import {
   ReactiveFormsModule,
   Validators
 } from '@angular/forms';
-import { correoValido, telefonoBolivia, textoConContenido } from '../../../../shared/validators/validaciones';
+import { correoValido, celularBolivia, textoConContenido } from '../../../../shared/validators/validaciones';
 
 import {
   ActivatedRoute,
@@ -85,7 +85,7 @@ export class SucursalFormComponent implements OnInit {
 
     telefono: ['', [
       Validators.maxLength(30),
-      telefonoBolivia()
+      celularBolivia()
     ]],
 
     direccion: ['', [

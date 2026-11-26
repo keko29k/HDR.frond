@@ -8,18 +8,19 @@ import {
   fechaHaceAnios,
   fechaNacimientoValida,
   nombrePersona,
-  telefonoBolivia,
+  celularBolivia,
   textoConContenido
 } from '../../../../shared/validators/validaciones';
 
 /** Edad mínima de un cliente (cámbiala aquí si lo necesitas). */
-const EDAD_MINIMA_CLIENTE = 18;
+const EDAD_MINIMA_CLIENTE = 14;
 import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
@@ -34,6 +35,7 @@ import { ClienteService } from '../../services/cliente';
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
+    MatDatepickerModule,
     MatButtonModule,
     MatProgressSpinnerModule,
     MatIconModule
@@ -65,7 +67,7 @@ export class ClienteFormComponent implements OnInit {
     nombres: ['', [Validators.required, Validators.maxLength(100), nombrePersona()]],
     apellidos: ['', [Validators.required, Validators.maxLength(100), nombrePersona()]],
     nitCi: ['', [Validators.required, Validators.maxLength(20), ciNitBolivia()]],
-    telefono: ['', [Validators.required, Validators.maxLength(20), telefonoBolivia()]],
+    telefono: ['', [Validators.required, Validators.maxLength(20), celularBolivia()]],
     correo: ['', [Validators.maxLength(150), correoValido()]],
     direccion: ['', [Validators.maxLength(250), textoConContenido(5)]],
     fechaNacimiento: ['', [fechaNacimientoValida(EDAD_MINIMA_CLIENTE)]],

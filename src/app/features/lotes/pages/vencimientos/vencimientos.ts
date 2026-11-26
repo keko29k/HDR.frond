@@ -23,6 +23,7 @@ import {
 } from '../../../inventarioSucursales/pages/lotes-producto-dialog/lotes-producto-dialog';
 import { RetirarLoteDialog } from '../retirar-lote-dialog/retirar-lote-dialog';
 import { NotificationService } from '../../../../core/services/notification.service';
+import { esAdministrador, idSucursalDeSesion } from '../../../../core/services/permisos';
 
 interface NivelInfo {
   id: NivelVencimiento;
@@ -90,7 +91,9 @@ export class VencimientosComponent implements OnInit {
 
   // Filtros
   horizonte = 90;
-  idSucursal = 0;
+  /** El administrador elige sucursal (0 = todas); el vendedor ve fija la suya. */
+  readonly esAdmin = esAdministrador();
+  idSucursal = this.esAdmin ? 0 : idSucursalDeSesion();
   nivelFiltro: NivelVencimiento | null = null;
   buscar = '';
   vista: 'lote' | 'producto' = 'lote';
@@ -104,7 +107,9 @@ export class VencimientosComponent implements OnInit {
 
   ngOnInit(): void {
     this.sucursalService.gets().subscribe({
-      next: sucursales => this.sucursales = sucursales,
+      next: sucursales => this.sucursales = this.esAdmin
+        ? sucursales
+        : sucursales.filter(s => s.id === this.idSucursal),
       error: () => this.sucursales = []
     });
 

@@ -1,16 +1,16 @@
-import { esVendedor } from '../../../../core/services/permisos';
+import { esAdministrador, esVendedor, idSucursalDeSesion } from '../../../../core/services/permisos';
+import { FiltroSucursalComponent } from '../../../../shared/components/filtro-sucursal/filtro-sucursal';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { EMPTY, finalize, forkJoin, switchMap } from 'rxjs';
+import { finalize, forkJoin } from 'rxjs';
 
 import { NotificationService } from '../../../../core/services/notification.service';
 import { Producto } from '../../../productos/models/producto.model';
 import { ProductoService } from '../../../productos/services/producto';
 import { Sucursal } from '../../../sucursales/models/sucursal.model';
 import { SucursalService } from '../../../sucursales/services/sucursal';
-import { UsuarioService } from '../../../usuarios/services/usuario';
 import { Lote as LoteModel } from '../../models/lote.model';
 import { LoteService } from '../../services/lote';
 
@@ -27,6 +27,7 @@ import { MatTableModule } from '@angular/material/table';
   standalone: true,
   imports: [
     CommonModule,
+    FiltroSucursalComponent,
     ReactiveFormsModule,
     MatButtonModule,
     MatCardModule,
@@ -52,14 +53,20 @@ export class LoteList implements OnInit {
   private loteService = inject(LoteService);
   private productoService = inject(ProductoService);
   private sucursalService = inject(SucursalService);
-  private usuarioService = inject(UsuarioService);
   private notificationService = inject(NotificationService);
   private router = inject(Router);
 
+  /** Administrador: elige sucursal (null = todas). Vendedor: siempre la suya. */
+  readonly esAdmin = esAdministrador();
+
+  /** Lotes recibidos del backend (al vendedor ya le llegan solo los de su sucursal). */
+  private todosLosLotes: LoteModel[] = [];
+
   lotes: LoteModel[] = [];
   productos: Producto[] = [];
+  sucursales: Sucursal[] = [];
   sucursalActual: Sucursal | null = null;
-  sucursalId = 0;
+  sucursalId: number | null = this.esAdmin ? null : idSucursalDeSesion();
   loading = false;
   error = false;
   filtroEstado: 'TODOS' | 'VIGENTES' | 'VENCIDOS' | 'AGOTADOS' = 'TODOS';
@@ -116,38 +123,26 @@ export class LoteList implements OnInit {
   }
 
   cargarLotes(): void {
-    const usuarioId = Number(localStorage.getItem('Id'));
-    if (!Number.isInteger(usuarioId) || usuarioId <= 0) {
+    if (!this.esAdmin && !this.sucursalId) {
       this.error = true;
-      this.notificationService.error('No se encontró el usuario de la sesión. Inicia sesión nuevamente.');
+      this.notificationService.error('Tu usuario no tiene una sucursal asignada. Inicia sesión nuevamente.');
       return;
     }
 
     this.loading = true;
     this.error = false;
-    this.usuarioService.getById(usuarioId)
-      .pipe(
-        switchMap(usuario => {
-          if (!Number.isInteger(Number(usuario.idSucursal)) || Number(usuario.idSucursal) <= 0) {
-            this.error = true;
-            this.notificationService.error('El usuario no tiene una sucursal asignada.');
-            return EMPTY;
-          }
-
-          this.sucursalId = Number(usuario.idSucursal);
-          return forkJoin({
-            lotes: this.loteService.gets(),
-            productos: this.productoService.gets(),
-            sucursal: this.sucursalService.getById(this.sucursalId)
-          });
-        }),
-        finalize(() => this.loading = false)
-      )
+    forkJoin({
+      lotes: this.loteService.gets(),
+      productos: this.productoService.gets(),
+      sucursales: this.sucursalService.gets()
+    })
+      .pipe(finalize(() => this.loading = false))
       .subscribe({
-        next: ({ lotes, productos, sucursal }) => {
-          this.lotes = lotes.filter(lote => Number(lote.idSucursal) === this.sucursalId);
+        next: ({ lotes, productos, sucursales }) => {
+          this.todosLosLotes = lotes;
           this.productos = productos;
-          this.sucursalActual = sucursal;
+          this.sucursales = sucursales;
+          this.aplicarSucursal();
         },
         error: (error) => {
           this.error = true;
@@ -162,10 +157,25 @@ export class LoteList implements OnInit {
       ?? `Producto ${id}`;
   }
 
+  /** Solo el administrador cambia de sucursal (null = todas). */
+  cambiarSucursal(idSucursal: number | null): void {
+    if (!this.esAdmin) return;
+    this.sucursalId = idSucursal;
+    this.aplicarSucursal();
+  }
+
+  private aplicarSucursal(): void {
+    const id = this.sucursalId;
+    this.lotes = id
+      ? this.todosLosLotes.filter(lote => Number(lote.idSucursal) === id)
+      : this.todosLosLotes;
+    this.sucursalActual = id
+      ? this.sucursales.find(s => s.id === id) ?? null
+      : null;
+  }
+
   nombreSucursal(id: number): string {
-    return Number(id) === this.sucursalId
-      ? this.sucursalActual?.nombre ?? `Sucursal ${id}`
-      : `Sucursal ${id}`;
+    return this.sucursales.find(s => s.id === Number(id))?.nombre ?? `Sucursal ${id}`;
   }
 
   estadoLote(lote: LoteModel): 'VIGENTE' | 'VENCIDO' | 'AGOTADO' {

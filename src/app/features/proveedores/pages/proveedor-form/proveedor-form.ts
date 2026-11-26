@@ -5,7 +5,7 @@ import {
   ReactiveFormsModule,
   Validators
 } from '@angular/forms';
-import { correoValido, nitEmpresa, nombrePersona, telefonoBolivia, textoConContenido } from '../../../../shared/validators/validaciones';
+import { correoValido, nitEmpresa, nombrePersona, celularBolivia, textoConContenido } from '../../../../shared/validators/validaciones';
 
 import {
   ActivatedRoute,
@@ -79,7 +79,7 @@ export class ProveedorFormComponent implements OnInit {
     telefono: ['', [
       Validators.required,
       Validators.maxLength(30),
-      telefonoBolivia()
+      celularBolivia()
     ]],
 
     contacto: ['', [

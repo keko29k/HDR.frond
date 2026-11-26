@@ -70,7 +70,10 @@
         <div class="grid-2">
           <mat-form-field appearance="outline">
             <mat-label>Fecha de fabricación</mat-label>
-            <input matInput type="date" formControlName="fechaFabricacion" [max]="hoy">
+            <input matInput [matDatepicker]="pFabricacion" formControlName="fechaFabricacion" [max]="hoy"
+              placeholder="dd/mm/aaaa" (click)="pFabricacion.open()">
+            <mat-datepicker-toggle matIconSuffix [for]="pFabricacion"></mat-datepicker-toggle>
+            <mat-datepicker #pFabricacion></mat-datepicker>
             @if (form.controls.fechaFabricacion.getError('invalido'); as msg) {
               <mat-error>{{ msg }}</mat-error>
             } @else if (form.controls.fechaFabricacion.invalid && form.controls.fechaFabricacion.touched) {
@@ -80,7 +83,10 @@
 
           <mat-form-field appearance="outline">
             <mat-label>Fecha de vencimiento</mat-label>
-            <input matInput type="date" formControlName="fechaVencimiento">
+            <input matInput [matDatepicker]="pVencimiento" formControlName="fechaVencimiento"
+              placeholder="dd/mm/aaaa" (click)="pVencimiento.open()">
+            <mat-datepicker-toggle matIconSuffix [for]="pVencimiento"></mat-datepicker-toggle>
+            <mat-datepicker #pVencimiento></mat-datepicker>
             @if (form.controls.fechaVencimiento.invalid && form.controls.fechaVencimiento.touched) {
               <mat-error>Ingrese la fecha de vencimiento.</mat-error>
             }

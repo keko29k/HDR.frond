@@ -36,6 +36,27 @@ export function esAdministrador(rol: string = rolDeSesion()): boolean {
   return valor === 'ADMINISTRADOR' || valor === 'ADMIN';
 }
 
+/**
+ * Sucursal del usuario conectado, leída del token (claim "IdSucursal").
+ * Devuelve 0 si no hay sesión o el token no la trae.
+ */
+export function idSucursalDeSesion(): number {
+  try {
+    const token = localStorage.getItem('token') ?? '';
+    const payload = token.split('.')[1];
+    if (!payload) return 0;
+
+    const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const datos = JSON.parse(atob(base64.padEnd(Math.ceil(base64.length / 4) * 4, '='))) as {
+      IdSucursal?: unknown;
+    };
+    const id = Number(datos.IdSucursal);
+    return Number.isInteger(id) && id > 0 ? id : 0;
+  } catch {
+    return 0;
+  }
+}
+
 /** Hay sesión y el rol no es administrador. */
 export function esVendedor(rol: string = rolDeSesion()): boolean {
   return rol.trim() !== '' && !esAdministrador(rol);

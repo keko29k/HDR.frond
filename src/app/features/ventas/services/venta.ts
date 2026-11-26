@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 
 import { environment } from '../../../../environments/environment';
 
-import { QueryFilter } from '../../../core/models/query-filter.model';
+import { QueryFilter, conSucursal } from '../../../core/models/query-filter.model';
 import { ApiResponse } from '../../../core/models/api-response.model';
 
 import { Venta } from '../models/venta.model';
@@ -43,7 +43,7 @@ export class VentaService {
 
     return this.http.get<ApiResponse<Venta[]>>(
       `${this.apiUrl}/paginacion`,
-      { params }
+      { params: conSucursal(params, filter) }
     );
   }
 

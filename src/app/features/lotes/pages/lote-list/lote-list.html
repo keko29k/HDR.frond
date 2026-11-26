@@ -3,7 +3,7 @@
     <div>
       <span class="eyebrow">Inventario y trazabilidad</span>
       <h2>Lotes</h2>
-      <p>Consulta y administra los lotes de tu sucursal.</p>
+      <p>{{ esAdmin ? 'Consulta y administra los lotes de todas las sucursales.' : 'Consulta y administra los lotes de tu sucursal.' }}</p>
       @if (sucursalActual) {
         <span class="branch-badge">
           <mat-icon>storefront</mat-icon>
@@ -58,7 +58,8 @@
   </section>
 
   <mat-card class="card">
-    <div class="toolbar">
+    <div class="toolbar filtros-lista">
+      <app-filtro-sucursal (cambio)="cambiarSucursal($event)" />
       <mat-form-field appearance="outline" class="search" subscriptSizing="dynamic">
         <mat-label>Buscar lote</mat-label>
         <mat-icon matPrefix>search</mat-icon>

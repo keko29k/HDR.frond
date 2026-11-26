@@ -78,6 +78,8 @@
         <p>Busca por concepto, comprobante u observación.</p>
       </div>
 
+      <div class="filtros-lista">
+        <app-filtro-sucursal (cambio)="cambiarSucursal($event)" />
       <mat-form-field appearance="outline" class="search" subscriptSizing="dynamic">
         <mat-label>Buscar gasto</mat-label>
         <mat-icon matPrefix>search</mat-icon>
@@ -88,6 +90,7 @@
           </button>
         }
       </mat-form-field>
+      </div>
     </div>
 
     <div class="table-container">

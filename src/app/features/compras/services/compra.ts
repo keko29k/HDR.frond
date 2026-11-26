@@ -4,7 +4,7 @@ import { environment } from '../../../../environments/environment';
 import { ApiResponse } from '../../../core/models/api-response.model';
 import { Compra } from '../models/compra.model';
 import { Observable } from 'rxjs';
-import { QueryFilter } from '../../../core/models/query-filter.model';
+import { QueryFilter, conSucursal } from '../../../core/models/query-filter.model';
 import { CompraCreate } from '../models/compraCreate.model';
 import { CompraUpdate } from '../models/compraUpdate.model';
 import { CompraDetalleDto } from '../models/compraDetalleDto';
@@ -24,7 +24,7 @@ export class CompraService {
       .set('PageSize', filter.pageSize)
       .set('Buscar', filter.buscar || '');
 
-    return this.http.get<ApiResponse<Compra[]>>( `${this.apiUrl}/paginacion`, { params });
+    return this.http.get<ApiResponse<Compra[]>>( `${this.apiUrl}/paginacion`, { params: conSucursal(params, filter) });
   }
 
   getById(id: number): Observable<Compra> {

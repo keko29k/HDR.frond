@@ -116,6 +116,9 @@ export interface ReporteStockBajo {
   sucursal: string;
   stockActual: number;
   stockMinimo: number;
+  stockMaximo: number | null;
+  /** Máximo − stock actual (null si no hay máximo). */
+  cantidadSugerida: number | null;
 }
 
 export interface ReporteLoteVencimiento {

@@ -6,6 +6,7 @@ import { finalize } from 'rxjs';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -30,6 +31,7 @@ type OrdenProducto = 'ventas' | 'cantidad' | 'utilidad' | 'margen';
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
+    MatDatepickerModule,
     MatSelectModule,
     MatIconModule,
     MatTooltipModule,
@@ -327,8 +329,8 @@ export class ReporteListComponent implements OnInit {
       case 'inventario':
         nombre = 'inventario';
         filas = [
-          ['Producto', 'Sucursal', 'Stock actual', 'Stock mínimo'],
-          ...r.inventario.stockBajo.map(s => [s.producto, s.sucursal, s.stockActual, s.stockMinimo]),
+          ['Producto', 'Sucursal', 'Stock actual', 'Stock mínimo', 'Stock máximo', 'Sugerido comprar'],
+          ...r.inventario.stockBajo.map(s => [s.producto, s.sucursal, s.stockActual, s.stockMinimo, s.stockMaximo ?? '', s.cantidadSugerida ?? '']),
           [],
           ['Producto', 'Lote', 'Sucursal', 'Vencimiento', 'Cantidad', 'Días restantes'],
           ...r.inventario.proximosVencimientos.map(l => [

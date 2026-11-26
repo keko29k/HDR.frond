@@ -27,8 +27,10 @@
     <mat-form-field appearance="outline" subscriptSizing="dynamic">
       <mat-label>Sucursal</mat-label>
       <mat-icon matPrefix>storefront</mat-icon>
-      <mat-select [(ngModel)]="idSucursal" (selectionChange)="cargar()">
-        <mat-option [value]="0">Todas las sucursales</mat-option>
+      <mat-select [(ngModel)]="idSucursal" [disabled]="!esAdmin" (selectionChange)="cargar()">
+        @if (esAdmin) {
+          <mat-option [value]="0">Todas las sucursales</mat-option>
+        }
         @for (s of sucursales; track s.id) {
           <mat-option [value]="s.id">{{ s.nombre }}</mat-option>
         }

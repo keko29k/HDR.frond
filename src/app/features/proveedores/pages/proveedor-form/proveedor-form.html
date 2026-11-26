@@ -91,14 +91,14 @@
             </mat-form-field>
 
             <mat-form-field appearance="outline">
-              <mat-label>Teléfono</mat-label>
-              <mat-icon matPrefix>call</mat-icon>
-              <input matInput type="tel" formControlName="telefono" placeholder="Ej. 76123456">
+              <mat-label>Número de celular</mat-label>
+              <mat-icon matPrefix>smartphone</mat-icon>
+              <input matInput type="tel" inputmode="numeric" maxlength="8" formControlName="telefono" placeholder="Ej. 76123456">
               @if (form.get('telefono')?.getError('invalido'); as msg) {
                 <mat-error>{{ msg }}</mat-error>
               }
               @if (form.get('telefono')?.hasError('required')) {
-                <mat-error>El teléfono es obligatorio.</mat-error>
+                <mat-error>El número de celular es obligatorio.</mat-error>
               }
               @if (form.get('telefono')?.hasError('maxlength')) {
                 <mat-error>Máximo 30 caracteres.</mat-error>
@@ -144,8 +144,8 @@
               <dd [class.muted]="!form.value.contacto">{{ form.value.contacto || 'Sin contacto' }}</dd>
             </div>
             <div>
-              <dt><mat-icon>call</mat-icon>Teléfono</dt>
-              <dd [class.muted]="!form.value.telefono">{{ form.value.telefono || 'Sin teléfono' }}</dd>
+              <dt><mat-icon>smartphone</mat-icon>Celular</dt>
+              <dd [class.muted]="!form.value.telefono">{{ form.value.telefono || 'Sin celular' }}</dd>
             </div>
             <div>
               <dt><mat-icon>mail</mat-icon>Correo</dt>

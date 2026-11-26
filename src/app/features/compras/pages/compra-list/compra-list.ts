@@ -6,6 +6,7 @@ import { debounceTime, distinctUntilChanged, finalize } from 'rxjs';
 
 import { NotificationService } from '../../../../core/services/notification.service';
 import { QueryFilter } from '../../../../core/models/query-filter.model';
+import { FiltroSucursalComponent } from '../../../../shared/components/filtro-sucursal/filtro-sucursal';
 import { MetaData } from '../../../../core/models/metadata.model';
 
 import { MatCardModule } from '@angular/material/card';
@@ -28,6 +29,7 @@ import { CompraDetalleDialog } from '../compra-detalle-dialog/compra-detalle-dia
   standalone: true,
   imports: [
     CommonModule,
+    FiltroSucursalComponent,
     ReactiveFormsModule,
     MatCardModule,
     MatTableModule,
@@ -121,6 +123,14 @@ export class CompraListComponent implements OnInit {
           );
         }
       });
+  }
+
+  // Solo el administrador cambia de sucursal; al vendedor el backend
+  // siempre le devuelve los datos de la suya.
+  cambiarSucursal(idSucursal: number | null): void {
+    this.filter.idSucursal = idSucursal;
+    this.filter.pageNumber = 1;
+    this.cargarCompras();
   }
 
   cambiarPagina(event: PageEvent): void {

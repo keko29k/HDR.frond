@@ -72,6 +72,8 @@
         <p>Busca por cliente, vendedor o método de pago.</p>
       </div>
 
+      <div class="filtros-lista">
+        <app-filtro-sucursal (cambio)="cambiarSucursal($event)" />
       <mat-form-field appearance="outline" class="search" subscriptSizing="dynamic">
         <mat-label>Buscar venta</mat-label>
         <mat-icon matPrefix>search</mat-icon>
@@ -82,6 +84,7 @@
           </button>
         }
       </mat-form-field>
+      </div>
     </div>
 
     <div class="legend" aria-hidden="true">

@@ -143,6 +143,8 @@
         <p>Consulta la sucursal, responsable, saldos y estado de cada caja.</p>
       </div>
 
+      <div class="filtros-lista">
+        <app-filtro-sucursal (cambio)="cambiarSucursal($event)" />
       <mat-form-field
         appearance="outline"
         class="search"
@@ -168,6 +170,7 @@
         }
 
       </mat-form-field>
+      </div>
     </div>
 
     <div class="table-wrap">

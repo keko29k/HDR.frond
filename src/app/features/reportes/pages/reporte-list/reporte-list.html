@@ -37,12 +37,18 @@
     <div class="filter-fields">
       <mat-form-field appearance="outline" subscriptSizing="dynamic">
         <mat-label>Desde</mat-label>
-        <input matInput type="date" [(ngModel)]="desde" [max]="hasta" (ngModelChange)="cambioFechaManual()">
+        <input matInput [matDatepicker]="pDesde" [(ngModel)]="desde" [max]="hasta" (ngModelChange)="cambioFechaManual()"
+          placeholder="dd/mm/aaaa" (click)="pDesde.open()">
+        <mat-datepicker-toggle matIconSuffix [for]="pDesde"></mat-datepicker-toggle>
+        <mat-datepicker #pDesde></mat-datepicker>
       </mat-form-field>
 
       <mat-form-field appearance="outline" subscriptSizing="dynamic">
         <mat-label>Hasta</mat-label>
-        <input matInput type="date" [(ngModel)]="hasta" [min]="desde" (ngModelChange)="cambioFechaManual()">
+        <input matInput [matDatepicker]="pHasta" [(ngModel)]="hasta" [min]="desde" (ngModelChange)="cambioFechaManual()"
+          placeholder="dd/mm/aaaa" (click)="pHasta.open()">
+        <mat-datepicker-toggle matIconSuffix [for]="pHasta"></mat-datepicker-toggle>
+        <mat-datepicker #pHasta></mat-datepicker>
       </mat-form-field>
 
       <mat-form-field appearance="outline" subscriptSizing="dynamic">
@@ -536,7 +542,7 @@
               <div class="table-wrap">
                 <table class="report-table">
                   <thead>
-                    <tr><th>Producto</th><th>Sucursal</th><th class="right">Stock</th><th class="right">Mínimo</th></tr>
+                    <tr><th>Producto</th><th>Sucursal</th><th class="right">Stock</th><th class="right">Mínimo</th><th class="right">Máximo</th><th class="right">Sugerido comprar</th></tr>
                   </thead>
                   <tbody>
                     @for (s of r.inventario.stockBajo; track s.idProducto + s.sucursal) {
@@ -545,6 +551,8 @@
                         <td class="muted">{{ s.sucursal }}</td>
                         <td class="right"><span class="money" [class.negative]="s.stockActual <= 0">{{ s.stockActual | number:'1.0-2' }}</span></td>
                         <td class="right muted">{{ s.stockMinimo | number:'1.0-2' }}</td>
+                        <td class="right muted">{{ s.stockMaximo ? (s.stockMaximo | number:'1.0-2') : '—' }}</td>
+                        <td class="right"><strong class="strong">{{ s.cantidadSugerida ? (s.cantidadSugerida | number:'1.0-2') : '—' }}</strong></td>
                       </tr>
                     }
                   </tbody>

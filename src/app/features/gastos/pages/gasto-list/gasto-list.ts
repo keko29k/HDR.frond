@@ -6,6 +6,7 @@ import { catchError, debounceTime, distinctUntilChanged, finalize, of } from 'rx
 
 import { NotificationService } from '../../../../core/services/notification.service';
 import { QueryFilter } from '../../../../core/models/query-filter.model';
+import { FiltroSucursalComponent } from '../../../../shared/components/filtro-sucursal/filtro-sucursal';
 import { MetaData } from '../../../../core/models/metadata.model';
 
 import { MatCardModule } from '@angular/material/card';
@@ -28,6 +29,7 @@ import { ReporteGeneral } from '../../../reportes/models/reporte-general.model';
   standalone: true,
   imports: [
     CommonModule,
+    FiltroSucursalComponent,
     ReactiveFormsModule,
     MatCardModule,
     MatTableModule,
@@ -141,6 +143,14 @@ export class GastoListComponent implements OnInit {
   actualizar(): void {
     this.cargarGastos();
     this.cargarResumenMes();
+  }
+
+  // Solo el administrador cambia de sucursal; al vendedor el backend
+  // siempre le devuelve los datos de la suya.
+  cambiarSucursal(idSucursal: number | null): void {
+    this.filter.idSucursal = idSucursal;
+    this.filter.pageNumber = 1;
+    this.cargarGastos();
   }
 
   cambiarPagina(event: PageEvent): void {

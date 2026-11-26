@@ -77,11 +77,14 @@
             <mat-form-field appearance="outline">
               <mat-label>Fecha de nacimiento</mat-label>
               <mat-icon matPrefix>cake</mat-icon>
-              <input matInput type="date" formControlName="fechaNacimiento" [min]="fechaMinima" [max]="fechaMaxima">
+              <input matInput [matDatepicker]="pNacimiento" formControlName="fechaNacimiento" [min]="fechaMinima" [max]="fechaMaxima"
+                placeholder="dd/mm/aaaa" (click)="pNacimiento.open()">
+              <mat-datepicker-toggle matIconSuffix [for]="pNacimiento"></mat-datepicker-toggle>
+              <mat-datepicker #pNacimiento startView="multi-year"></mat-datepicker>
               @if (form.get('fechaNacimiento')?.getError('invalido'); as msg) {
                 <mat-error>{{ msg }}</mat-error>
               }
-              <mat-hint>Opcional · mayor de {{ edadMinima }} años</mat-hint>
+              <mat-hint>Opcional · al menos {{ edadMinima }} años</mat-hint>
             </mat-form-field>
           </div>
         </section>
@@ -96,14 +99,14 @@
           </div>
           <div class="section-body fields">
             <mat-form-field appearance="outline">
-              <mat-label>Teléfono</mat-label>
-              <mat-icon matPrefix>call</mat-icon>
-              <input matInput type="tel" formControlName="telefono" placeholder="Ej. 76123456" autocomplete="tel">
+              <mat-label>Número de celular</mat-label>
+              <mat-icon matPrefix>smartphone</mat-icon>
+              <input matInput type="tel" inputmode="numeric" maxlength="8" formControlName="telefono" placeholder="Ej. 76123456" autocomplete="tel">
               @if (form.get('telefono')?.getError('invalido'); as msg) {
                 <mat-error>{{ msg }}</mat-error>
               }
               @if (form.get('telefono')?.hasError('required')) {
-                <mat-error>El teléfono es obligatorio.</mat-error>
+                <mat-error>El número de celular es obligatorio.</mat-error>
               }
               @if (form.get('telefono')?.hasError('maxlength')) {
                 <mat-error>Máximo 20 caracteres.</mat-error>
@@ -161,8 +164,8 @@
           </div>
           <dl class="preview-list">
             <div>
-              <dt><mat-icon>call</mat-icon>Teléfono</dt>
-              <dd [class.muted]="!form.value.telefono">{{ form.value.telefono || 'Sin teléfono' }}</dd>
+              <dt><mat-icon>smartphone</mat-icon>Celular</dt>
+              <dd [class.muted]="!form.value.telefono">{{ form.value.telefono || 'Sin celular' }}</dd>
             </div>
             <div>
               <dt><mat-icon>mail</mat-icon>Correo</dt>

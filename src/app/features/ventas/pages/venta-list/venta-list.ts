@@ -6,6 +6,7 @@ import { debounceTime, distinctUntilChanged, finalize } from 'rxjs';
 
 import { NotificationService } from '../../../../core/services/notification.service';
 import { QueryFilter } from '../../../../core/models/query-filter.model';
+import { FiltroSucursalComponent } from '../../../../shared/components/filtro-sucursal/filtro-sucursal';
 import { MetaData } from '../../../../core/models/metadata.model';
 
 import { MatCardModule } from '@angular/material/card';
@@ -29,6 +30,7 @@ import { VentaDetalleDialog, VentaDetalleResultado } from '../venta-detalle-dial
   standalone: true,
   imports: [
     CommonModule,
+    FiltroSucursalComponent,
     ReactiveFormsModule,
     MatCardModule,
     MatTableModule,
@@ -117,6 +119,14 @@ export class VentaListComponent implements OnInit {
           this.notificationService.error('No se pudo cargar la lista de ventas.');
         }
       });
+  }
+
+  // Solo el administrador cambia de sucursal; al vendedor el backend
+  // siempre le devuelve los datos de la suya.
+  cambiarSucursal(idSucursal: number | null): void {
+    this.filter.idSucursal = idSucursal;
+    this.filter.pageNumber = 1;
+    this.cargarVentas();
   }
 
   cambiarPagina(event: PageEvent): void {
